@@ -552,11 +552,80 @@ function parseKoreanLocationFromGeo(geo) {
     if (district) city = district;
   }
 
+  region = normalizeKoreanRegionName(region);
+  city = normalizeKoreanCityName(city, region);
+
   const label = city && city !== region
     ? (geo?.locality && geo.locality !== city ? `${city} ${geo.locality}` : city)
     : region;
 
   return { region, city, label };
+}
+
+const ENGLISH_TO_KOREAN_REGION = {
+  gyeonggi: "경기도",
+  seoul: "서울특별시",
+  busan: "부산광역시",
+  daegu: "대구광역시",
+  incheon: "인천광역시",
+  gwangju: "광주광역시",
+  daejeon: "대전광역시",
+  ulsan: "울산광역시",
+  sejong: "세종특별자치시",
+  gangwon: "강원특별자치도",
+  chungbuk: "충청북도",
+  chungnam: "충청남도",
+  jeonbuk: "전북특별자치도",
+  jeonnam: "전라남도",
+  gyeongbuk: "경상북도",
+  gyeongnam: "경상남도",
+  jeju: "제주특별자치도",
+};
+
+const ENGLISH_TO_KOREAN_CITY = {
+  suwon: "수원",
+  seongnam: "성남",
+  yongin: "용인",
+  goyang: "고양",
+  bucheon: "부천",
+  anyang: "안양",
+  namyangju: "남양주",
+  hwaseong: "화성",
+  pyeongtaek: "평택",
+  siheung: "시흥",
+  uijeongbu: "의정부",
+  ansan: "안산",
+  gimpo: "김포",
+  paju: "파주",
+};
+
+function normalizeKoreanRegionName(name) {
+  const raw = String(name ?? "").trim();
+  const lower = raw.toLowerCase().replace(/[\s_-]+/g, "");
+  for (const [english, korean] of Object.entries(ENGLISH_TO_KOREAN_REGION)) {
+    if (lower.includes(english)) return korean;
+  }
+  return raw;
+}
+
+function normalizeKoreanCityName(city, region) {
+  let value = String(city ?? "").trim();
+  const lower = value.toLowerCase().replace(/[^a-z0-9\uAC00-\uD7A3]/g, "");
+  for (const [english, korean] of Object.entries(ENGLISH_TO_KOREAN_CITY)) {
+    if (lower.includes(english)) return korean;
+  }
+
+  if (String(region).includes("경기")) {
+    const guMap = { 분당: "성남", 수정: "성남", 중원: "성남", 기흥: "용인", 수지: "용인", 처인: "용인" };
+    for (const [gu, parent] of Object.entries(guMap)) {
+      if (value.includes(gu)) return parent;
+    }
+  }
+
+  const siMatch = value.match(/([\uAC00-\uD7A3]{2,})(?:시|군)/u);
+  if (siMatch?.[1]) return siMatch[1];
+
+  return value;
 }
 
 function normalizeWelfareAreaName(value) {
@@ -567,20 +636,18 @@ function normalizeWelfareAreaName(value) {
 }
 
 function filterLocalWelfareByRegion(services, apiData) {
-  if (!Array.isArray(services) || !apiData?.region) return services;
+  if (!Array.isArray(services) || !apiData?.region) return [];
 
   const targetRegion = normalizeWelfareAreaName(apiData.region);
-  const filtered = services.filter((service) => {
+  return services.filter((service) => {
     if (service.source === "national") return false;
-    if (!service.region?.trim()) return true;
+    if (!service.region?.trim()) return false;
     const serviceRegion = normalizeWelfareAreaName(service.region);
     return (
       serviceRegion.includes(targetRegion.slice(0, 2)) ||
       targetRegion.includes(serviceRegion.slice(0, 2))
     );
   });
-
-  return filtered.length > 0 ? filtered : services.filter((service) => service.source !== "national");
 }
 
 function formatWelfareLocationLabel(apiData, fallbackLabel, locationSource) {
@@ -664,10 +731,14 @@ async function fetchWeather(latitude, longitude) {
   return fetchWeatherDirect(latitude, longitude);
 }
 
-async function fetchWelfareInfo(region, city, category = "all", limit = 4) {
-  const { data, error } = await supabaseClient.functions.invoke("search-welfare", {
-    body: { region, city, category, limit },
-  });
+async function fetchWelfareInfo(region, city, category = "all", limit = 4, coords = null) {
+  const body = { region, city, category, limit };
+  if (coords && Number.isFinite(coords.latitude) && Number.isFinite(coords.longitude)) {
+    body.latitude = coords.latitude;
+    body.longitude = coords.longitude;
+  }
+
+  const { data, error } = await supabaseClient.functions.invoke("search-welfare", { body });
 
   if (error) {
     throw new Error(await getInvokeErrorMessage(error, data));
@@ -886,7 +957,7 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
     return;
   }
 
-  const { weather, locationSource } = cachedWelfareContext;
+  const { weather, locationSource, coords } = cachedWelfareContext;
 
   if (locationLabel) {
     locationLabel.textContent = formatWelfareLocationLabel(null, weather.label, locationSource);
@@ -896,7 +967,7 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
 
   try {
     const fetchLimit = preview ? 6 : BROWSE_WELFARE_LIMIT;
-    const data = await fetchWelfareInfo(weather.region, weather.city, categoryId, fetchLimit);
+    const data = await fetchWelfareInfo(weather.region, weather.city, categoryId, fetchLimit, coords);
 
     if (locationLabel) {
       locationLabel.textContent = formatWelfareLocationLabel(data, weather.label, locationSource);
@@ -968,7 +1039,7 @@ async function initBrowseWelfareLocation(forcePrompt = false) {
     weather = await fetchLocationLabelDirect(location.latitude, location.longitude);
   }
 
-  cachedWelfareContext = { weather, locationSource: location.source };
+  cachedWelfareContext = { weather, locationSource: location.source, coords: location };
 
   const locationLabel = document.getElementById("browse-welfare-location");
   if (locationLabel) {
@@ -1010,7 +1081,7 @@ async function initHomeLocationServices(forcePrompt = false) {
       if (!weather) {
         weather = await fetchLocationLabelDirect(location.latitude, location.longitude);
       }
-      cachedWelfareContext = { weather, locationSource: location.source };
+      cachedWelfareContext = { weather, locationSource: location.source, coords: location };
       if (welfareCategoryReload) {
         await welfareCategoryReload();
       } else {
