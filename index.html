@@ -24,13 +24,13 @@
         <span class="material-symbols-outlined" aria-hidden="true">home</span> 홈
       </a>
       <a class="nav-link" href="#youtube-section" data-section="youtube">
-        <span class="material-symbols-outlined" aria-hidden="true">smart_display</span> 안심 유튜브
+        <span class="material-symbols-outlined" aria-hidden="true">smart_display</span> 유튜브
       </a>
       <a class="nav-link" href="#news-section" data-section="news">
-        <span class="material-symbols-outlined" aria-hidden="true">gavel</span> 신뢰 뉴스
+        <span class="material-symbols-outlined" aria-hidden="true">newspaper</span> 뉴스
       </a>
       <a class="nav-link" href="#welfare-section" data-section="welfare">
-        <span class="material-symbols-outlined" aria-hidden="true">volunteer_activism</span> 우리 동네 복지
+        <span class="material-symbols-outlined" aria-hidden="true">volunteer_activism</span> 복지정보
       </a>
       <a class="nav-link" href="#" data-section="consult">
         <span class="material-symbols-outlined" aria-hidden="true">smart_toy</span> 보안관 상담
@@ -96,35 +96,35 @@
         </div>
       </section>
 
-      <!-- 콘텐츠 그리드 -->
+      <!-- 콘텐츠 3칸: 유튜브 · 뉴스 · 복지정보 -->
       <div class="content-grid">
-        <section id="youtube-section" class="content-section" aria-labelledby="youtube-heading">
+        <section id="youtube-section" class="content-section content-column" aria-labelledby="youtube-heading">
           <div class="section-header">
             <h3 id="youtube-heading" class="section-title">
               <span class="material-symbols-outlined section-icon" aria-hidden="true">smart_display</span>
-              안심 유튜브 추천
+              유튜브
             </h3>
           </div>
           <div id="youtube-categories" class="category-tabs" role="tablist" aria-label="유튜브 카테고리"></div>
           <div id="youtube-content" class="youtube-grid"></div>
         </section>
 
-        <section id="news-section" class="content-section" aria-labelledby="news-heading">
+        <section id="news-section" class="content-section content-column" aria-labelledby="news-heading">
           <div class="section-header">
             <h3 id="news-heading" class="section-title">
               <span class="material-symbols-outlined section-icon" aria-hidden="true">newspaper</span>
-              오늘의 주요 뉴스
+              뉴스
             </h3>
           </div>
           <div id="news-categories" class="category-tabs" role="tablist" aria-label="뉴스 카테고리"></div>
           <div id="news-content" class="news-list"></div>
         </section>
 
-        <section id="welfare-section" class="content-section welfare-section" aria-labelledby="welfare-heading">
+        <section id="welfare-section" class="content-section content-column welfare-section" aria-labelledby="welfare-heading">
           <div class="section-header">
             <h3 id="welfare-heading" class="section-title">
               <span class="material-symbols-outlined section-icon" aria-hidden="true">volunteer_activism</span>
-              우리 동네 복지 정보
+              복지정보
             </h3>
             <p id="welfare-location-label" class="welfare-location-label">📍 위치 확인 중...</p>
           </div>
