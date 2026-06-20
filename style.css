@@ -35,6 +35,7 @@
   --space-card: 20px;
   --layout-max-wide: min(1440px, 100%);
   --layout-max-content: min(1240px, 100%);
+  --layout-search-max: min(960px, 100%);
   --radius-card: 16px;
   --radius-btn: 12px;
   --shadow-card: 0 4px 16px rgba(11, 61, 145, 0.12);
@@ -516,12 +517,55 @@ body {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
 }
 
-/* ── 히어로 / 검색 ── */
+/* ── 홈: 상단(헤더) · 검색 · 카드 3단 분리 ── */
 .main-content {
   flex: 1;
-  padding-bottom: 1rem;
+  padding-bottom: 0;
 }
 
+/* 1) 검색 단 */
+.home-search-band {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1.75rem var(--space-main-x) 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+}
+
+.home-search-inner {
+  width: 100%;
+  max-width: var(--layout-search-max);
+  margin: 0 auto;
+}
+
+.search-form--home {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+}
+
+/* 2) 유튜브·뉴스·복지 카드 단 */
+.home-cards-band {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1rem var(--space-main-x) 1.75rem;
+  background: #fff;
+}
+
+.home-cards-band .content-grid {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 1024px) {
+  .home-cards-band {
+    padding: 1.25rem var(--space-main-x) 2rem;
+  }
+}
+
+/* (구) 히어로 — 다른 페이지 호환 */
 .hero-section {
   text-align: center;
   padding: 1.75rem var(--space-main-x) 1.5rem;
@@ -530,7 +574,8 @@ body {
 }
 
 .hero-content {
-  max-width: var(--layout-max-content);
+  width: 100%;
+  max-width: var(--layout-search-max);
   margin: 0 auto;
 }
 
@@ -1167,6 +1212,10 @@ body {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1rem;
     padding: 1.25rem var(--space-main-x) 1.75rem;
+  }
+
+  .home-cards-band .content-grid {
+    padding: 0;
   }
 }
 

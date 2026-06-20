@@ -18,9 +18,9 @@
 
     <main class="main-content" id="home-section">
 
-      <section class="hero-section" id="hero-section">
-        <div class="hero-content">
-          <form id="search-form" class="search-form" novalidate>
+      <section class="home-search-band" id="hero-section" aria-label="검색">
+        <div class="home-search-inner">
+          <form id="search-form" class="search-form search-form--home" novalidate>
             <label for="search-input" class="sr-only">검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요</label>
             <div class="search-row">
               <span class="search-mark" aria-hidden="true">
@@ -36,7 +36,8 @@
         </div>
       </section>
 
-      <div class="content-grid">
+      <section class="home-cards-band" aria-label="추천 콘텐츠">
+        <div class="content-grid">
         <section id="youtube-section" class="content-section content-column" aria-labelledby="youtube-heading">
           <div class="section-header">
             <h3 id="youtube-heading" class="section-title">
@@ -78,7 +79,8 @@
           </div>
           <a id="welfare-more" class="section-more-link btn btn--secondary" href="welfare.html">더보기</a>
         </section>
-      </div>
+        </div>
+      </section>
     </main>
   </div>
 
