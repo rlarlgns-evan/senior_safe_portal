@@ -480,15 +480,9 @@ const HomeModule = {
 // ── Event bindings & boot ──
 
 function bindEvents() {
-  dom.mobileMenuToggle?.addEventListener("click", () => NavigationUI.toggleMobileMenu());
   dom.searchForm?.addEventListener("submit", (e) => SearchModule.handleSearchSubmit(e));
   dom.loadingCancel?.addEventListener("click", () => SearchModule.handleLoadingCancel());
   dom.errorClose?.addEventListener("click", () => AlertUI.hideError());
-  dom.loginButton?.addEventListener("click", () => AuthModule.openLoginModal());
-  dom.loginModalClose?.addEventListener("click", () => AuthModule.closeLoginModal());
-  dom.loginForm?.addEventListener("submit", (e) => AuthModule.handleLoginSubmit(e));
-  dom.loginErrorClose?.addEventListener("click", () => AlertUI.hideLoginError());
-  dom.logoutButton?.addEventListener("click", () => AuthModule.handleLogout());
   dom.chatFab?.addEventListener("click", () => ChatModule.toggleChatWindow());
   dom.chatClose?.addEventListener("click", () => ChatModule.closeChatWindow());
   dom.chatForm?.addEventListener("submit", (e) => ChatModule.handleChatSubmit(e));
@@ -506,7 +500,6 @@ function initApp() {
     "안녕하세요! 저는 디지털 보안관 강아지예요. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.",
     "bot",
   );
-  AuthModule.initAuth();
   bindEvents();
 
   if (new URLSearchParams(location.search).get("consult") === "1") {

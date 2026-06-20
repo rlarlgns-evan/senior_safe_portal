@@ -1166,6 +1166,155 @@ async function chatWithAgent(message, history) {
   return data;
 }
 
+function getSiteHeaderHtml() {
+  return `
+    <div class="site-header-row">
+      <a class="site-brand" href="index.html">
+        <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="48" height="48" />
+        <span class="site-brand-text">시니어 디지털 보안관</span>
+      </a>
+      <nav class="top-nav" aria-label="주요 메뉴" data-auto-nav></nav>
+      <div class="header-end">
+        <div class="auth-area" id="auth-area">
+          <span id="user-greeting" class="user-greeting hidden"></span>
+          <button type="button" id="login-button" class="auth-button auth-login btn btn--primary">로그인</button>
+          <button type="button" id="logout-button" class="auth-button auth-logout btn btn--secondary hidden">로그아웃</button>
+        </div>
+        <button type="button" id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobile-nav">
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+        </button>
+      </div>
+    </div>
+    <nav id="mobile-nav" class="mobile-nav hidden" aria-label="모바일 메뉴" data-auto-nav="true"></nav>
+  `;
+}
+
+function injectSiteHeader() {
+  const header = document.querySelector("header.site-header");
+  if (!header) return;
+  header.innerHTML = getSiteHeaderHtml();
+}
+
+function getLoginModalHtml() {
+  return `
+    <div id="login-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
+      <div class="modal-panel card">
+        <button type="button" id="login-modal-close" class="modal-close btn btn--danger" aria-label="로그인 창 닫기">닫기</button>
+        <h2 id="login-modal-title" class="modal-title">로그인</h2>
+        <p class="modal-desc">이메일과 비밀번호로 로그인하세요. (Supabase 계정)</p>
+        <form id="login-form" class="login-form">
+          <label for="login-email" class="form-label">이메일</label>
+          <input id="login-email" type="email" class="modal-input" placeholder="example@email.com" autocomplete="email" required />
+          <label for="login-password" class="form-label">비밀번호</label>
+          <input id="login-password" type="password" class="modal-input" placeholder="비밀번호" autocomplete="current-password" required />
+          <div id="login-error" class="login-error alert-persistent hidden" role="alert">
+            <p id="login-error-message"></p>
+            <button type="button" id="login-error-close" class="btn btn--danger">닫기</button>
+          </div>
+          <button type="submit" class="modal-submit btn btn--primary">로그인하기</button>
+        </form>
+        <p class="modal-note">계정이 없으시면 Supabase에서 회원가입 후 이용해 주세요.</p>
+      </div>
+    </div>
+  `;
+}
+
+function injectLoginModal() {
+  if (document.getElementById("login-modal")) return;
+  document.body.insertAdjacentHTML("beforeend", getLoginModalHtml());
+}
+
+const SiteAuth = {
+  updateAuthUI(user) {
+    const greeting = document.getElementById("user-greeting");
+    const loginBtn = document.getElementById("login-button");
+    const logoutBtn = document.getElementById("logout-button");
+
+    if (user) {
+      const emailLocal = user.email?.split("@")[0] ?? "회원";
+      const safeName = emailLocal.replace(/[^\w.\-가-힣]/g, "").slice(0, 32) || "회원";
+      if (greeting) greeting.textContent = `${safeName}님`;
+      greeting?.classList.remove("hidden");
+      loginBtn?.classList.add("hidden");
+      logoutBtn?.classList.remove("hidden");
+    } else {
+      greeting?.classList.add("hidden");
+      loginBtn?.classList.remove("hidden");
+      logoutBtn?.classList.add("hidden");
+    }
+  },
+
+  hideLoginError() {
+    document.getElementById("login-error")?.classList.add("hidden");
+  },
+
+  showLoginError(message) {
+    const box = document.getElementById("login-error");
+    const text = document.getElementById("login-error-message");
+    if (text) text.textContent = message;
+    box?.classList.remove("hidden");
+  },
+
+  openLoginModal() {
+    SiteAuth.hideLoginError();
+    document.getElementById("login-modal")?.classList.remove("hidden");
+    document.getElementById("login-email")?.focus();
+  },
+
+  closeLoginModal() {
+    document.getElementById("login-modal")?.classList.add("hidden");
+    document.getElementById("login-form")?.reset();
+    SiteAuth.hideLoginError();
+  },
+
+  async handleLoginSubmit(event) {
+    event.preventDefault();
+    SiteAuth.hideLoginError();
+
+    try {
+      const email = (document.getElementById("login-email")?.value ?? "").trim();
+      const password = document.getElementById("login-password")?.value ?? "";
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new Error("올바른 이메일 주소를 입력해 주세요.");
+      }
+      if (!password) throw new Error("비밀번호를 입력해 주세요.");
+
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        SiteAuth.showLoginError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해 주세요.");
+        return;
+      }
+
+      SiteAuth.closeLoginModal();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "로그인 중 문제가 발생했습니다.";
+      SiteAuth.showLoginError(message);
+    }
+  },
+
+  async handleLogout() {
+    await supabaseClient.auth.signOut();
+  },
+
+  bindEvents() {
+    document.getElementById("login-button")?.addEventListener("click", () => SiteAuth.openLoginModal());
+    document.getElementById("login-modal-close")?.addEventListener("click", () => SiteAuth.closeLoginModal());
+    document.getElementById("login-form")?.addEventListener("submit", (e) => SiteAuth.handleLoginSubmit(e));
+    document.getElementById("login-error-close")?.addEventListener("click", () => SiteAuth.hideLoginError());
+    document.getElementById("logout-button")?.addEventListener("click", () => SiteAuth.handleLogout());
+  },
+
+  async init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    SiteAuth.updateAuthUI(session?.user ?? null);
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      SiteAuth.updateAuthUI(session?.user ?? null);
+    });
+    SiteAuth.bindEvents();
+  },
+};
+
 function getSiteFooterHtml() {
   return `
     <footer class="site-footer" aria-label="사이트 하단">
@@ -1260,6 +1409,9 @@ function closeMobileNavMenu() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  injectSiteHeader();
+  injectLoginModal();
   initSiteNavigation();
+  SiteAuth.init();
   injectSiteFooter();
 });
