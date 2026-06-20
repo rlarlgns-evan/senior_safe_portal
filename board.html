@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>게시판 - 시니어 디지털 보안관</title>
+  <title>자유게시판 - 시니어 디지털 보안관</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -14,44 +14,88 @@
     <header class="site-header"></header>
 
     <main class="board-main">
-      <div class="board-hero">
-        <img src="assets/mascot-sheriff.png" alt="" class="board-hero-mascot" width="80" height="80" />
-        <div>
-          <h1 class="board-title">
-            <span class="material-symbols-outlined section-icon" aria-hidden="true">forum</span>
-            안전 정보 게시판
-          </h1>
-          <p class="board-lead">디지털 안전 경험과 꿀팁을 서로 올리고 공유해요.</p>
-        </div>
+      <h1 class="board-page-title">자유게시판</h1>
+      <hr class="board-title-rule" />
+
+      <div class="board-search-bar">
+        <form id="board-search-form" class="board-search-form" role="search">
+          <input
+            id="board-search-input"
+            type="search"
+            class="board-search-input"
+            placeholder="검색어를 입력해주세요."
+            autocomplete="off"
+            aria-label="게시글 검색"
+          />
+          <button type="submit" class="board-search-btn">검색</button>
+        </form>
       </div>
 
-      <div class="board-toolbar">
+      <div class="board-list-toolbar">
         <p id="board-auth-hint" class="board-auth-hint">글을 쓰려면 우측 상단에서 로그인해 주세요.</p>
-        <button type="button" id="board-write-btn" class="board-write-btn btn btn--primary">
-          <span class="material-symbols-outlined" aria-hidden="true">edit</span>
-          글쓰기
-        </button>
+        <button type="button" id="board-write-btn" class="board-write-btn btn btn--primary">글쓰기</button>
       </div>
+
+      <div id="board-status" class="board-status hidden" aria-live="polite"></div>
 
       <section id="board-compose" class="board-compose hidden" aria-labelledby="board-compose-title">
-        <h2 id="board-compose-title" class="board-compose-title">새 글 작성</h2>
+        <h2 id="board-compose-title" class="board-compose-title">글쓰기</h2>
         <form id="board-form" class="board-form">
+          <label for="board-name-input" class="form-label">이름</label>
+          <input id="board-name-input" type="text" class="modal-input" maxlength="32" placeholder="표시할 이름" required />
           <label for="board-title-input" class="form-label">제목</label>
-          <input id="board-title-input" type="text" class="modal-input" maxlength="100" placeholder="예: 스미싱 문자 이렇게 확인했어요" required />
+          <input id="board-title-input" type="text" class="modal-input" maxlength="100" placeholder="제목을 입력하세요" required />
           <label for="board-content-input" class="form-label">내용</label>
-          <textarea id="board-content-input" class="board-textarea" maxlength="2000" rows="6" placeholder="다른 분들과 나누고 싶은 내용을 적어 주세요." required></textarea>
+          <textarea id="board-content-input" class="board-textarea" maxlength="2000" rows="8" placeholder="내용을 입력하세요" required></textarea>
           <div id="board-form-error" class="login-error alert-persistent hidden" role="alert">
             <p id="board-form-error-message"></p>
           </div>
           <div class="board-form-actions">
             <button type="button" id="board-compose-cancel" class="btn btn--secondary">취소</button>
-            <button type="submit" class="btn btn--primary">올리기</button>
+            <button type="submit" class="btn btn--primary">등록</button>
           </div>
         </form>
       </section>
 
-      <div id="board-status" class="board-status" aria-live="polite"></div>
-      <ul id="board-list" class="board-list" aria-label="게시글 목록"></ul>
+      <section id="board-detail" class="board-detail hidden" aria-labelledby="board-detail-title">
+        <div class="board-detail-header">
+          <h2 id="board-detail-title" class="board-detail-title"></h2>
+          <dl class="board-detail-meta"></dl>
+        </div>
+        <div id="board-detail-body" class="board-detail-body"></div>
+        <div class="board-detail-actions">
+          <button type="button" id="board-detail-back" class="btn btn--secondary">목록으로</button>
+          <button type="button" id="board-detail-delete" class="btn btn--danger hidden">삭제</button>
+        </div>
+      </section>
+
+      <div id="board-list-view" class="board-list-view">
+        <div class="board-table-wrap">
+          <table class="board-table" aria-label="게시글 목록">
+            <thead>
+              <tr>
+                <th scope="col" class="col-no">번호</th>
+                <th scope="col" class="col-title">제목</th>
+                <th scope="col" class="col-name">이름</th>
+                <th scope="col" class="col-id">아이디</th>
+                <th scope="col" class="col-date">작성일</th>
+                <th scope="col" class="col-views">조회수</th>
+              </tr>
+            </thead>
+            <tbody id="board-table-body">
+              <tr>
+                <td colspan="6" class="board-table-empty">게시글을 불러오고 있습니다...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <nav id="board-pagination" class="board-pagination" aria-label="게시판 페이지">
+          <button type="button" id="board-prev" class="board-page-btn" disabled>이전</button>
+          <span id="board-page-info" class="board-page-info">1 page / 1 pages</span>
+          <button type="button" id="board-next" class="board-page-btn" disabled>다음</button>
+        </nav>
+      </div>
     </main>
   </div>
 

@@ -2774,57 +2774,81 @@ button.search-button {
   background: #1d4ed8;
 }
 
-/* ── 게시판 페이지 ── */
+/* ── 게시판 페이지 (자유게시판 표 형식) ── */
 
 .board-main {
   flex: 1;
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 1.25rem 1rem 2.5rem;
+  padding: 1.5rem 1rem 2.5rem;
 }
 
-.board-hero {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1.25rem;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%);
-  border: 2px solid var(--color-border);
-}
-
-.board-hero-mascot {
-  width: 80px;
-  height: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-}
-
-.board-title {
-  margin: 0 0 0.35rem;
+.board-page-title {
+  margin: 0 0 0.75rem;
   font-size: var(--font-2xl);
   font-weight: 800;
+  color: var(--color-text);
+}
+
+.board-title-rule {
+  border: none;
+  border-top: 1px solid #d1d5db;
+  margin: 0 0 1.25rem;
+}
+
+.board-search-bar {
+  background: #e5e7eb;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.board-search-form {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
-.board-lead {
-  margin: 0;
+.board-search-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0.65rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
   font-size: var(--font-base);
-  color: var(--color-muted);
-  line-height: 1.55;
+  font-family: inherit;
+  background: #fff;
 }
 
-.board-toolbar {
+.board-search-btn {
+  flex-shrink: 0;
+  min-height: 48px;
+  padding: 0.65rem 1.35rem;
+  border: none;
+  border-radius: 4px;
+  background: #4b5563;
+  color: #fff;
+  font-size: var(--font-base);
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.board-search-btn:hover,
+.board-search-btn:focus {
+  background: #374151;
+}
+
+.board-list-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .board-auth-hint {
@@ -2835,11 +2859,8 @@ button.search-button {
 }
 
 .board-write-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
   min-height: var(--btn-min-height);
-  padding: 0.75rem 1.25rem;
+  padding: 0.65rem 1.25rem;
   font-size: var(--font-base);
   font-weight: 800;
 }
@@ -2849,50 +2870,10 @@ button.search-button {
   cursor: not-allowed;
 }
 
-.board-compose {
-  margin-bottom: 1.5rem;
-  padding: 1.25rem;
-  border-radius: 14px;
-  background: #fff;
-  border: 2px solid var(--color-border);
-}
-
-.board-compose-title {
-  margin: 0 0 1rem;
-  font-size: var(--font-xl);
-  font-weight: 800;
-}
-
-.board-form .form-label {
-  display: block;
-  margin: 0.75rem 0 0.35rem;
-  font-weight: 800;
-}
-
-.board-textarea {
-  width: 100%;
-  min-height: 160px;
-  padding: 0.85rem 1rem;
-  font-size: var(--font-base);
-  font-family: inherit;
-  border: var(--btn-border-width) solid var(--color-border);
-  border-radius: var(--radius-btn);
-  resize: vertical;
-  line-height: 1.55;
-}
-
-.board-form-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  justify-content: flex-end;
-  margin-top: 1rem;
-}
-
 .board-status {
   margin-bottom: 1rem;
   padding: 0.85rem 1rem;
-  border-radius: var(--radius-btn);
+  border-radius: 4px;
   background: var(--primary-blue-light);
   font-size: var(--font-base);
   font-weight: 600;
@@ -2907,84 +2888,207 @@ button.search-button {
   color: var(--color-danger);
 }
 
-.board-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
+.board-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-.board-empty {
+.board-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--font-base);
+  background: #fff;
+}
+
+.board-table thead tr {
+  border-top: 3px solid var(--color-text);
+  border-bottom: 3px solid var(--color-text);
+}
+
+.board-table th {
+  padding: 0.85rem 0.5rem;
+  font-weight: 800;
   text-align: center;
-  padding: 2rem 1rem;
-  border: 2px dashed var(--color-border);
-  border-radius: 14px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.board-table td {
+  padding: 0.85rem 0.5rem;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid #e5e7eb;
+  word-break: break-word;
+}
+
+.board-table .col-no {
+  width: 4.5rem;
+}
+
+.board-table .col-title {
+  width: auto;
+  text-align: left;
+}
+
+.board-table .col-name,
+.board-table .col-id {
+  width: 6.5rem;
+}
+
+.board-table .col-date {
+  width: 7.5rem;
+}
+
+.board-table .col-views {
+  width: 5rem;
+}
+
+.board-title-link {
+  display: inline;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #2563eb;
+  font-size: inherit;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.45;
+}
+
+.board-title-link:hover,
+.board-title-link:focus {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
+.board-table-empty {
+  padding: 2.5rem 1rem !important;
   color: var(--color-muted);
+  font-weight: 600;
+}
+
+.board-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding: 0.75rem 0;
+}
+
+.board-page-info {
+  font-size: var(--font-base);
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.board-page-btn {
+  padding: 0.35rem 0.5rem;
+  border: none;
+  background: none;
+  color: #6b7280;
+  font-size: var(--font-base);
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.board-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.board-compose,
+.board-detail {
+  margin-bottom: 1.25rem;
+  padding: 1.25rem;
+  border: 2px solid var(--color-border);
+  background: #fff;
+}
+
+.board-compose-title,
+.board-detail-title {
+  margin: 0 0 1rem;
+  font-size: var(--font-xl);
+  font-weight: 800;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--color-text);
+}
+
+.board-form .form-label {
+  display: block;
+  margin: 0.75rem 0 0.35rem;
+  font-weight: 800;
+}
+
+.board-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 0.85rem 1rem;
+  font-size: var(--font-base);
+  font-family: inherit;
+  border: var(--btn-border-width) solid var(--color-border);
+  border-radius: 4px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.board-form-actions,
+.board-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.board-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  margin: 0 0 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.board-detail-meta div {
+  display: flex;
+  gap: 0.35rem;
   font-size: var(--font-base);
 }
 
-.board-empty .mascot-loading {
-  width: 72px;
-  margin: 0 auto 0.75rem;
-  display: block;
-}
-
-.board-card {
-  border: 2px solid var(--color-border);
-  border-radius: 14px;
-  background: #fff;
-  overflow: hidden;
-}
-
-.board-card-toggle {
-  width: 100%;
-  padding: 1.1rem 1.15rem;
-  border: none;
-  background: #fff;
-  text-align: left;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.board-card-toggle:hover,
-.board-card-toggle:focus {
-  background: #f9fafb;
-}
-
-.board-card-title {
-  margin: 0 0 0.45rem;
-  font-size: var(--font-lg);
+.board-detail-meta dt {
   font-weight: 800;
-  color: var(--color-text);
-}
-
-.board-card-meta {
-  margin: 0;
-  font-size: 0.95rem;
   color: var(--color-muted);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
 }
 
-.board-card-body {
-  padding: 0 1.15rem 1.15rem;
-  border-top: 1px solid var(--color-border);
+.board-detail-meta dd {
+  margin: 0;
+  font-weight: 600;
 }
 
-.board-card-content {
-  margin: 1rem 0;
+.board-detail-body {
+  min-height: 120px;
+  padding: 1rem 0;
   font-size: var(--font-base);
   line-height: 1.65;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
-.board-delete-btn {
-  min-height: var(--btn-min-height);
-  padding: 0.65rem 1.15rem;
-  font-size: var(--font-base);
-  font-weight: 800;
+@media (max-width: 768px) {
+  .board-table .col-id,
+  .board-table .col-views {
+    display: none;
+  }
+
+  .board-table th.col-id,
+  .board-table th.col-views {
+    display: none;
+  }
 }
