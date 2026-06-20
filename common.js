@@ -317,6 +317,15 @@ function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn, 
   return { reload: loadCategory, getActiveId: () => activeId };
 }
 
+function renderVerifiedBadge(label) {
+  return `
+    <div class="verified-badge">
+      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+      ${escapeHtml(label)}
+    </div>
+  `;
+}
+
 function renderYoutubeThumbnailCard(item) {
   if (item.status === "danger") {
     return `
@@ -335,9 +344,7 @@ function renderYoutubeThumbnailCard(item) {
       <article class="browse-yt-card">
         <div class="browse-yt-thumb">
           <img src="${escapeHtml(item.thumbnail)}" alt="" loading="lazy" />
-          <span class="browse-yt-safe">
-            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
-          </span>
+          ${renderVerifiedBadge("확인된 영상")}
         </div>
         <p class="browse-yt-label">${escapeHtml(item.title)}</p>
       </article>
@@ -351,9 +358,7 @@ function renderYoutubeHomeCard(item) {
       <article class="video-card-ui">
         <div class="video-thumb">
           <img src="${escapeHtml(item.thumbnail)}" alt="" loading="lazy" />
-          <div class="safe-badge-ui">
-            <span class="material-symbols-outlined" style="font-size:16px">check_circle</span> 안전 확인됨
-          </div>
+          ${renderVerifiedBadge("확인된 영상")}
         </div>
         <div class="card-body">
           <h4 class="card-title">${escapeHtml(item.title)}</h4>
@@ -439,7 +444,6 @@ async function searchNews(query, display = 5) {
 function renderNewsHomeCard(article) {
   const href = article.originallink || article.link;
   const thumb = article.thumbnail || getFaviconThumbnail(href);
-  const publisher = article.publisher || "뉴스";
   const isLogo = !article.thumbnail || thumb.includes("google.com/s2/favicons");
   const thumbClass = isLogo ? "news-thumb news-thumb-logo" : "news-thumb";
   const thumbHtml = thumb
@@ -449,12 +453,11 @@ function renderNewsHomeCard(article) {
   return `
     <a class="news-card-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">
       <article class="news-card-ui">
-        <div class="${thumbClass}">${thumbHtml}</div>
+        <div class="${thumbClass}">
+          ${thumbHtml}
+          ${renderVerifiedBadge("확인된 기사")}
+        </div>
         <div class="news-body">
-          <div class="news-badge">
-            <span class="material-symbols-outlined" style="font-size:20px">verified</span>
-            ${escapeHtml(publisher)}
-          </div>
           <h4 class="news-title">${escapeHtml(article.title)}</h4>
           <p class="news-summary">${escapeHtml(article.summary)}</p>
           <span class="news-link">${escapeHtml(article.pubDate || "자세히 읽기")} →</span>

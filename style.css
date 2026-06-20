@@ -1141,6 +1141,7 @@ button.search-button {
   text-overflow: ellipsis;
 }
 
+.content-grid .verified-badge,
 .content-grid .safe-badge-ui {
   font-size: 0.78rem;
   padding: 0.2rem 0.5rem;
@@ -1544,19 +1545,28 @@ button.search-button {
   opacity: 0.35;
 }
 
+.verified-badge,
 .safe-badge-ui {
   position: absolute;
   top: 0.5rem;
   left: 0.5rem;
+  z-index: 1;
   background: #76ff03;
   padding: 0.25rem 0.65rem;
   border-radius: 999px;
   font-size: 0.88rem;
   font-weight: 800;
   border: 1px solid var(--color-text);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.2rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.verified-badge .material-symbols-outlined,
+.safe-badge-ui .material-symbols-outlined {
+  font-size: 16px !important;
 }
 
 .card-body {
@@ -1596,6 +1606,7 @@ button.search-button {
 }
 
 .news-thumb {
+  position: relative;
   flex: 0 0 132px;
   width: 132px;
   aspect-ratio: 4 / 3;
@@ -2626,22 +2637,11 @@ button.search-button {
   object-fit: cover;
 }
 
-.browse-yt-safe {
-  position: absolute;
-  top: 0.45rem;
-  left: 0.45rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  background: rgba(118, 255, 3, 0.95);
-  border: 1px solid var(--color-text);
-}
-
-.browse-yt-safe .material-symbols-outlined {
-  font-size: 18px !important;
+.browse-yt-thumb .verified-badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  top: 0.4rem;
+  left: 0.4rem;
 }
 
 .browse-yt-label {
