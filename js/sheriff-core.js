@@ -15,7 +15,7 @@ const SITE_NAV_ITEMS = [
   { id: "news", href: "news.html", label: "뉴스" },
   { id: "welfare", href: "welfare.html", label: "복지" },
   { id: "board", href: "board.html", label: "자유게시판" },
-  { id: "info", href: "community.html", label: "정보" },
+  { id: "info", href: "information.html", label: "정보" },
 ];
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1387,7 +1387,7 @@ function getSiteHeaderHtml() {
           </div>
         </aside>
         <div class="auth-area" id="auth-area">
-          <a href="community.html" id="mypage-link" class="auth-button auth-mypage btn btn--secondary hidden">마이페이지</a>
+          <a href="board.html" id="mypage-link" class="auth-button auth-mypage btn btn--secondary hidden">마이페이지</a>
           <span id="user-greeting" class="user-greeting hidden"></span>
           <button type="button" id="login-button" class="auth-button auth-login btn btn--primary">로그인</button>
           <button type="button" id="logout-button" class="auth-button auth-logout btn btn--secondary hidden">로그아웃</button>

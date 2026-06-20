@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>정보 - 시니어 디지털 보안관</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+</head>
+<body class="community-page" data-nav="info">
+
+  <div class="app-layout">
+    <header class="site-header"></header>
+
+    <main class="community-main">
+      <div class="community-hero">
+        <img src="assets/mascot-sheriff.png" alt="" class="community-hero-mascot" width="88" height="88" />
+        <div>
+          <h1 class="community-title">
+            <span class="material-symbols-outlined section-icon" aria-hidden="true">menu_book</span>
+            디지털 안전 정보
+          </h1>
+          <p class="community-lead">어르신과 가족이 함께 알아두면 좋은 디지털 안전 정보를 모았습니다.</p>
+        </div>
+      </div>
+
+      <section class="community-section" aria-labelledby="community-tips-heading">
+        <h2 id="community-tips-heading" class="community-section-title">꼭 기억하세요</h2>
+        <div class="community-card-grid">
+          <article class="community-card">
+            <span class="material-symbols-outlined community-card-icon" aria-hidden="true">link_off</span>
+            <h3>모르는 링크는 누르지 마세요</h3>
+            <p>문자·카톡으로 온 주소는 바로 열지 말고, 홈에서 링크 검사를 먼저 해보세요.</p>
+          </article>
+          <article class="community-card">
+            <span class="material-symbols-outlined community-card-icon" aria-hidden="true">call_end</span>
+            <h3>전화로 돈·비밀번호 요구는 사기</h3>
+            <p>검찰·경찰·은행 직원을 사칭해도 계좌·카드·인증번호는 절대 알려주지 마세요.</p>
+          </article>
+          <article class="community-card">
+            <span class="material-symbols-outlined community-card-icon" aria-hidden="true">family_restroom</span>
+            <h3>가족과 함께 확인하세요</h3>
+            <p>의심스러운 연락은 자녀·손주에게 보여주고 함께 판단하면 더 안전합니다.</p>
+          </article>
+          <article class="community-card">
+            <span class="material-symbols-outlined community-card-icon" aria-hidden="true">verified_user</span>
+            <h3>공식 앱·홈페이지만 이용</h3>
+            <p>은행·공공기관은 검색 광고보다 직접 입력한 주소나 공식 앱을 이용하세요.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="community-section" aria-labelledby="community-faq-heading">
+        <h2 id="community-faq-heading" class="community-section-title">자주 묻는 질문</h2>
+        <div class="community-faq-list">
+          <details class="community-faq">
+            <summary>「택배 미수령」 문자가 왔어요. 어떻게 해야 하나요?</summary>
+            <p>본인이 주문하지 않은 택배 안내는 대부분 스미싱입니다. 링크를 누르지 말고 삭제하세요. 궁금하면 택배사 공식 앱이나 고객센터 번호를 직접 찾아 확인하세요.</p>
+          </details>
+          <details class="community-faq">
+            <summary>유튜브·뉴스도 안전한지 어떻게 알 수 있나요?</summary>
+            <p>홈과 각 전용 페이지에서 신뢰할 수 있는 주제별 콘텐츠만 골라 보여 드립니다. 그래도 불안하면 화면 오른쪽 아래 「보안관 단디에게 물어보기」 버튼으로 물어보세요.</p>
+          </details>
+          <details class="community-faq">
+            <summary>복지 혜택은 우리 동네 것만 볼 수 있나요?</summary>
+            <p>네. 위치 허용 후 복지정보 페이지에서 우리 지역(지자체) 맞춤 혜택을 확인할 수 있습니다.</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="community-cta" aria-labelledby="community-cta-heading">
+        <h2 id="community-cta-heading" class="community-section-title">경험을 나누고 싶으신가요?</h2>
+        <p>게시판에서 안전 팁과 궁금한 점을 다른 분들과 함께 나눌 수 있습니다.</p>
+        <a class="community-cta-btn" href="board.html">
+          <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+          게시판 바로가기
+        </a>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/core/utils.js"></script>
+  <script src="js/sheriff-core.js"></script>
+  <script src="js/bootstrap.js"></script>
+</body>
+</html>

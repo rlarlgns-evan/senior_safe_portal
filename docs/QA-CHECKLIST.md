@@ -29,7 +29,7 @@
 - [ ] 로그인: 글 작성·본인 글 삭제 (confirm)
 - [ ] 조회수 증가 (RLS)
 
-### 정적 페이지 (team, community, privacy, terms)
+### 정적 페이지 (team, information, privacy, terms)
 - [ ] 헤더·푸터·로그인 모달
 
 ## 보안
