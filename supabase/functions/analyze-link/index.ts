@@ -16,14 +16,32 @@ function extractTitle(html: string): string {
   return match?.[1]?.replace(/\s+/g, " ").trim() || "";
 }
 
-function extractDescription(html: string): string {
-  const doubleQuote = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([\s\S]*?)["'][^>]*>/i);
-  if (doubleQuote?.[1]) {
-    return doubleQuote[1].replace(/\s+/g, " ").trim();
+function extractMetaContent(html: string, key: string): string {
+  const patterns = [
+    new RegExp(`<meta[^>]*(?:name|property)=["']${key}["'][^>]*content=["']([\\s\\S]*?)["'][^>]*>`, "i"),
+    new RegExp(`<meta[^>]*content=["']([\\s\\S]*?)["'][^>]*(?:name|property)=["']${key}["'][^>]*>`, "i"),
+  ];
+
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match?.[1]) {
+      return match[1].replace(/\s+/g, " ").trim();
+    }
   }
 
-  const singleQuote = html.match(/<meta[^>]*content=["']([\s\S]*?)["'][^>]*name=["']description["'][^>]*>/i);
-  return singleQuote?.[1]?.replace(/\s+/g, " ").trim() || "";
+  return "";
+}
+
+function extractDescription(html: string): string {
+  return extractMetaContent(html, "description")
+    || extractMetaContent(html, "og:description")
+    || extractMetaContent(html, "twitter:description");
+}
+
+function extractBestTitle(html: string): string {
+  return extractTitle(html)
+    || extractMetaContent(html, "og:title")
+    || extractMetaContent(html, "twitter:title");
 }
 
 function normalizeUrl(rawUrl: unknown): string {
@@ -45,8 +63,9 @@ async function scrapeUrlMetadata(targetUrl: string): Promise<{ title: string; de
   const response = await fetch(targetUrl, {
     method: "GET",
     headers: {
-      "User-Agent": "SeniorDigitalSheriffBot/1.0",
+      "User-Agent": "Mozilla/5.0 (compatible; SeniorDigitalSheriffBot/1.0)",
       Accept: "text/html,application/xhtml+xml",
+      "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
     },
     redirect: "follow",
   });
@@ -56,12 +75,12 @@ async function scrapeUrlMetadata(targetUrl: string): Promise<{ title: string; de
   }
 
   const contentType = response.headers.get("content-type") || "";
-  if (!contentType.includes("text/html")) {
+  if (!contentType.includes("text/html") && !contentType.includes("application/xhtml")) {
     throw new Error("웹페이지(HTML) 형식이 아닌 링크입니다.");
   }
 
   const html = await response.text();
-  const title = extractTitle(html);
+  const title = extractBestTitle(html);
   const description = extractDescription(html);
 
   if (!title && !description) {
@@ -71,7 +90,13 @@ async function scrapeUrlMetadata(targetUrl: string): Promise<{ title: string; de
   return { title, description };
 }
 
-async function analyzeWithGemini(title: string, description: string, targetUrl: string, apiKey: string): Promise<AnalysisResult> {
+async function analyzeWithGemini(
+  title: string,
+  description: string,
+  targetUrl: string,
+  apiKey: string,
+  scrapeNote?: string,
+): Promise<AnalysisResult> {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash",
@@ -81,9 +106,15 @@ async function analyzeWithGemini(title: string, description: string, targetUrl: 
   });
 
   const systemPrompt =
-    "You are a Senior Digital Sheriff. Analyze the provided webpage title and description to determine if it is a phishing link, a scam, or fake news targeting seniors. Return a JSON object strictly in this format: {'status': '안전' or '위험', 'reason': 'Explain the reason clearly and simply in Korean.'}.";
+    "You are a Senior Digital Sheriff. Analyze the provided webpage URL, title, and description to determine if it is a phishing link, a scam, or fake news targeting seniors. Return a JSON object strictly in this format: {\"status\": \"안전\" or \"위험\", \"reason\": \"Explain the reason clearly and simply in Korean.\"}.";
 
-  const userPrompt = `URL: ${targetUrl}\nTitle: ${title || "(없음)"}\nDescription: ${description || "(없음)"}`;
+  const userPrompt = [
+    `URL: ${targetUrl}`,
+    `Title: ${title || "(없음)"}`,
+    `Description: ${description || "(없음)"}`,
+    scrapeNote ? `Scrape note: ${scrapeNote}` : "",
+    "If page metadata is missing, analyze the URL pattern, domain reputation, and common senior-targeting scam signals.",
+  ].filter(Boolean).join("\n");
 
   const result = await model.generateContent([
     { text: systemPrompt },
@@ -91,7 +122,13 @@ async function analyzeWithGemini(title: string, description: string, targetUrl: 
   ]);
 
   const text = result.response.text();
-  const parsed = JSON.parse(text) as Partial<AnalysisResult>;
+  let parsed: Partial<AnalysisResult>;
+
+  try {
+    parsed = JSON.parse(text) as Partial<AnalysisResult>;
+  } catch {
+    throw new Error("AI 분석 결과를 해석하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+  }
 
   return {
     status: parsed.status === "위험" ? "위험" : "안전",
@@ -119,13 +156,27 @@ Deno.serve(async (req: Request) => {
 
     const body = await req.json();
     const targetUrl = normalizeUrl(body?.url);
-    const { title, description } = await scrapeUrlMetadata(targetUrl);
-    const analysis = await analyzeWithGemini(title, description, targetUrl, geminiApiKey);
+
+    let title = "";
+    let description = "";
+    let scrapeNote: string | undefined;
+
+    try {
+      const scraped = await scrapeUrlMetadata(targetUrl);
+      title = scraped.title;
+      description = scraped.description;
+    } catch (scrapeError) {
+      scrapeNote = scrapeError instanceof Error
+        ? scrapeError.message
+        : "페이지 정보를 가져오지 못했습니다.";
+    }
+
+    const analysis = await analyzeWithGemini(title, description, targetUrl, geminiApiKey, scrapeNote);
 
     return new Response(
       JSON.stringify({
         ...analysis,
-        scraped: { title, description, url: targetUrl },
+        scraped: { title, description, url: targetUrl, scrapeNote },
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );

@@ -71,6 +71,22 @@ function hideError() { errorBox.classList.add("hidden"); }
 function showResultOverlay() { resultView.classList.remove("hidden"); }
 function hideResultOverlay() { resultView.classList.add("hidden"); }
 
+async function getInvokeErrorMessage(error, data) {
+  if (data?.message) return data.message;
+
+  const response = error?.context;
+  if (response && typeof response.json === "function") {
+    try {
+      const body = await response.clone().json();
+      if (body?.message) return body.message;
+    } catch {
+      // ignore JSON parse failure
+    }
+  }
+
+  return error?.message || "링크 분석 요청에 실패했습니다.";
+}
+
 // ── 사이드바 (모바일) ──
 
 function openSidebar() {
@@ -261,8 +277,7 @@ async function analyzeLink(url) {
   try {
     const { data, error } = await supabaseClient.functions.invoke("analyze-link", { body: { url } });
     if (error) {
-      const detail = data?.message || error.message || "링크 분석 요청에 실패했습니다.";
-      throw new Error(detail);
+      throw new Error(await getInvokeErrorMessage(error, data));
     }
     if (!data?.status) throw new Error(data?.message || "분석 결과를 받지 못했습니다.");
 
@@ -333,7 +348,8 @@ async function handleChatSubmit(event) {
     try {
       const url = normalizeUrl(text);
       const { data, error } = await supabaseClient.functions.invoke("analyze-link", { body: { url } });
-      if (error || !data?.status) throw new Error("분석 실패");
+      if (error) throw new Error(await getInvokeErrorMessage(error, data));
+      if (!data?.status) throw new Error(data?.message || "분석 실패");
       chatMessages.lastElementChild.textContent = data.status === "위험"
         ? `🚨 위험 링크입니다. ${data.reason}`
         : `✅ 비교적 안전해 보입니다. ${data.reason}`;
