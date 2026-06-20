@@ -5,7 +5,7 @@
 const SUPABASE_URL = "https://oweduuhfkiutlszfwukt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93ZWR1dWhma2l1dGxzemZ3dWt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjMyNzUsImV4cCI6MjA5NzUzOTI3NX0.n25pwv-WuWOBIGY7cwJCYj1TxILYpy2XA2nn7a6ySMY";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // DOM
 const sidebar = document.getElementById("sidebar");
@@ -103,10 +103,10 @@ function updateAuthUI(user) {
 }
 
 async function initAuth() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
   updateAuthUI(session?.user ?? null);
 
-  supabase.auth.onAuthStateChange((_event, session) => {
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
     updateAuthUI(session?.user ?? null);
   });
 }
@@ -129,7 +129,7 @@ loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   loginError.classList.add("hidden");
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error } = await supabaseClient.auth.signInWithPassword({
     email: loginEmail.value.trim(),
     password: loginPassword.value,
   });
@@ -144,7 +144,7 @@ loginForm.addEventListener("submit", async (event) => {
 });
 
 logoutButton.addEventListener("click", async () => {
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
 });
 
 // ── 더미 콘텐츠 ──
@@ -259,9 +259,12 @@ function renderVerdict(result) {
 async function analyzeLink(url) {
   showLoading();
   try {
-    const { data, error } = await supabase.functions.invoke("analyze-link", { body: { url } });
-    if (error) throw new Error(error.message || "링크 분석 요청에 실패했습니다.");
-    if (!data?.status) throw new Error("분석 결과를 받지 못했습니다.");
+    const { data, error } = await supabaseClient.functions.invoke("analyze-link", { body: { url } });
+    if (error) {
+      const detail = data?.message || error.message || "링크 분석 요청에 실패했습니다.";
+      throw new Error(detail);
+    }
+    if (!data?.status) throw new Error(data?.message || "분석 결과를 받지 못했습니다.");
 
     lastAnalyzedUrl = url;
     renderVerdict(data);
@@ -329,7 +332,7 @@ async function handleChatSubmit(event) {
     addChatBubble("링크를 확인하고 있습니다...", "bot");
     try {
       const url = normalizeUrl(text);
-      const { data, error } = await supabase.functions.invoke("analyze-link", { body: { url } });
+      const { data, error } = await supabaseClient.functions.invoke("analyze-link", { body: { url } });
       if (error || !data?.status) throw new Error("분석 실패");
       chatMessages.lastElementChild.textContent = data.status === "위험"
         ? `🚨 위험 링크입니다. ${data.reason}`
