@@ -7,8 +7,8 @@
 // ============================================
 // Supabase 설정 (마지막 단계에서 연동 — 지금은 비워두세요)
 // ============================================
-const SUPABASE_URL = '';
-const SUPABASE_ANON_KEY = '';
+const SUPABASE_URL = 'https://oweduuhfkiutlszfwukt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93ZWR1dWhma2l1dGxzemZ3dWt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjMyNzUsImV4cCI6MjA5NzUzOTI3NX0.n25pwv-WuWOBIGY7cwJCYj1TxILYpy2XA2nn7a6ySMY';
 
 /** Supabase 연동 여부 */
 const isSupabaseReady = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
