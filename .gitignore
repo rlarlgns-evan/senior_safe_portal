@@ -1,0 +1,17 @@
+# 환경 변수 / 시크릿
+.env
+.env.*
+*.local
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 에디터
+.vscode/
+.idea/
+*.swp
+
+# Supabase 로컬
+.supabase/
