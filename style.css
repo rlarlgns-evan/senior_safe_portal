@@ -236,7 +236,7 @@ body {
 
 .site-header-row {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem 1rem;
   max-width: 1440px;
@@ -268,31 +268,43 @@ body {
   gap: 0.65rem;
   justify-self: end;
   flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  background: #fff;
+  padding-left: 0.35rem;
 }
 
 .top-nav {
   display: none;
   align-items: center;
-  justify-content: center;
-  justify-self: center;
+  justify-content: flex-start;
+  justify-self: stretch;
+  min-width: 0;
   width: 100%;
-  max-width: 920px;
-  gap: 0.35rem;
-  flex-wrap: wrap;
+  max-width: 100%;
+  gap: 0.25rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.top-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .top-nav-link {
-  flex: 1 1 0;
-  min-width: 4.5rem;
-  padding: 0.7rem 1rem;
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 0.55rem 0.75rem;
   border-radius: 999px;
   text-decoration: none;
   color: var(--color-text);
   font-weight: 800;
-  font-size: var(--font-lg);
+  font-size: var(--font-base);
   border: var(--btn-border-width) solid transparent;
   white-space: nowrap;
-  min-height: 56px;
+  min-height: 48px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -369,12 +381,29 @@ body {
   }
 }
 
+@media (min-width: 768px) and (max-width: 1099px) {
+  .site-brand-text {
+    display: none;
+  }
+
+  .top-nav-link {
+    padding: 0.5rem 0.65rem;
+    min-height: 44px;
+    font-size: 0.95rem;
+  }
+}
+
 @media (min-width: 1100px) {
+  .top-nav {
+    justify-content: center;
+    max-width: 920px;
+    justify-self: center;
+  }
+
   .top-nav-link {
     font-size: var(--font-xl);
     padding: 0.8rem 1.25rem;
     min-height: 60px;
-    min-width: 5.5rem;
   }
 }
 
