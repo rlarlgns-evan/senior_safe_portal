@@ -271,6 +271,8 @@ function renderNewsHomeCard(article) {
   const href = article.originallink || article.link;
   const thumb = article.thumbnail || getFaviconThumbnail(href);
   const publisher = article.publisher || "뉴스";
+  const isLogo = !article.thumbnail || thumb.includes("google.com/s2/favicons");
+  const thumbClass = isLogo ? "news-thumb news-thumb-logo" : "news-thumb";
   const thumbHtml = thumb
     ? `<img src="${escapeHtml(thumb)}" alt="" loading="lazy" />`
     : `<span class="material-symbols-outlined" aria-hidden="true">newspaper</span>`;
@@ -278,7 +280,7 @@ function renderNewsHomeCard(article) {
   return `
     <a class="news-card-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">
       <article class="news-card-ui">
-        <div class="news-thumb">${thumbHtml}</div>
+        <div class="${thumbClass}">${thumbHtml}</div>
         <div class="news-body">
           <div class="news-badge">
             <span class="material-symbols-outlined" style="font-size:20px">verified</span>
