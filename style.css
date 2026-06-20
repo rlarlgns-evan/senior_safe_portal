@@ -32,7 +32,7 @@ body {
 }
 
 .view {
-  min-height: 100vh;
+  width: 100%;
 }
 
 /* 접근성: 스크린 리더 전용 텍스트 */
@@ -58,6 +58,8 @@ body {
   align-items: center;
   padding: 2rem 1.5rem 1rem;
   text-align: center;
+  background: linear-gradient(180deg, #e8f0fe 0%, #f5f7fa 100%);
+  border-bottom: 4px solid #0d3b66;
 }
 
 .hero-header {
@@ -244,10 +246,11 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
-  padding: 0 1.5rem 1.5rem;
+  padding: 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  background-color: #f5f7fa;
 }
 
 .result-column {

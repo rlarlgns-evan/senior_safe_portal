@@ -5,13 +5,22 @@
  */
 
 // ============================================
-// Supabase 설정 (배포 전 실제 값으로 교체)
+// Supabase 설정 (마지막 단계에서 연동 — 지금은 비워두세요)
 // ============================================
 const SUPABASE_URL = '';
 const SUPABASE_ANON_KEY = '';
 
-// Supabase 클라이언트 초기화
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/** Supabase 연동 여부 */
+const isSupabaseReady = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+
+/** Supabase 클라이언트 (키가 있을 때만 생성) */
+let supabase = null;
+
+function initSupabaseClient() {
+  if (isSupabaseReady && window.supabase) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+}
 
 // ============================================
 // DOM 요소 참조
@@ -127,8 +136,14 @@ function renderYoutubeResults(videos) {
     }
 
     // 안전 영상: 썸네일 + 메타데이터 + 링크
-    const videoUrl = `https://www.youtube.com/watch?v=${video.video_id}`;
-    const thumbnail = video.thumbnail || `https://img.youtube.com/vi/${video.video_id}/hqdefault.jpg`;
+    const videoUrl = video.video_id.startsWith('demo-')
+      ? 'https://www.youtube.com'
+      : `https://www.youtube.com/watch?v=${video.video_id}`;
+    const thumbnail = video.thumbnail || (
+      video.video_id.startsWith('demo-')
+        ? 'https://via.placeholder.com/480x270/0d3b66/ffffff?text=%EC%95%88%EC%A0%84+%EC%98%81%EC%83%81'
+        : `https://img.youtube.com/vi/${video.video_id}/hqdefault.jpg`
+    );
 
     return `
       <article class="video-card">
@@ -165,24 +180,60 @@ function escapeHtml(str) {
 }
 
 // ============================================
-// Supabase Edge Function 호출
+// UI 미리보기용 데모 데이터 (Supabase 연동 전)
 // ============================================
 
 /**
- * search-videos Edge Function 호출 및 결과 처리
+ * Supabase 없이 UI/UX 확인용 더미 유튜브 검색 결과
+ * @param {string} query - 검색어
+ */
+function getDemoYoutubeResults(query) {
+  return [
+    {
+      video_id: 'demo-safe-1',
+      title: `[안전] ${query} — 건강 정보 가이드`,
+      channel: '공신력 있는 건강 채널',
+      thumbnail: '',
+      status: '안전',
+      reason: '',
+    },
+    {
+      video_id: 'demo-danger-1',
+      title: '',
+      channel: '',
+      status: '위험',
+      reason: '「100% 치료」, 「즉시 효과」 등 과장 광고 표현이 포함되어 있습니다.',
+    },
+    {
+      video_id: 'demo-safe-2',
+      title: `[안전] ${query} — 어르신을 위한 쉬운 설명`,
+      channel: '시니어 교육 채널',
+      thumbnail: '',
+      status: '안전',
+      reason: '',
+    },
+  ];
+}
+
+// ============================================
+// 검색 실행 (Supabase 또는 데모 모드)
+// ============================================
+
+/**
+ * search-videos Edge Function 호출 또는 데모 결과 표시
  * @param {string} query - 검색어
  */
 async function performSearch(query) {
   const trimmedQuery = query.trim();
   if (!trimmedQuery) return;
 
-  // 큰 검색 영역 → 축소 헤더로 전환 & 유튜브 로딩 표시
   showResultView();
   showYoutubeLoading();
 
-  // Supabase 설정 확인
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    showYoutubeError('Supabase 설정이 필요합니다. script.js 상단의 URL과 ANON_KEY를 입력해 주세요.');
+  // Supabase 미연동 → 데모 모드 (UI/UX 확인용)
+  if (!isSupabaseReady) {
+    await new Promise((resolve) => setTimeout(resolve, 900));
+    renderYoutubeResults(getDemoYoutubeResults(trimmedQuery));
     return;
   }
 
@@ -197,7 +248,6 @@ async function performSearch(query) {
       return;
     }
 
-    // 응답 데이터 렌더링
     renderYoutubeResults(data?.videos || data);
   } catch (err) {
     console.error('검색 요청 실패:', err);
@@ -338,9 +388,9 @@ chatForm.addEventListener('submit', handleChatSubmit);
 // 초기화
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-  // 첫 화면: 유튜브 안내 + 뉴스 + 생활정보 + 챗봇 모두 표시
+  initSupabaseClient();
   showYoutubePlaceholder();
   renderDummyNews();
   renderDummyInfo();
-  console.log('🛡️ 시니어 디지털 보안관 준비 완료');
+  console.log('🛡️ 시니어 디지털 보안관 준비 완료 (UI 미리보기 모드)');
 });
