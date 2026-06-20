@@ -235,7 +235,8 @@ body {
 }
 
 .site-header-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 0.75rem 1rem;
   max-width: 1440px;
@@ -250,9 +251,9 @@ body {
   gap: 0.5rem;
   text-decoration: none;
   color: var(--color-text);
-  flex: 0 0 auto;
+  flex-shrink: 0;
   min-width: 0;
-  margin-right: auto;
+  justify-self: start;
 }
 
 .site-brand-text {
@@ -265,16 +266,16 @@ body {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  flex: 0 0 auto;
-  margin-left: auto;
+  justify-self: end;
+  flex-shrink: 0;
 }
 
 .top-nav {
   display: none;
   align-items: center;
   justify-content: center;
-  flex: 1 1 auto;
-  min-width: 0;
+  justify-self: center;
+  width: 100%;
   max-width: 920px;
   gap: 0.35rem;
   flex-wrap: wrap;
@@ -351,22 +352,8 @@ body {
 }
 
 @media (min-width: 768px) {
-  .site-header-row {
-    flex-wrap: nowrap;
-  }
-
-  .site-brand {
-    margin-right: 0;
-  }
-
   .top-nav {
     display: flex;
-    margin-left: 0.5rem;
-    margin-right: 0.5rem;
-  }
-
-  .header-end {
-    margin-left: auto;
   }
 
   .mobile-menu-toggle {
@@ -393,14 +380,8 @@ body {
 
 @media (max-width: 767px) {
   .site-header-row {
-    flex-wrap: wrap;
-    justify-content: space-between;
+    grid-template-columns: auto 1fr auto;
     gap: 0.5rem;
-  }
-
-  .site-brand {
-    margin-right: 0;
-    order: 1;
   }
 
   .site-brand-text {
@@ -408,8 +389,7 @@ body {
   }
 
   .header-end {
-    order: 2;
-    margin-left: auto;
+    justify-self: end;
   }
 
   .header-end:empty {
@@ -418,11 +398,9 @@ body {
 
   .top-nav {
     display: flex;
-    order: 3;
-    flex: 1 1 100%;
+    grid-column: 1 / -1;
     width: 100%;
     max-width: none;
-    margin: 0;
     justify-content: space-evenly;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
