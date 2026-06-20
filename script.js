@@ -111,31 +111,7 @@ logoutButton.addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
 });
 
-// ── 더미 콘텐츠 ──
-
-function renderDefaultYoutube() {
-  const videos = [
-    { title: "무릎 관절에 좋은 아침 스트레칭", channel: "건강채널", views: "1.2만회" },
-    { title: "미스터트롯 베스트 메들리 1시간", channel: "트로트명가", views: "50만회" },
-    { title: "요즘 유행하는 보이스피싱 예방법", channel: "경찰청", views: "10만회" },
-    { title: "임영웅 콘서트 라이브 모음", channel: "음악방송", views: "200만회" },
-  ];
-
-  youtubeContent.innerHTML = videos.map((v) => `
-    <article class="video-card-ui">
-      <div class="video-thumb">
-        <span class="material-symbols-outlined">play_circle</span>
-        <div class="safe-badge-ui">
-          <span class="material-symbols-outlined" style="font-size:16px">check_circle</span> 안전 확인됨
-        </div>
-      </div>
-      <div class="card-body">
-        <h4 class="card-title">${escapeHtml(v.title)}</h4>
-        <p class="card-meta">${escapeHtml(v.channel)} • 조회수 ${escapeHtml(v.views)}</p>
-      </div>
-    </article>
-  `).join("");
-}
+// ── 홈 추천 콘텐츠 ──
 
 function renderNews() {
   const articles = [
@@ -273,7 +249,7 @@ document.querySelectorAll("[data-section]").forEach((link) => {
 // ── 초기화 ──
 
 document.addEventListener("DOMContentLoaded", () => {
-  renderDefaultYoutube();
+  loadHomeYoutubeRecommendations(youtubeContent);
   renderNews();
   addChatBubble("안녕하세요! 저는 시니어 디지털 보안관입니다. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.", "bot");
   initAuth();

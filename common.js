@@ -141,7 +141,71 @@ function videoResultToItem(video) {
     url: `https://www.youtube.com/watch?v=${video.video_id}`,
     subtitle: `${video.channel || "YouTube"} · 영상`,
     videoId: video.video_id,
+    channel: video.channel || "YouTube",
   };
+}
+
+const SENIOR_HOME_YOUTUBE_QUERIES = [
+  "시니어 건강 운동",
+  "트로트 명곡 모음",
+  "어르신 스트레칭",
+  "보이스피싱 예방",
+  "임영웅 라이브",
+  "무릎 관절 운동",
+  "국민건강보험 어르신",
+  "노년기 두뇌 훈련",
+];
+
+function pickSeniorHomeQuery() {
+  return SENIOR_HOME_YOUTUBE_QUERIES[Math.floor(Math.random() * SENIOR_HOME_YOUTUBE_QUERIES.length)];
+}
+
+function renderYoutubeHomeCard(item) {
+  if (item.status === "danger") {
+    return `
+      <article class="blocked-card-ui">
+        <p class="card-title" style="color:#dc2626">🚨 보안관 차단: 검증되지 않은 영상</p>
+        <p class="card-meta" style="color:#7f1d1d;margin-bottom:0.35rem">${escapeHtml(item.title)}</p>
+        <p class="card-meta" style="color:#7f1d1d">${escapeHtml(item.reason)}</p>
+      </article>
+    `;
+  }
+
+  return `
+    <a class="video-card-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">
+      <article class="video-card-ui">
+        <div class="video-thumb">
+          <img src="${escapeHtml(item.thumbnail)}" alt="" loading="lazy" />
+          <div class="safe-badge-ui">
+            <span class="material-symbols-outlined" style="font-size:16px">check_circle</span> 안전 확인됨
+          </div>
+        </div>
+        <div class="card-body">
+          <h4 class="card-title">${escapeHtml(item.title)}</h4>
+          <p class="card-meta">${escapeHtml(item.channel)}</p>
+        </div>
+      </article>
+    </a>
+  `;
+}
+
+async function loadHomeYoutubeRecommendations(container) {
+  container.innerHTML = `<p class="youtube-loading">어르신을 위한 안전한 영상을 찾고 있습니다...</p>`;
+
+  try {
+    const query = pickSeniorHomeQuery();
+    const videos = await searchVideos(query);
+    const items = videos.map(videoResultToItem);
+
+    if (items.length === 0) {
+      container.innerHTML = `<p class="youtube-loading">추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.</p>`;
+      return;
+    }
+
+    container.innerHTML = items.map(renderYoutubeHomeCard).join("");
+  } catch {
+    container.innerHTML = `<p class="youtube-loading">영상을 불러오지 못했습니다. 검색창에서 직접 검색해 보세요.</p>`;
+  }
 }
 
 async function runSearch(raw) {
