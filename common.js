@@ -341,6 +341,33 @@ function filterWelfareServices(services, categoryId) {
 function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn, options = {}) {
   let activeId = categories[0].id;
   let loading = false;
+  let autoRotateEnabled = options.autoRotate === true && categories.length > 1;
+  let autoRotateTimer = null;
+  const autoRotateMs = Number(options.autoRotateMs) > 0 ? Number(options.autoRotateMs) : 5000;
+
+  function stopAutoRotate() {
+    autoRotateEnabled = false;
+    if (autoRotateTimer) {
+      clearTimeout(autoRotateTimer);
+      autoRotateTimer = null;
+    }
+  }
+
+  function queueAutoRotate() {
+    if (!autoRotateEnabled || loading || categories.length < 2) return;
+
+    if (autoRotateTimer) clearTimeout(autoRotateTimer);
+    autoRotateTimer = setTimeout(async () => {
+      autoRotateTimer = null;
+      if (!autoRotateEnabled || loading) return;
+
+      const currentIndex = categories.findIndex((cat) => cat.id === activeId);
+      const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % categories.length : 0;
+      activeId = categories[nextIndex].id;
+      renderTabs();
+      await loadCategory();
+    }, autoRotateMs);
+  }
 
   function notifyCategoryChange() {
     if (typeof options.onCategoryChange === "function") {
@@ -364,6 +391,7 @@ function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn, 
         const nextId = button.dataset.category;
         if (loading || nextId === activeId) return;
 
+        stopAutoRotate();
         activeId = nextId;
         renderTabs();
         await loadCategory();
@@ -382,6 +410,11 @@ function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn, 
     if (!category) return;
 
     loading = true;
+    if (autoRotateTimer) {
+      clearTimeout(autoRotateTimer);
+      autoRotateTimer = null;
+    }
+
     tabsContainer.querySelectorAll(".category-tab").forEach((button) => {
       button.disabled = true;
     });
@@ -395,13 +428,18 @@ function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn, 
     } finally {
       loading = false;
       renderTabs();
+      queueAutoRotate();
     }
   }
 
   renderTabs();
   loadCategory();
 
-  return { reload: loadCategory, getActiveId: () => activeId };
+  return {
+    reload: loadCategory,
+    getActiveId: () => activeId,
+    stopAutoRotate,
+  };
 }
 
 function renderVerifiedBadge(label) {
