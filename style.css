@@ -78,7 +78,11 @@
   --color-youtube: #e63b2e;
   --color-verified-badge: #76ff03;
 
-  /* ── Accent gradients (nav active, etc.) ── */
+  /* ── Nav active (soft highlight) ── */
+  --color-nav-active-bg: #fef9e7;
+  --color-nav-active-border: #c9a227;
+
+  /* ── Accent gradients (legacy / other UI) ── */
   --color-accent-gradient-start: #fff8dc;
   --color-accent-gradient-mid: #ffe566;
   --color-accent-gradient-end: #ffd700;
@@ -561,31 +565,17 @@ button.back-link-prominent {
 }
 
 .top-nav-link.nav-active {
-  background: linear-gradient(160deg, var(--color-accent-gradient-start) 0%, var(--color-accent-gradient-mid) 42%, var(--color-accent-gradient-end) 100%);
-  border-color: var(--color-primary-alpha-12);
+  background: var(--color-nav-active-bg);
+  border-color: var(--color-nav-active-border);
   color: var(--color-primary);
-  box-shadow:
-    0 3px 10px var(--color-accent-alpha-28),
-    inset 0 1px 0 var(--color-accent-inset-highlight);
-}
-
-.top-nav-link.nav-active::after {
-  content: "";
-  position: absolute;
-  bottom: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 1.35rem;
-  height: 3px;
-  border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  opacity: 0.75;
+  box-shadow: none;
 }
 
 .top-nav-link.nav-active:hover,
 .top-nav-link.nav-active:focus {
-  background: linear-gradient(160deg, var(--color-accent-gradient-hover-start) 0%, var(--color-accent-gradient-hover-mid) 42%, var(--color-accent-gradient-hover-end) 100%);
-  color: var(--color-primary);
+  background: var(--color-nav-active-bg);
+  border-color: var(--color-accent-dark);
+  color: var(--color-primary-dark);
 }
 
 .mobile-menu-toggle {
@@ -612,12 +602,10 @@ button.back-link-prominent {
 }
 
 .mobile-nav-link.mobile-nav-active {
-  background: linear-gradient(160deg, var(--color-accent-gradient-start) 0%, var(--color-accent-gradient-mid) 42%, var(--color-accent-gradient-end) 100%);
-  border-color: var(--color-primary-alpha-12);
+  background: var(--color-nav-active-bg);
+  border-color: var(--color-nav-active-border);
   color: var(--color-primary);
-  box-shadow:
-    0 3px 10px var(--color-accent-alpha-28),
-    inset 0 1px 0 var(--color-accent-inset-highlight);
+  box-shadow: none;
 }
 
 @media (min-width: 768px) {
