@@ -1094,11 +1094,12 @@ async function chatWithAgent(message, history) {
 
 function getSiteFooterHtml() {
   return `
-    <footer class="site-footer">
+    <footer class="site-footer" aria-label="사이트 하단">
       <div class="site-footer-inner">
         <div class="site-footer-brand">
-          <img src="${MASCOT_POTATO_SRC}" alt="" class="footer-potato" width="72" height="72" loading="lazy" />
+          <img src="${MASCOT_POTATO_SRC}" alt="샤이한 열정 감자 마스코트" class="footer-potato" width="88" height="88" loading="lazy" />
           <p class="site-footer-provider">샤이한 열정 감자</p>
+          <p class="site-footer-tagline">샤이한 열정 감자가 제공하는 페이지입니다</p>
         </div>
       </div>
     </footer>
