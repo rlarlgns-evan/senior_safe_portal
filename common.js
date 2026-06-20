@@ -1241,6 +1241,15 @@ function initSiteNavigation() {
   document.querySelectorAll(".top-nav-link, .mobile-nav-link").forEach((link) => {
     link.addEventListener("click", () => closeMobileNavMenu());
   });
+
+  const mobileToggle = document.getElementById("mobile-menu-toggle");
+  const mobileNav = document.getElementById("mobile-nav");
+  mobileToggle?.addEventListener("click", () => {
+    if (!mobileNav) return;
+    const willOpen = mobileNav.classList.contains("hidden");
+    mobileNav.classList.toggle("hidden", !willOpen);
+    mobileToggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  });
 }
 
 function closeMobileNavMenu() {
