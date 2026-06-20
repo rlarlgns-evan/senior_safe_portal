@@ -2812,6 +2812,44 @@ button.search-button {
   color: var(--color-muted);
 }
 
+.site-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.75rem;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.site-footer-nav a {
+  color: var(--color-text);
+  font-size: var(--font-base);
+  font-weight: 700;
+  text-decoration: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.site-footer-nav a:hover,
+.site-footer-nav a:focus {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.footer-divider {
+  color: #c4c4c4;
+  font-weight: 700;
+  user-select: none;
+}
+
+.site-footer-copy {
+  margin: 0;
+  font-size: var(--font-base);
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
 /* ── 정보 페이지 (약관 · 팀 소개) ── */
 .info-main {
   flex: 1;

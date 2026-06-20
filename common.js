@@ -1175,6 +1175,14 @@ function getSiteFooterHtml() {
           <p class="site-footer-provider">샤이한 열정 감자</p>
           <p class="site-footer-tagline">샤이한 열정 감자가 제공하는 페이지입니다</p>
         </div>
+        <nav class="site-footer-nav" aria-label="정보 링크">
+          <a href="terms.html">이용약관</a>
+          <span class="footer-divider" aria-hidden="true">·</span>
+          <a href="privacy.html">개인정보처리방침</a>
+          <span class="footer-divider" aria-hidden="true">·</span>
+          <a href="team.html">팀 소개</a>
+        </nav>
+        <p class="site-footer-copy">© 2026 시니어 디지털 보안관</p>
       </div>
     </footer>
   `;
