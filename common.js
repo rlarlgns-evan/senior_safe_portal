@@ -146,10 +146,11 @@ async function analyzeLink(url) {
   return data;
 }
 
-async function searchVideos(query, limit = 5) {
-  const { data, error } = await supabaseClient.functions.invoke("search-videos", {
-    body: { query, limit },
-  });
+async function searchVideos(query, limit = 5, options = {}) {
+  const body = { query, limit };
+  if (options.skipAnalysis) body.skipAnalysis = true;
+
+  const { data, error } = await supabaseClient.functions.invoke("search-videos", { body });
   if (error) {
     throw new Error(await getInvokeErrorMessage(error, data));
   }
@@ -184,6 +185,50 @@ const YOUTUBE_CATEGORIES = [
   { id: "documentary", label: "다큐", query: "다큐멘터리 역사" },
   { id: "health", label: "건강", query: "시니어 건강 운동" },
 ];
+
+/** API 장애 시 공식·교육 채널 영상으로 대체 */
+const YOUTUBE_CATEGORY_FALLBACK = {
+  music: [
+    { video_id: "7DIh3WaGcEU", title: "전유진 - 사랑만은 않겠어요 [불후의 명곡2]", channel: "KBS 레전드 케이팝", status: "안전" },
+    { video_id: "b3NNDg-gYpw", title: "트로트파의 기운을 얻어 가는 전유진 [불후의 명곡2]", channel: "KBS 레전드 케이팝", status: "안전" },
+  ],
+  affairs: [
+    { video_id: "B2lHwQBZx-A", title: "9시 뉴스", channel: "KBS News", status: "안전" },
+  ],
+  entertainment: [
+    { video_id: "Nob6hMO60NE", title: "운동으로 꿈을 가르치는 지한구 선생님 [유퀴즈]", channel: "유 퀴즈 온 더 튜브", status: "안전" },
+    { video_id: "lwycbWG8gJI", title: "유퀴즈 온더블럭 하이라이트", channel: "tvN D ENT", status: "안전" },
+  ],
+  documentary: [
+    { video_id: "cLVugRBot1c", title: "EBS 다큐프라임 - 공부의 배신 1부", channel: "EBS 다큐", status: "안전" },
+  ],
+  health: [
+    { video_id: "oq0eugtuMas", title: "국민건강체조 (새천년건강체조)", channel: "국민체육진흥공단", status: "안전" },
+    { video_id: "vKGj6kF8b8o", title: "하체 근력 운동 | 백세수업", channel: "서울아산병원", status: "안전" },
+    { video_id: "WhanMCBWDH8", title: "6070 시니어 저강도 운동 1분", channel: "엄마의 생존운동", status: "안전" },
+  ],
+  _shared: [
+    { video_id: "7DIh3WaGcEU", title: "전유진 - 사랑만은 않겠어요 [불후의 명곡2]", channel: "KBS 레전드 케이팝", status: "안전" },
+    { video_id: "B2lHwQBZx-A", title: "9시 뉴스", channel: "KBS News", status: "안전" },
+    { video_id: "oq0eugtuMas", title: "국민건강체조 (새천년건강체조)", channel: "국민체육진흥공단", status: "안전" },
+  ],
+};
+
+function getYoutubeFallbackItems(categoryId, count) {
+  const primary = YOUTUBE_CATEGORY_FALLBACK[categoryId] || [];
+  const shared = YOUTUBE_CATEGORY_FALLBACK._shared || [];
+  const seen = new Set();
+  const items = [];
+
+  for (const video of [...primary, ...shared]) {
+    if (!video?.video_id || seen.has(video.video_id)) continue;
+    seen.add(video.video_id);
+    items.push(videoResultToItem(video));
+    if (items.length >= count) break;
+  }
+
+  return items;
+}
 
 const NEWS_CATEGORIES = [
   { id: "affairs", label: "시사", query: "국정 시사" },
@@ -306,7 +351,10 @@ function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn, 
     });
 
     try {
-      await loadFn(contentContainer, category.query, { preview: options.preview !== false });
+      await loadFn(contentContainer, category.query, {
+        preview: options.preview !== false,
+        categoryId: category.id,
+      });
       notifyCategoryChange();
     } finally {
       loading = false;
@@ -384,7 +432,7 @@ async function fetchSafeYoutubeItems(query, neededCount) {
   for (const searchQuery of queryVariants) {
     if (safeItems.length >= neededCount) break;
 
-    const videos = await searchVideos(searchQuery, 15);
+    const videos = await searchVideos(searchQuery, 15, { skipAnalysis: true });
     for (const video of videos) {
       if (!isVideoSafe(video)) continue;
 
@@ -409,6 +457,11 @@ async function loadHomeYoutubeRecommendations(container, query, options = {}) {
       const safeItems = await fetchSafeYoutubeItems(query, HOME_YOUTUBE_PREVIEW);
 
       if (safeItems.length === 0) {
+        const fallbackItems = getYoutubeFallbackItems(options.categoryId, HOME_YOUTUBE_PREVIEW);
+        if (fallbackItems.length > 0) {
+          container.innerHTML = fallbackItems.map(renderYoutubeHomeCard).join("");
+          return;
+        }
         container.innerHTML = mascotLoadingHtml("안전한 추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.");
         return;
       }
@@ -426,7 +479,22 @@ async function loadHomeYoutubeRecommendations(container, query, options = {}) {
     }
 
     container.innerHTML = `<div class="browse-grid browse-youtube-grid">${items.map(renderYoutubeThumbnailCard).join("")}</div>`;
-  } catch {
+  } catch (err) {
+    console.warn("YouTube recommendations failed:", err);
+    const fallbackItems = getYoutubeFallbackItems(
+      options.categoryId,
+      preview ? HOME_YOUTUBE_PREVIEW : BROWSE_YOUTUBE_LIMIT,
+    );
+
+    if (fallbackItems.length > 0) {
+      if (preview) {
+        container.innerHTML = fallbackItems.map(renderYoutubeHomeCard).join("");
+      } else {
+        container.innerHTML = `<div class="browse-grid browse-youtube-grid">${fallbackItems.map(renderYoutubeThumbnailCard).join("")}</div>`;
+      }
+      return;
+    }
+
     container.innerHTML = mascotLoadingHtml("영상을 불러오지 못했습니다. 검색창에서 직접 검색해 보세요.");
   }
 }

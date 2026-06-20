@@ -70,8 +70,23 @@ async function fetchYouTubeVideos(
   const response = await fetch(`https://www.googleapis.com/youtube/v3/search?${params.toString()}`);
 
   if (!response.ok) {
-    console.error("YouTube API HTTP", response.status);
-    throw new Error("영상 검색 서비스에 일시적인 문제가 있습니다. 잠시 후 다시 시도해 주세요.");
+    let message = "영상 검색 서비스에 일시적인 문제가 있습니다. 잠시 후 다시 시도해 주세요.";
+    try {
+      const errBody = await response.json();
+      const reason = errBody?.error?.errors?.[0]?.reason ?? "";
+      console.error("YouTube API HTTP", response.status, reason, errBody?.error?.message);
+
+      if (reason === "quotaExceeded" || reason === "dailyLimitExceeded") {
+        message = "오늘 영상 검색 한도를 모두 사용했습니다. 내일 다시 시도해 주세요.";
+      } else if (reason === "keyInvalid" || reason === "accessNotConfigured") {
+        message = "YouTube API 설정에 문제가 있습니다. 관리자에게 문의해 주세요.";
+      } else if (response.status === 403) {
+        message = "YouTube API 접근이 거부되었습니다. API 키 제한(Referrer/IP)을 확인해 주세요.";
+      }
+    } catch {
+      console.error("YouTube API HTTP", response.status);
+    }
+    throw new Error(message);
   }
 
   const data = await response.json();
@@ -187,6 +202,7 @@ Deno.serve(async (req: Request) => {
 
     const query = sanitizeSearchQuery(body?.query);
     const maxResults = clampLimit(body?.limit, 5, 20);
+    const skipAnalysis = body?.skipAnalysis === true;
 
     const youtubeItems = await fetchYouTubeVideos(query, youtubeApiKey, maxResults);
 
@@ -194,7 +210,9 @@ Deno.serve(async (req: Request) => {
       return jsonResponse(req, { videos: [] });
     }
 
-    const geminiResults = await analyzeWithGemini(youtubeItems, geminiApiKey);
+    const geminiResults = skipAnalysis
+      ? []
+      : await analyzeWithGemini(youtubeItems, geminiApiKey);
     const videos = mergeVideoResults(youtubeItems, geminiResults);
 
     return jsonResponse(req, { videos });
