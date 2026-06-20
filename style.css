@@ -1032,10 +1032,11 @@ button.search-button {
 .content-column {
   display: flex;
   flex-direction: column;
+  gap: 0.65rem;
   background: #fff;
   border: var(--btn-border-width) solid var(--color-border);
   border-radius: var(--radius-card);
-  padding: var(--space-card);
+  padding: var(--space-card) var(--space-card) 0.65rem;
   min-width: 0;
   min-height: 0;
   box-shadow: var(--shadow-card);
@@ -1052,7 +1053,7 @@ button.search-button {
 .content-grid .section-header {
   flex-shrink: 0;
   padding-bottom: 0.5rem;
-  margin-bottom: 0.65rem;
+  margin-bottom: 0;
   border-bottom: 2px solid var(--color-border);
 }
 
@@ -1075,7 +1076,7 @@ button.search-button {
 
 .content-grid .category-tabs {
   flex-shrink: 0;
-  margin-bottom: 0.65rem;
+  margin-bottom: 0;
 }
 
 .content-grid .youtube-grid,
@@ -1093,7 +1094,7 @@ button.search-button {
   flex-shrink: 0;
   margin-top: auto;
   margin-bottom: 0;
-  padding-top: 0.65rem;
+  padding-top: 0;
 }
 
 .content-column .category-tabs {
@@ -1950,7 +1951,7 @@ button.search-button {
   gap: 0.35rem;
   margin-top: auto;
   margin-bottom: 0;
-  padding-top: 0.75rem;
+  padding-top: 0;
   width: 100%;
   text-align: center;
   text-decoration: none;
