@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>시니어 디지털 보안관</title>
+  <link rel="icon" href="assets/mascot-sheriff.png" type="image/png" />
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -15,7 +16,7 @@
     <header class="site-header">
       <div class="site-header-row">
         <a class="site-brand" href="#home-section" data-section="home">
-          <span class="material-symbols-outlined brand-icon" aria-hidden="true">shield</span>
+          <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="40" height="40" />
           <span class="site-brand-text">시니어 디지털 보안관</span>
         </a>
 
@@ -52,7 +53,23 @@
     <main class="main-content" id="home-section">
 
       <!-- 검색 영역 -->
-      <section class="hero-section">
+      <section class="hero-section" id="hero-section">
+        <div class="hero-weather-bg" id="hero-weather-bg" aria-hidden="true">
+          <div class="weather-sky"></div>
+          <div class="weather-celestial">
+            <div id="weather-sun" class="weather-sun hidden"></div>
+            <div id="weather-moon" class="weather-moon hidden"></div>
+          </div>
+          <div class="weather-clouds">
+            <span class="weather-cloud weather-cloud-1"></span>
+            <span class="weather-cloud weather-cloud-2"></span>
+            <span class="weather-cloud weather-cloud-3"></span>
+          </div>
+          <div id="weather-precip" class="weather-precip hidden"></div>
+          <div class="weather-scrim"></div>
+        </div>
+
+        <div class="hero-content">
         <div class="hero-weather-bar">
           <div id="weather-widget" class="weather-card" aria-live="polite">
             <div class="weather-icon-wrap" aria-hidden="true">
@@ -71,7 +88,10 @@
           </div>
         </div>
 
-        <p class="hero-subtitle">무엇이든 안전하게 검색하세요</p>
+        <div class="hero-intro">
+          <img src="assets/mascot-sheriff.png" alt="" class="hero-mascot" width="140" height="140" />
+          <p class="hero-subtitle">무엇이든 안전하게 검색하세요</p>
+        </div>
 
         <form id="search-form" class="search-form" novalidate>
           <label for="search-input" class="form-label">검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요</label>
@@ -84,6 +104,7 @@
           </div>
           <p class="form-help">링크는 안전 검사 · 일반 검색어는 유튜브 추천</p>
         </form>
+        </div>
       </section>
 
       <!-- 콘텐츠 3칸: 유튜브 · 뉴스 · 복지정보 -->
@@ -122,7 +143,10 @@
           </div>
           <div id="welfare-categories" class="category-tabs" role="tablist" aria-label="복지 카테고리"></div>
           <div id="welfare-content" class="welfare-content">
-            <p class="youtube-loading">근처 복지 시설과 혜택 정보를 찾고 있습니다...</p>
+            <div class="loading-with-mascot youtube-loading">
+              <img src="assets/mascot-sheriff.png" alt="" class="mascot-loading" width="72" height="72" />
+              <p>근처 복지 시설과 혜택 정보를 찾고 있습니다...</p>
+            </div>
           </div>
           <a id="welfare-more" class="section-more-link" href="welfare.html">더보기</a>
         </section>
@@ -135,7 +159,7 @@
     <div id="chat-window" class="chat-window hidden" role="dialog" aria-labelledby="chat-title">
       <div class="chat-header">
         <div class="chat-header-info">
-          <span class="material-symbols-outlined" aria-hidden="true">smart_toy</span>
+          <img src="assets/mascot-sheriff.png" alt="" class="chat-header-mascot" width="44" height="44" />
           <div>
             <h3 id="chat-title">디지털 보안관 AI 상담</h3>
             <p>대화하듯 편하게 물어보세요</p>
@@ -152,9 +176,9 @@
         <button type="submit" class="chat-submit">메시지 보내기</button>
       </form>
     </div>
-    <button type="button" id="chat-fab" class="chat-fab">
-      <span class="material-symbols-outlined" aria-hidden="true">support_agent</span>
-      보안관에게 물어보기
+    <button type="button" id="chat-fab" class="chat-fab chat-fab--mascot">
+      <img src="assets/mascot-sheriff.png" alt="" class="chat-fab-img" width="48" height="48" />
+      <span>보안관에게 물어보기</span>
     </button>
   </div>
 
@@ -179,7 +203,7 @@
   <!-- 로딩 / 오류 -->
   <div id="loading-overlay" class="loading-overlay hidden" role="dialog" aria-modal="true" aria-live="assertive">
     <div class="loading-box">
-      <div class="loading-spinner" aria-hidden="true"></div>
+      <img src="assets/mascot-sheriff.png" alt="" class="loading-mascot" width="96" height="96" />
       <p>안전 검사를 진행하고 있습니다. 잠시만 기다려주세요...</p>
     </div>
   </div>

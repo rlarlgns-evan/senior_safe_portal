@@ -142,10 +142,22 @@ async function handleSearchSubmit(event) {
 const chatHistory = [];
 
 function addChatBubble(text, sender) {
+  const row = document.createElement("div");
+  row.className = `chat-message-row chat-message-row--${sender}`;
+
+  if (sender === "bot") {
+    const avatar = document.createElement("img");
+    avatar.src = MASCOT_SRC;
+    avatar.alt = "";
+    avatar.className = "chat-mascot-avatar";
+    row.appendChild(avatar);
+  }
+
   const bubble = document.createElement("div");
   bubble.className = `chat-bubble ${sender}`;
   bubble.textContent = text;
-  chatMessages.appendChild(bubble);
+  row.appendChild(bubble);
+  chatMessages.appendChild(row);
   chatMessages.scrollTop = chatMessages.scrollHeight;
   return bubble;
 }
@@ -234,6 +246,8 @@ function updateSectionMoreLink(linkEl, page, categoryId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  applyWeatherBackground(null);
+
   const youtubeMore = document.getElementById("youtube-more");
   const newsMore = document.getElementById("news-more");
   const welfareMore = document.getElementById("welfare-more");
@@ -268,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ).reload,
   );
   initHomeLocationServices();
-  addChatBubble("안녕하세요! 저는 시니어 디지털 보안관입니다. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.", "bot");
+  addChatBubble("안녕하세요! 저는 디지털 보안관 강아지예요. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.", "bot");
   initAuth();
 });
 

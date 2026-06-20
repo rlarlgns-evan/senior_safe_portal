@@ -5,8 +5,22 @@
 const SUPABASE_URL = "https://oweduuhfkiutlszfwukt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93ZWR1dWhma2l1dGxzemZ3dWt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjMyNzUsImV4cCI6MjA5NzUzOTI3NX0.n25pwv-WuWOBIGY7cwJCYj1TxILYpy2XA2nn7a6ySMY";
 const SEARCH_RESULTS_KEY = "sheriff-search-results";
+const MASCOT_SRC = "assets/mascot-sheriff.png";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function mascotImg(className, alt = "디지털 보안관 마스코트") {
+  return `<img src="${MASCOT_SRC}" alt="${escapeHtml(alt)}" class="${className}" loading="lazy" />`;
+}
+
+function mascotLoadingHtml(message) {
+  return `
+    <div class="loading-with-mascot youtube-loading">
+      ${mascotImg("mascot-loading")}
+      <p>${escapeHtml(message)}</p>
+    </div>
+  `;
+}
 
 function escapeHtml(value) {
   const div = document.createElement("div");
@@ -369,14 +383,14 @@ async function fetchSafeYoutubeItems(query, neededCount) {
 
 async function loadHomeYoutubeRecommendations(container, query, options = {}) {
   const preview = options.preview !== false;
-  container.innerHTML = `<p class="youtube-loading">어르신을 위한 안전한 영상을 찾고 있습니다...</p>`;
+  container.innerHTML = mascotLoadingHtml("어르신을 위한 안전한 영상을 찾고 있습니다...");
 
   try {
     if (preview) {
       const safeItems = await fetchSafeYoutubeItems(query, HOME_YOUTUBE_PREVIEW);
 
       if (safeItems.length === 0) {
-        container.innerHTML = `<p class="youtube-loading">안전한 추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.</p>`;
+        container.innerHTML = mascotLoadingHtml("안전한 추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.");
         return;
       }
 
@@ -388,13 +402,13 @@ async function loadHomeYoutubeRecommendations(container, query, options = {}) {
     const items = videos.map(videoResultToItem);
 
     if (items.length === 0) {
-      container.innerHTML = `<p class="youtube-loading">추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.</p>`;
+      container.innerHTML = mascotLoadingHtml("추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.");
       return;
     }
 
     container.innerHTML = `<div class="browse-youtube-grid">${items.map(renderYoutubeThumbnailCard).join("")}</div>`;
   } catch {
-    container.innerHTML = `<p class="youtube-loading">영상을 불러오지 못했습니다. 검색창에서 직접 검색해 보세요.</p>`;
+    container.innerHTML = mascotLoadingHtml("영상을 불러오지 못했습니다. 검색창에서 직접 검색해 보세요.");
   }
 }
 
@@ -441,14 +455,14 @@ function renderNewsHomeCard(article) {
 
 async function loadHomeNewsRecommendations(container, query, options = {}) {
   const preview = options.preview !== false;
-  container.innerHTML = `<p class="youtube-loading">오늘의 뉴스를 불러오고 있습니다...</p>`;
+  container.innerHTML = mascotLoadingHtml("오늘의 뉴스를 불러오고 있습니다...");
 
   try {
     const articles = await searchNews(query, preview ? 5 : BROWSE_NEWS_LIMIT);
     const visibleArticles = preview ? articles.slice(0, HOME_NEWS_PREVIEW) : articles;
 
     if (visibleArticles.length === 0) {
-      container.innerHTML = `<p class="youtube-loading">뉴스를 찾지 못했습니다. 잠시 후 새로고침해 주세요.</p>`;
+      container.innerHTML = mascotLoadingHtml("뉴스를 찾지 못했습니다. 잠시 후 새로고침해 주세요.");
       return;
     }
 
@@ -458,7 +472,7 @@ async function loadHomeNewsRecommendations(container, query, options = {}) {
       container.innerHTML = `<div class="browse-news-list">${visibleArticles.map(renderNewsHomeCard).join("")}</div>`;
     }
   } catch {
-    container.innerHTML = `<p class="youtube-loading">뉴스를 불러오지 못했습니다. Supabase에 search-news 배포 및 네이버 API 키를 확인해 주세요.</p>`;
+    container.innerHTML = mascotLoadingHtml("뉴스를 불러오지 못했습니다. Supabase에 search-news 배포 및 네이버 API 키를 확인해 주세요.");
   }
 }
 
@@ -656,6 +670,103 @@ function weatherCodeToIcon(code) {
   return "partly_cloudy_day";
 }
 
+function getKoreaTime() {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date());
+
+  return {
+    hour: Number(parts.find((part) => part.type === "hour")?.value ?? 12),
+    minute: Number(parts.find((part) => part.type === "minute")?.value ?? 0),
+  };
+}
+
+function getTimePhase(hour) {
+  if (hour >= 5 && hour < 7) return "dawn";
+  if (hour >= 7 && hour < 17) return "day";
+  if (hour >= 17 && hour < 20) return "sunset";
+  return "night";
+}
+
+function weatherCodeToScene(code) {
+  if (code === 0) return "clear";
+  if (code >= 1 && code <= 3) return "cloudy";
+  if (code >= 45 && code <= 48) return "fog";
+  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return "rain";
+  if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) return "snow";
+  if (code >= 95) return "storm";
+  return "cloudy";
+}
+
+function getSunPosition(hour, minute) {
+  const total = hour * 60 + minute;
+  const sunrise = 6 * 60;
+  const sunset = 19 * 60;
+
+  if (total < sunrise) {
+    return { x: 8, y: 78 };
+  }
+  if (total > sunset) {
+    return { x: 92, y: 78 };
+  }
+
+  const progress = (total - sunrise) / (sunset - sunrise);
+  return {
+    x: 8 + progress * 84,
+    y: 78 - Math.sin(progress * Math.PI) * 58,
+  };
+}
+
+function applyWeatherBackground(weather) {
+  const hero = document.getElementById("hero-section") || document.querySelector(".hero-section");
+  const sun = document.getElementById("weather-sun");
+  const moon = document.getElementById("weather-moon");
+  const precip = document.getElementById("weather-precip");
+  if (!hero) return;
+
+  const { hour, minute } = getKoreaTime();
+  const phase = getTimePhase(hour);
+  const scene = weather ? weatherCodeToScene(weather.weatherCode) : "clear";
+
+  hero.dataset.timePhase = phase;
+  hero.dataset.weatherScene = scene;
+
+  const isDaytime = phase === "dawn" || phase === "day" || phase === "sunset";
+  const hideSunForWeather = scene === "storm" || (scene === "rain" && phase === "day");
+  const showSun = isDaytime && !hideSunForWeather;
+  const showMoon = phase === "night" && scene !== "storm";
+
+  if (sun) {
+    sun.classList.toggle("hidden", !showSun);
+    if (showSun) {
+      const pos = getSunPosition(hour, minute);
+      sun.style.left = `${pos.x}%`;
+      sun.style.top = `${pos.y}%`;
+    }
+  }
+
+  if (moon) {
+    moon.classList.toggle("hidden", !showMoon);
+    const moonX = 12 + ((hour + minute / 60) / 24) * 76;
+    moon.style.left = `${Math.min(moonX, 88)}%`;
+    moon.style.top = phase === "night" ? "18%" : "22%";
+  }
+
+  if (precip) {
+    precip.classList.remove("hidden", "weather-precip-rain", "weather-precip-snow");
+    if (scene === "rain" || scene === "storm") {
+      precip.classList.add("weather-precip-rain");
+    } else if (scene === "snow") {
+      precip.classList.add("weather-precip-snow");
+    } else {
+      precip.classList.add("hidden");
+    }
+  }
+}
+
 function renderWeatherWidget(weather, locationSource) {
   const mainEl = document.getElementById("weather-main");
   const subEl = document.getElementById("weather-sub");
@@ -674,6 +785,8 @@ function renderWeatherWidget(weather, locationSource) {
   if (locationButton) {
     locationButton.classList.toggle("hidden", locationSource === "gps");
   }
+
+  applyWeatherBackground(weather);
 }
 
 function renderWelfareQuickLinks(links) {
@@ -697,7 +810,7 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
   const locationLabel = document.getElementById("welfare-location-label");
 
   if (!cachedWelfareContext) {
-    container.innerHTML = `<p class="youtube-loading">위치 정보를 확인한 뒤 복지 정보를 불러옵니다...</p>`;
+    container.innerHTML = mascotLoadingHtml("위치 정보를 확인한 뒤 복지 정보를 불러옵니다...");
     return;
   }
 
@@ -708,7 +821,7 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
     locationLabel.textContent = `📍 ${weather.label}${suffix} 맞춤 복지 정보`;
   }
 
-  container.innerHTML = `<p class="youtube-loading">우리 지역 복지 혜택을 찾고 있습니다...</p>`;
+  container.innerHTML = mascotLoadingHtml("우리 지역 복지 혜택을 찾고 있습니다...");
 
   try {
     const fetchLimit = preview ? 4 : BROWSE_WELFARE_LIMIT;
@@ -725,10 +838,10 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
 
     const localHtml = localServices.length > 0
       ? localServices.map(renderWelfareServiceCard).join("")
-      : `<p class="youtube-loading">${escapeHtml(categoryLabel)} 분야 지자체 복지서비스를 찾지 못했습니다.</p>`;
+      : mascotLoadingHtml(`${categoryLabel} 분야 지자체 복지서비스를 찾지 못했습니다.`);
     const nationalHtml = nationalServices.length > 0
       ? nationalServices.map(renderWelfareServiceCard).join("")
-      : `<p class="youtube-loading">${escapeHtml(categoryLabel)} 분야 중앙부처 복지서비스를 찾지 못했습니다.</p>`;
+      : mascotLoadingHtml(`${categoryLabel} 분야 중앙부처 복지서비스를 찾지 못했습니다.`);
 
     container.innerHTML = `
       <div class="welfare-services${preview ? "" : " welfare-services-browse"}">
@@ -746,7 +859,7 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
       </div>
     `;
   } catch {
-    container.innerHTML = `<p class="youtube-loading">복지 정보를 불러오지 못했습니다. Supabase에 search-welfare 배포 및 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.</p>`;
+    container.innerHTML = mascotLoadingHtml("복지 정보를 불러오지 못했습니다. Supabase에 search-welfare 배포 및 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.");
   }
 }
 
@@ -782,6 +895,7 @@ async function initHomeLocationServices(forcePrompt = false) {
   if (mainEl) mainEl.textContent = "날씨 확인 중...";
   if (subEl) subEl.textContent = "위치를 불러오고 있습니다";
   if (locationButton) locationButton.classList.add("hidden");
+  applyWeatherBackground(null);
 
   const location = await requestUserLocation(forcePrompt);
   let weather = null;
@@ -808,7 +922,7 @@ async function initHomeLocationServices(forcePrompt = false) {
         await loadHomeWelfareInfo(welfareContainer, "all");
       }
     } catch {
-      welfareContainer.innerHTML = `<p class="youtube-loading">복지 정보를 불러오지 못했습니다. search-welfare 함수와 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.</p>`;
+      welfareContainer.innerHTML = mascotLoadingHtml("복지 정보를 불러오지 못했습니다. search-welfare 함수와 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.");
     }
   }
 }

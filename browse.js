@@ -64,11 +64,11 @@ async function initBrowsePage() {
   const initialCategoryId = getInitialCategoryId(config.categories);
 
   if (type === "welfare") {
-    contentContainer.innerHTML = `<p class="youtube-loading">위치 정보를 확인한 뒤 복지 정보를 불러옵니다...</p>`;
+    contentContainer.innerHTML = mascotLoadingHtml("위치 정보를 확인한 뒤 복지 정보를 불러옵니다...");
     try {
       await initBrowseWelfareLocation();
     } catch {
-      contentContainer.innerHTML = `<p class="youtube-loading">복지 정보를 불러오지 못했습니다.</p>`;
+      contentContainer.innerHTML = mascotLoadingHtml("복지 정보를 불러오지 못했습니다.");
       return;
     }
   }
@@ -132,7 +132,7 @@ async function initBrowsePage() {
   if (locationButton && type === "welfare") {
     locationButton.addEventListener("click", async () => {
       cachedUserLocation = null;
-      contentContainer.innerHTML = `<p class="youtube-loading">위치를 다시 확인하고 있습니다...</p>`;
+      contentContainer.innerHTML = mascotLoadingHtml("위치를 다시 확인하고 있습니다...");
       await initBrowseWelfareLocation(true);
       if (reloadContent) await reloadContent();
     });
