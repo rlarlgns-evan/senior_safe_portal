@@ -674,6 +674,12 @@ body {
   color: var(--color-text);
 }
 
+.search-input::placeholder {
+  color: var(--color-muted);
+  font-size: var(--font-base);
+  opacity: 1;
+}
+
 .search-input:focus {
   outline: none;
   border-color: var(--primary-blue);
