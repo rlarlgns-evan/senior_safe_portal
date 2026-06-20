@@ -3114,15 +3114,20 @@ button.back-link-prominent {
 /* 개인정보처리방침 · 이용약관 — 본문 10pt, 제목 12pt bold */
 .info-panel.legal-doc {
   font-size: 10pt;
+  font-weight: 400;
   line-height: 1.6;
+  color: var(--color-text);
 }
 
 .info-panel.legal-doc h1,
 .info-panel.legal-doc h2,
-.info-panel.legal-doc h3 {
+.info-panel.legal-doc h3,
+.info-panel.legal-doc .privacy-table th,
+.info-panel.legal-doc .privacy-contact dt {
   font-size: 12pt;
   font-weight: 700;
   line-height: 1.45;
+  color: var(--color-text);
 }
 
 .info-panel.legal-doc h1 {
@@ -3141,26 +3146,40 @@ button.back-link-prominent {
 .info-panel.legal-doc li,
 .info-panel.legal-doc td,
 .info-panel.legal-doc dd,
+.info-panel.legal-doc a,
+.info-panel.legal-doc ul,
+.info-panel.legal-doc ol,
 .info-panel.legal-doc .info-lead,
 .info-panel.legal-doc .privacy-meta,
-.info-panel.legal-doc .privacy-list {
+.info-panel.legal-doc .privacy-list,
+.info-panel.legal-doc .privacy-list li {
   font-size: 10pt;
   font-weight: 400;
+  line-height: 1.6;
 }
 
-.info-panel.legal-doc .privacy-table th {
-  font-size: 12pt;
-  font-weight: 700;
+.info-panel.legal-doc .info-lead,
+.info-panel.legal-doc .privacy-meta {
+  color: var(--color-muted);
 }
 
-.info-panel.legal-doc .privacy-contact dt {
-  font-size: 12pt;
-  font-weight: 700;
+.info-panel.legal-doc .privacy-table td {
+  font-size: 10pt;
+  font-weight: 400;
 }
 
 .info-panel.legal-doc .privacy-contact dd {
   font-size: 10pt;
   font-weight: 400;
+}
+
+.info-panel.legal-doc strong {
+  font-size: inherit;
+  font-weight: 700;
+}
+
+.info-panel.legal-doc a {
+  color: var(--color-primary);
 }
 
 .info-panel p,
