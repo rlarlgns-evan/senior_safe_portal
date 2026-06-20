@@ -583,40 +583,53 @@ function renderYoutubeHomeCard(item) {
   `;
 }
 
+async function fetchYoutubeFeedFromDb(categoryId, neededCount) {
+  try {
+    const { data, error } = await supabaseClient
+      .from("youtube_feeds")
+      .select("videos, updated_at")
+      .eq("category_id", categoryId)
+      .maybeSingle();
+
+    if (error || !Array.isArray(data?.videos) || data.videos.length === 0) {
+      return null;
+    }
+
+    const items = data.videos.map((video) => videoResultToItem(video));
+    return {
+      items: padYoutubeItemsToCount(items, categoryId, neededCount),
+      updatedAt: data.updated_at,
+    };
+  } catch (err) {
+    console.warn("YouTube feed DB read failed:", err);
+    return null;
+  }
+}
+
 async function fetchYoutubeItemsForCategory(categoryId, query, neededCount) {
   const cacheKey = buildYoutubeCacheKey(categoryId, query, neededCount);
   const cached = getCachedYoutubeItems(cacheKey);
-  if (cached) return cached;
+  if (cached) return { items: cached, source: "cache" };
 
-  if (youtubeQuotaBlocked) {
-    return padYoutubeItemsToCount([], categoryId, neededCount);
+  const fromDb = await fetchYoutubeFeedFromDb(categoryId, neededCount);
+  if (fromDb?.items?.length) {
+    setCachedYoutubeItems(cacheKey, fromDb.items);
+    return { items: fromDb.items, source: "db", updatedAt: fromDb.updatedAt };
   }
 
-  const searchQueries = getYoutubeSearchQueries(categoryId, query);
-  const baseOptions = { skipAnalysis: true };
+  return {
+    items: padYoutubeItemsToCount([], categoryId, neededCount),
+    source: "fallback",
+  };
+}
 
-  let items = await searchYoutubeQueryBatch(searchQueries, neededCount, baseOptions);
-
-  if (items.length < neededCount && neededCount > HOME_YOUTUBE_PREVIEW && !youtubeQuotaBlocked) {
-    const broadQuery = getCategoryQuery(YOUTUBE_CATEGORIES, categoryId);
-    const extra = await searchYoutubeQueryBatch([broadQuery], neededCount, baseOptions);
-    const seenIds = new Set(items.map((item) => item.videoId));
-
-    for (const item of extra) {
-      if (seenIds.has(item.videoId)) continue;
-      seenIds.add(item.videoId);
-      items.push(item);
-      if (items.length >= neededCount) break;
-    }
-  }
-
-  if (items.length < neededCount) {
-    return padYoutubeItemsToCount(items, categoryId, neededCount);
-  }
-
-  const result = items.slice(0, neededCount);
-  setCachedYoutubeItems(cacheKey, result);
-  return result;
+function renderYoutubeFeedFallbackNotice() {
+  return `
+    <p class="youtube-quota-notice" role="status">
+      <span class="material-symbols-outlined" aria-hidden="true">info</span>
+      추천 영상 목록을 준비 중입니다. 아래는 검증된 기본 추천 영상입니다. 잠시 후 다시 방문해 주세요.
+    </p>
+  `;
 }
 
 async function loadHomeYoutubeRecommendations(container, query, options = {}) {
@@ -624,28 +637,24 @@ async function loadHomeYoutubeRecommendations(container, query, options = {}) {
   const categoryId = options.categoryId;
   const neededCount = preview ? HOME_YOUTUBE_PREVIEW : BROWSE_YOUTUBE_LIMIT;
 
-  if (youtubeQuotaBlocked) {
-    const items = padYoutubeItemsToCount([], categoryId, neededCount);
-    renderYoutubeItems(container, items, preview, { quotaNotice: true });
-    return;
-  }
-
-  container.innerHTML = mascotLoadingHtml("카테고리에 맞는 영상을 찾고 있습니다...");
+  container.innerHTML = mascotLoadingHtml("추천 영상을 불러오고 있습니다...");
 
   try {
-    const items = await fetchYoutubeItemsForCategory(categoryId, query, neededCount);
-    renderYoutubeItems(container, items, preview, { quotaNotice: youtubeQuotaBlocked });
+    const { items, source } = await fetchYoutubeItemsForCategory(categoryId, query, neededCount);
+    renderYoutubeItems(container, items, preview, {
+      quotaNotice: youtubeQuotaBlocked,
+      feedFallbackNotice: source === "fallback",
+    });
   } catch (err) {
     console.warn("YouTube recommendations failed:", err);
-    if (isYoutubeQuotaError(err)) markYoutubeQuotaBlocked();
     const fallbackItems = padYoutubeItemsToCount([], categoryId, neededCount);
 
     if (fallbackItems.length > 0) {
-      renderYoutubeItems(container, fallbackItems, preview, { quotaNotice: true });
+      renderYoutubeItems(container, fallbackItems, preview, { feedFallbackNotice: true });
       return;
     }
 
-    container.innerHTML = mascotLoadingHtml("영상을 불러오지 못했습니다. 검색창에서 직접 검색해 보세요.");
+    container.innerHTML = mascotLoadingHtml("영상을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
   }
 }
 
@@ -655,7 +664,11 @@ function renderYoutubeItems(container, items, preview, renderOptions = {}) {
     return;
   }
 
-  const notice = renderOptions.quotaNotice ? renderYoutubeQuotaNotice() : "";
+  const notice = renderOptions.quotaNotice
+    ? renderYoutubeQuotaNotice()
+    : renderOptions.feedFallbackNotice
+      ? renderYoutubeFeedFallbackNotice()
+      : "";
   if (preview) {
     container.innerHTML = notice + items.map(renderYoutubeHomeCard).join("");
   } else {

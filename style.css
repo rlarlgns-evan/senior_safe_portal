@@ -3111,6 +3111,58 @@ button.back-link-prominent {
   font-size: var(--font-lg);
 }
 
+/* 개인정보처리방침 · 이용약관 — 본문 10pt, 제목 12pt bold */
+.info-panel.legal-doc {
+  font-size: 10pt;
+  line-height: 1.6;
+}
+
+.info-panel.legal-doc h1,
+.info-panel.legal-doc h2,
+.info-panel.legal-doc h3 {
+  font-size: 12pt;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.info-panel.legal-doc h1 {
+  margin: 0 0 0.5rem;
+}
+
+.info-panel.legal-doc h2 {
+  margin: 1.25rem 0 0.45rem;
+}
+
+.info-panel.legal-doc h3 {
+  margin: 0.85rem 0 0.4rem;
+}
+
+.info-panel.legal-doc p,
+.info-panel.legal-doc li,
+.info-panel.legal-doc td,
+.info-panel.legal-doc dd,
+.info-panel.legal-doc .info-lead,
+.info-panel.legal-doc .privacy-meta,
+.info-panel.legal-doc .privacy-list {
+  font-size: 10pt;
+  font-weight: 400;
+}
+
+.info-panel.legal-doc .privacy-table th {
+  font-size: 12pt;
+  font-weight: 700;
+}
+
+.info-panel.legal-doc .privacy-contact dt {
+  font-size: 12pt;
+  font-weight: 700;
+}
+
+.info-panel.legal-doc .privacy-contact dd {
+  font-size: 10pt;
+  font-weight: 400;
+}
+
 .info-panel p,
 .info-panel li {
   line-height: 1.6;

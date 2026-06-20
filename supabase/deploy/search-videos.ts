@@ -197,7 +197,7 @@ function resolveAnalysisPrompt(mode: unknown): string {
 
 const YOUTUBE_VIDEO_ID_PATTERN = /^[\w-]{11}$/;
 const DEFAULT_SEARCH_LIMIT = 10;
-const MAX_SEARCH_LIMIT = 25;
+const MAX_SEARCH_LIMIT = 50;
 
 const ALLOWED_YOUTUBE_VIDEO_CATEGORIES = new Set([
   "10", "17", "24", "25", "26", "27", "28",
