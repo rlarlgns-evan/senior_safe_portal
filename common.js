@@ -15,7 +15,6 @@ const SITE_NAV_ITEMS = [
   { id: "news", href: "news.html", label: "뉴스" },
   { id: "welfare", href: "welfare.html", label: "복지정보" },
   { id: "community", href: "community.html", label: "커뮤니티" },
-  { id: "consult", href: "index.html?consult=1", label: "상담" },
 ];
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1356,7 +1355,7 @@ function buildNavLinksHtml(activeId, linkClass) {
   }).join("");
 }
 
-/** body[data-nav] 기준으로 네비 주입 및 상담 링크 처리 */
+/** body[data-nav] 기준으로 네비 주입 */
 function initSiteNavigation() {
   const activeId = document.body.dataset.nav || "";
 
@@ -1369,23 +1368,6 @@ function initSiteNavigation() {
   if (mobileNav?.dataset.autoNav === "true") {
     mobileNav.innerHTML = buildNavLinksHtml(activeId, "mobile-nav-link");
   }
-
-  document.querySelectorAll('[data-nav="consult"]').forEach((link) => {
-    link.addEventListener("click", (event) => {
-      const onHome = /index\.html$/i.test(location.pathname)
-        || location.pathname.endsWith("/")
-        || location.pathname.endsWith("\\");
-
-      if (!onHome) return;
-
-      event.preventDefault();
-      const chatWindow = document.getElementById("chat-window");
-      const chatInput = document.getElementById("chat-input");
-      chatWindow?.classList.remove("hidden");
-      chatInput?.focus();
-      closeMobileNavMenu();
-    });
-  });
 
   document.querySelectorAll(".top-nav-link, .mobile-nav-link").forEach((link) => {
     link.addEventListener("click", () => closeMobileNavMenu());
