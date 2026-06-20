@@ -269,16 +269,25 @@ async function searchNews(query) {
 
 function renderNewsHomeCard(article) {
   const href = article.originallink || article.link;
+  const thumb = article.thumbnail || getFaviconThumbnail(href);
+  const publisher = article.publisher || "뉴스";
+  const thumbHtml = thumb
+    ? `<img src="${escapeHtml(thumb)}" alt="" loading="lazy" />`
+    : `<span class="material-symbols-outlined" aria-hidden="true">newspaper</span>`;
+
   return `
     <a class="news-card-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">
       <article class="news-card-ui">
-        <div class="news-badge">
-          <span class="material-symbols-outlined" style="font-size:20px">verified</span>
-          네이버 뉴스
+        <div class="news-thumb">${thumbHtml}</div>
+        <div class="news-body">
+          <div class="news-badge">
+            <span class="material-symbols-outlined" style="font-size:20px">verified</span>
+            ${escapeHtml(publisher)}
+          </div>
+          <h4 class="news-title">${escapeHtml(article.title)}</h4>
+          <p class="news-summary">${escapeHtml(article.summary)}</p>
+          <span class="news-link">${escapeHtml(article.pubDate || "자세히 읽기")} →</span>
         </div>
-        <h4 class="news-title">${escapeHtml(article.title)}</h4>
-        <p class="news-summary">${escapeHtml(article.summary)}</p>
-        <span class="news-link">${escapeHtml(article.pubDate || "자세히 읽기")} →</span>
       </article>
     </a>
   `;
@@ -340,20 +349,95 @@ function requestUserLocation(forcePrompt = false) {
   });
 }
 
-async function fetchWeather(latitude, longitude) {
-  const { data, error } = await supabaseClient.functions.invoke("get-weather", {
-    body: { latitude, longitude },
+function weatherCodeToLabel(code) {
+  if (code === 0) return "맑음";
+  if (code <= 3) return "구름 조금";
+  if (code <= 48) return "안개";
+  if (code <= 57) return "이슬비";
+  if (code <= 67) return "비";
+  if (code <= 77) return "눈";
+  if (code <= 82) return "소나기";
+  if (code <= 86) return "눈";
+  if (code <= 99) return "뇌우";
+  return "알 수 없음";
+}
+
+async function fetchLocationLabelDirect(latitude, longitude) {
+  const params = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+    localityLanguage: "ko",
   });
 
-  if (error) {
-    throw new Error(await getInvokeErrorMessage(error, data));
+  const response = await fetch(
+    `https://api.bigdatacloud.net/data/reverse-geocode-client?${params.toString()}`,
+  );
+
+  if (!response.ok) {
+    throw new Error("위치 정보를 받지 못했습니다.");
   }
 
-  if (typeof data?.temperature !== "number") {
-    throw new Error(data?.message || "날씨 정보를 받지 못했습니다.");
+  const geo = await response.json();
+  const region = geo.principalSubdivision || geo.countryName || "대한민국";
+  const city = geo.city || geo.locality || region;
+  const label = geo.locality && geo.locality !== city
+    ? `${city} ${geo.locality}`
+    : city;
+
+  return { region, city, label };
+}
+
+async function fetchWeatherDirect(latitude, longitude) {
+  const params = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+    current: "temperature_2m,apparent_temperature,weather_code",
+    timezone: "Asia/Seoul",
+  });
+
+  const [location, weatherResponse] = await Promise.all([
+    fetchLocationLabelDirect(latitude, longitude),
+    fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`),
+  ]);
+
+  if (!weatherResponse.ok) {
+    throw new Error("날씨 정보를 받지 못했습니다.");
   }
 
-  return data;
+  const data = await weatherResponse.json();
+  const current = data?.current;
+
+  if (!current || typeof current.temperature_2m !== "number") {
+    throw new Error("날씨 정보를 받지 못했습니다.");
+  }
+
+  const weatherCode = typeof current.weather_code === "number" ? current.weather_code : 0;
+
+  return {
+    ...location,
+    temperature: Math.round(current.temperature_2m),
+    apparentTemperature: Math.round(current.apparent_temperature ?? current.temperature_2m),
+    weatherCode,
+    condition: weatherCodeToLabel(weatherCode),
+    latitude,
+    longitude,
+  };
+}
+
+async function fetchWeather(latitude, longitude) {
+  try {
+    const { data, error } = await supabaseClient.functions.invoke("get-weather", {
+      body: { latitude, longitude },
+    });
+
+    if (!error && typeof data?.temperature === "number") {
+      return data;
+    }
+  } catch {
+    // Edge Function 미배포·오류 시 브라우저에서 직접 조회
+  }
+
+  return fetchWeatherDirect(latitude, longitude);
 }
 
 async function fetchWelfareInfo(region, city) {
@@ -429,11 +513,12 @@ function renderWeatherWidget(weather, locationSource) {
   if (!mainEl || !subEl || !iconEl) return;
 
   mainEl.textContent = `${weather.label} ${weather.temperature}°C`;
-  subEl.textContent = `${weather.condition} · 체감 ${weather.apparentTemperature}°C`;
+  const locationNote = locationSource === "default" ? " · 기본 위치(서울)" : " · 내 위치";
+  subEl.textContent = `📍 ${weather.condition} · 체감 ${weather.apparentTemperature}°C${locationNote}`;
   iconEl.textContent = weatherCodeToIcon(weather.weatherCode);
 
   if (locationButton) {
-    locationButton.classList.toggle("hidden", locationSource !== "default");
+    locationButton.classList.toggle("hidden", locationSource === "gps");
   }
 }
 
@@ -496,24 +581,31 @@ async function initHomeLocationServices(forcePrompt = false) {
   const welfareContainer = document.getElementById("welfare-content");
   const mainEl = document.getElementById("weather-main");
   const subEl = document.getElementById("weather-sub");
+  const locationButton = document.getElementById("location-button");
 
   if (mainEl) mainEl.textContent = "날씨 확인 중...";
   if (subEl) subEl.textContent = "위치를 불러오고 있습니다";
 
   const location = await requestUserLocation(forcePrompt);
+  let weather = null;
 
   try {
-    const weather = await fetchWeather(location.latitude, location.longitude);
+    weather = await fetchWeather(location.latitude, location.longitude);
     renderWeatherWidget(weather, location.source);
-
-    if (welfareContainer) {
-      await loadHomeWelfareInfo(welfareContainer, weather, location.source);
-    }
   } catch {
     if (mainEl) mainEl.textContent = "날씨를 불러올 수 없음";
-    if (subEl) subEl.textContent = "잠시 후 다시 시도해 주세요";
-    if (welfareContainer) {
-      welfareContainer.innerHTML = `<p class="youtube-loading">위치 기반 정보를 불러오지 못했습니다. get-weather 함수 배포를 확인해 주세요.</p>`;
+    if (subEl) subEl.textContent = "인터넷 연결을 확인해 주세요";
+    locationButton?.classList.remove("hidden");
+  }
+
+  if (welfareContainer) {
+    try {
+      if (!weather) {
+        weather = await fetchLocationLabelDirect(location.latitude, location.longitude);
+      }
+      await loadHomeWelfareInfo(welfareContainer, weather, location.source);
+    } catch {
+      welfareContainer.innerHTML = `<p class="youtube-loading">복지 정보를 불러오지 못했습니다. search-welfare 함수와 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.</p>`;
     }
   }
 }
