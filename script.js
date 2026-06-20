@@ -1,11 +1,6 @@
 /**
- * 시니어 디지털 보안관 - 대시보드 + 링크 분석 + 로그인
+ * 시니어 디지털 보안관 - 홈(대시보드)
  */
-
-const SUPABASE_URL = "https://oweduuhfkiutlszfwukt.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93ZWR1dWhma2l1dGxzemZ3dWt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjMyNzUsImV4cCI6MjA5NzUzOTI3NX0.n25pwv-WuWOBIGY7cwJCYj1TxILYpy2XA2nn7a6ySMY";
-
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // DOM
 const sidebar = document.getElementById("sidebar");
@@ -15,9 +10,6 @@ const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("search-input");
 const youtubeContent = document.getElementById("youtube-content");
 const newsContent = document.getElementById("news-content");
-const resultView = document.getElementById("result-view");
-const backButton = document.getElementById("back-button");
-const verdictContainer = document.getElementById("verdict-container");
 const loadingOverlay = document.getElementById("loading-overlay");
 const errorBox = document.getElementById("error-box");
 const errorMessage = document.getElementById("error-message");
@@ -38,54 +30,10 @@ const loginEmail = document.getElementById("login-email");
 const loginPassword = document.getElementById("login-password");
 const loginError = document.getElementById("login-error");
 
-let lastAnalyzedUrl = "";
-
-// ── 유틸 ──
-
-function escapeHtml(value) {
-  const div = document.createElement("div");
-  div.textContent = value ?? "";
-  return div.innerHTML;
-}
-
-function isLikelyUrl(text) {
-  const t = text.trim();
-  return /^https?:\/\//i.test(t) || /^[\w-]+\.(com|co\.kr|net|org|kr|go\.kr|or\.kr)/i.test(t);
-}
-
-function normalizeUrl(rawUrl) {
-  const trimmed = rawUrl.trim();
-  if (!trimmed) throw new Error("입력값이 비어 있습니다.");
-  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-  const url = new URL(withProtocol);
-  if (!["http:", "https:"].includes(url.protocol)) {
-    throw new Error("http 또는 https 링크만 검사할 수 있습니다.");
-  }
-  return url.toString();
-}
-
 function showLoading() { loadingOverlay.classList.remove("hidden"); }
 function hideLoading() { loadingOverlay.classList.add("hidden"); }
 function showError(message) { errorMessage.textContent = message; errorBox.classList.remove("hidden"); }
 function hideError() { errorBox.classList.add("hidden"); }
-function showResultOverlay() { resultView.classList.remove("hidden"); }
-function hideResultOverlay() { resultView.classList.add("hidden"); }
-
-async function getInvokeErrorMessage(error, data) {
-  if (data?.message) return data.message;
-
-  const response = error?.context;
-  if (response && typeof response.json === "function") {
-    try {
-      const body = await response.clone().json();
-      if (body?.message) return body.message;
-    } catch {
-      // ignore JSON parse failure
-    }
-  }
-
-  return error?.message || "링크 분석 요청에 실패했습니다.";
-}
 
 // ── 사이드바 (모바일) ──
 
@@ -189,40 +137,6 @@ function renderDefaultYoutube() {
   `).join("");
 }
 
-function renderDemoYoutubeResults(query) {
-  const items = [
-    { safe: true, title: `[안전] ${query} — 건강 정보`, channel: "공신력 있는 건강 채널" },
-    { safe: false, reason: "과장 광고 표현이 감지되었습니다." },
-    { safe: true, title: `[안전] ${query} — 어르신 쉬운 설명`, channel: "시니어 교육 채널" },
-    { safe: true, title: `[안전] ${query} — 생활 꿀팁`, channel: "생활정보 채널" },
-  ];
-
-  youtubeContent.innerHTML = items.map((item) => {
-    if (!item.safe) {
-      return `
-        <div class="blocked-card-ui">
-          <p class="card-title" style="color:#dc2626">🚨 보안관 차단: 검증되지 않은 정보</p>
-          <p class="card-meta" style="color:#7f1d1d">${escapeHtml(item.reason)}</p>
-        </div>
-      `;
-    }
-    return `
-      <article class="video-card-ui">
-        <div class="video-thumb">
-          <span class="material-symbols-outlined">play_circle</span>
-          <div class="safe-badge-ui">
-            <span class="material-symbols-outlined" style="font-size:16px">check_circle</span> 안전 확인됨
-          </div>
-        </div>
-        <div class="card-body">
-          <h4 class="card-title">${escapeHtml(item.title)}</h4>
-          <p class="card-meta">${escapeHtml(item.channel)}</p>
-        </div>
-      </article>
-    `;
-  }).join("");
-}
-
 function renderNews() {
   const articles = [
     { title: "올해부터 기초연금 월 33만원으로 인상", summary: "65세 이상 어르신 기초연금이 이번 달부터 인상되어 지급됩니다." },
@@ -243,53 +157,7 @@ function renderNews() {
   `).join("");
 }
 
-// ── 링크 분석 ──
-
-function renderVerdict(result) {
-  const status = result?.status === "위험" ? "위험" : "안전";
-  const reason = result?.reason || "분석 근거를 가져오지 못했습니다.";
-
-  if (status === "위험") {
-    verdictContainer.innerHTML = `
-      <div class="verdict-box verdict-danger">
-        <p class="verdict-status">🚨 위험 링크로 의심됩니다</p>
-        <p class="verdict-reason">${escapeHtml(reason)}</p>
-      </div>
-    `;
-    return;
-  }
-
-  verdictContainer.innerHTML = `
-    <div class="verdict-box verdict-safe">
-      <p class="verdict-status">✅ 안전한 링크로 보입니다</p>
-      <p class="verdict-reason">${escapeHtml(reason)}</p>
-    </div>
-    <button id="open-link-button" type="button" class="open-link-button">이 링크 열기</button>
-  `;
-
-  document.getElementById("open-link-button").addEventListener("click", () => {
-    window.open(lastAnalyzedUrl, "_blank", "noopener,noreferrer");
-  });
-}
-
-async function analyzeLink(url) {
-  showLoading();
-  try {
-    const { data, error } = await supabaseClient.functions.invoke("analyze-link", { body: { url } });
-    if (error) {
-      throw new Error(await getInvokeErrorMessage(error, data));
-    }
-    if (!data?.status) throw new Error(data?.message || "분석 결과를 받지 못했습니다.");
-
-    lastAnalyzedUrl = url;
-    renderVerdict(data);
-    showResultOverlay();
-  } catch (err) {
-    showError(`링크 검사 중 문제가 발생했습니다: ${err.message}`);
-  } finally {
-    hideLoading();
-  }
-}
+// ── 검색 → 결과 페이지 ──
 
 async function handleSearchSubmit(event) {
   event.preventDefault();
@@ -302,19 +170,15 @@ async function handleSearchSubmit(event) {
     return;
   }
 
-  if (isLikelyUrl(raw)) {
-    try {
-      await analyzeLink(normalizeUrl(raw));
-    } catch (err) {
-      showError(err.message);
-    }
-    return;
+  showLoading();
+  try {
+    const payload = await runSearch(raw);
+    saveSearchResults(payload);
+    goToResultsPage();
+  } catch (err) {
+    showError(`검색 중 문제가 발생했습니다: ${err.message}`);
+    hideLoading();
   }
-
-  youtubeContent.innerHTML = `<p class="youtube-loading">안전한 영상을 찾고 있습니다...</p>`;
-  document.getElementById("youtube-section").scrollIntoView({ behavior: "smooth" });
-  await new Promise((r) => setTimeout(r, 700));
-  renderDemoYoutubeResults(raw);
 }
 
 // ── 챗봇 ──
@@ -347,12 +211,18 @@ async function handleChatSubmit(event) {
     addChatBubble("링크를 확인하고 있습니다...", "bot");
     try {
       const url = normalizeUrl(text);
-      const { data, error } = await supabaseClient.functions.invoke("analyze-link", { body: { url } });
-      if (error) throw new Error(await getInvokeErrorMessage(error, data));
-      if (!data?.status) throw new Error(data?.message || "분석 실패");
+      const data = await analyzeLink(url);
+      const payload = {
+        query: text,
+        type: "link",
+        summary: "링크 1건을 정밀 검사했습니다.",
+        items: [linkAnalysisToItem(data, url)],
+      };
+      saveSearchResults(payload);
       chatMessages.lastElementChild.textContent = data.status === "위험"
-        ? `🚨 위험 링크입니다. ${data.reason}`
-        : `✅ 비교적 안전해 보입니다. ${data.reason}`;
+        ? `🚨 위험 링크입니다. 결과 페이지로 이동합니다.`
+        : `✅ 비교적 안전해 보입니다. 결과 페이지로 이동합니다.`;
+      setTimeout(() => goToResultsPage(), 800);
     } catch {
       chatMessages.lastElementChild.textContent = "분석 중 오류가 발생했습니다.";
     }
@@ -396,7 +266,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 searchForm.addEventListener("submit", handleSearchSubmit);
-backButton.addEventListener("click", hideResultOverlay);
 errorClose.addEventListener("click", hideError);
 chatFab.addEventListener("click", toggleChat);
 chatClose.addEventListener("click", () => chatWindow.classList.add("hidden"));
