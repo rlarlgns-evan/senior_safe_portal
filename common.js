@@ -120,6 +120,30 @@ async function analyzeLink(url) {
   return data;
 }
 
+async function searchVideos(query) {
+  const { data, error } = await supabaseClient.functions.invoke("search-videos", { body: { query } });
+  if (error) {
+    throw new Error(await getInvokeErrorMessage(error, data));
+  }
+  if (!Array.isArray(data?.videos)) {
+    throw new Error(data?.message || "영상 검색 결과를 받지 못했습니다.");
+  }
+  return data.videos;
+}
+
+function videoResultToItem(video) {
+  const isDanger = video.status === "위험";
+  return {
+    status: isDanger ? "danger" : "safe",
+    title: video.title,
+    reason: video.reason || "분석 결과 없음",
+    thumbnail: video.thumbnail || `https://img.youtube.com/vi/${video.video_id}/hqdefault.jpg`,
+    url: `https://www.youtube.com/watch?v=${video.video_id}`,
+    subtitle: `${video.channel || "YouTube"} · 영상`,
+    videoId: video.video_id,
+  };
+}
+
 async function runSearch(raw) {
   const query = raw.trim();
   if (!query) {
@@ -139,11 +163,21 @@ async function runSearch(raw) {
     };
   }
 
+  const videos = await searchVideos(query);
+  if (videos.length === 0) {
+    throw new Error("검색 결과가 없습니다. 다른 검색어를 입력해 주세요.");
+  }
+
+  const items = videos.map(videoResultToItem);
+  const dangerCount = items.filter((item) => item.status === "danger").length;
+
   return {
     query,
     type: "youtube",
-    summary: `총 3개의 영상을 정밀 검사했습니다.`,
-    items: buildDemoVideoItems(query),
+    summary: dangerCount > 0
+      ? `총 ${items.length}개 영상 검사 · 위험 ${dangerCount}건 발견`
+      : `총 ${items.length}개의 영상을 정밀 검사했습니다.`,
+    items,
   };
 }
 

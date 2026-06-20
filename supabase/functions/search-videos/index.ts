@@ -173,13 +173,7 @@ Deno.serve(async (req: Request) => {
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
 
     if (!youtubeApiKey || !geminiApiKey) {
-      return new Response(
-        JSON.stringify({ error: "API keys not configured" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+      throw new Error("서버에 YOUTUBE_API_KEY 또는 GEMINI_API_KEY가 설정되지 않았습니다.");
     }
 
     // 요청 본문 파싱
@@ -252,11 +246,11 @@ Deno.serve(async (req: Request) => {
 
     return new Response(
       JSON.stringify({
-        error: "Internal server error",
-        message: error instanceof Error ? error.message : "Unknown error",
+        error: "검색 실패",
+        message: error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.",
       }),
       {
-        status: 500,
+        status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       },
     );

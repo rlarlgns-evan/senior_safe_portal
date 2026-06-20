@@ -129,7 +129,7 @@ function renderResultCard(item) {
         </p>
         ${item.url && item.status === "safe"
           ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="bg-[#a73a00] text-white w-full md:w-auto self-start px-6 py-2.5 font-bold hover:bg-[#802a00] active:translate-y-[2px] transition-all flex items-center justify-center gap-2 rounded ${cfg.button}">
-              링크 열기 <span class="material-symbols-outlined text-sm">open_in_new</span>
+              ${item.videoId ? "유튜브에서 보기" : "링크 열기"} <span class="material-symbols-outlined text-sm">${item.videoId ? "play_circle" : "open_in_new"}</span>
             </a>`
           : item.url && item.status === "danger"
             ? `<p class="text-[#ba1a1a] font-bold flex items-center gap-2">
