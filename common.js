@@ -6,6 +6,7 @@ const SUPABASE_URL = "https://oweduuhfkiutlszfwukt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93ZWR1dWhma2l1dGxzemZ3dWt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjMyNzUsImV4cCI6MjA5NzUzOTI3NX0.n25pwv-WuWOBIGY7cwJCYj1TxILYpy2XA2nn7a6ySMY";
 const SEARCH_RESULTS_KEY = "sheriff-search-results";
 const MASCOT_SRC = "assets/mascot-sheriff.png";
+const MASCOT_POTATO_SRC = "assets/mascot-potato.png";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -202,7 +203,7 @@ const WELFARE_CATEGORY_KEYWORDS = {
 
 const HOME_YOUTUBE_PREVIEW = 3;
 const HOME_NEWS_PREVIEW = 3;
-const HOME_WELFARE_PREVIEW = 2;
+const HOME_WELFARE_PREVIEW = 3;
 const BROWSE_YOUTUBE_LIMIT = 20;
 const BROWSE_NEWS_LIMIT = 20;
 const BROWSE_WELFARE_LIMIT = 10;
@@ -406,7 +407,7 @@ async function loadHomeYoutubeRecommendations(container, query, options = {}) {
       return;
     }
 
-    container.innerHTML = `<div class="browse-youtube-grid">${items.map(renderYoutubeThumbnailCard).join("")}</div>`;
+    container.innerHTML = `<div class="browse-grid browse-youtube-grid">${items.map(renderYoutubeThumbnailCard).join("")}</div>`;
   } catch {
     container.innerHTML = mascotLoadingHtml("영상을 불러오지 못했습니다. 검색창에서 직접 검색해 보세요.");
   }
@@ -469,7 +470,7 @@ async function loadHomeNewsRecommendations(container, query, options = {}) {
     if (preview) {
       container.innerHTML = visibleArticles.map(renderNewsHomeCard).join("");
     } else {
-      container.innerHTML = `<div class="browse-news-list">${visibleArticles.map(renderNewsHomeCard).join("")}</div>`;
+      container.innerHTML = `<div class="browse-grid browse-news-grid">${visibleArticles.map(renderNewsHomeCard).join("")}</div>`;
     }
   } catch {
     container.innerHTML = mascotLoadingHtml("뉴스를 불러오지 못했습니다. Supabase에 search-news 배포 및 네이버 API 키를 확인해 주세요.");
@@ -622,13 +623,28 @@ async function fetchWelfareInfo(region, city, category = "all", limit = 4) {
   return data;
 }
 
-function renderWelfareServiceCard(service) {
+function renderWelfareServiceCard(service, compact = false) {
   const isNational = service.source === "national";
   const badge = isNational ? "중앙부처 복지" : "지자체 복지";
   const regionLabel = [service.region, service.city].filter(Boolean).join(" ");
   const metaParts = isNational
     ? [service.department, service.organization].filter(Boolean)
     : [regionLabel, service.department].filter(Boolean);
+  const summaryText = service.summary || "";
+
+  if (compact) {
+    return `
+      <article class="welfare-card welfare-card-compact">
+        <div class="welfare-badge">${badge}</div>
+        <h4 class="welfare-title">${escapeHtml(service.servNm)}</h4>
+        ${metaParts.length ? `<p class="welfare-meta">${escapeHtml(metaParts.join(" · "))}</p>` : ""}
+        ${summaryText ? `<p class="welfare-address">${escapeHtml(summaryText)}</p>` : ""}
+        ${service.onlineAvailable === "Y" ? `<span class="welfare-online">온라인 신청 가능</span>` : ""}
+        <a class="welfare-link" href="${escapeHtml(service.link)}" target="_blank" rel="noopener noreferrer">자세히 보기 →</a>
+      </article>
+    `;
+  }
+
   const target = service.target ? `<p class="welfare-detail"><strong>지원대상</strong> ${escapeHtml(service.target)}</p>` : "";
   const criteria = service.criteria ? `<p class="welfare-detail"><strong>선정기준</strong> ${escapeHtml(service.criteria)}</p>` : "";
   const benefit = service.benefit ? `<p class="welfare-detail"><strong>지원내용</strong> ${escapeHtml(service.benefit)}</p>` : "";
@@ -638,7 +654,6 @@ function renderWelfareServiceCard(service) {
   const online = service.onlineAvailable === "Y"
     ? `<span class="welfare-online">온라인 신청 가능</span>`
     : "";
-  const summaryText = service.summary || "";
 
   return `
     <article class="welfare-card">
@@ -836,15 +851,30 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
 
     const categoryLabel = WELFARE_CATEGORIES.find((cat) => cat.id === categoryId)?.label ?? "전체";
 
+    const emptyLocal = mascotLoadingHtml(`${categoryLabel} 분야 지자체 복지서비스를 찾지 못했습니다.`);
+    const emptyNational = mascotLoadingHtml(`${categoryLabel} 분야 중앙부처 복지서비스를 찾지 못했습니다.`);
+
+    if (preview) {
+      const combined = [...localServices, ...nationalServices].slice(0, HOME_WELFARE_PREVIEW);
+
+      if (combined.length === 0) {
+        container.innerHTML = mascotLoadingHtml(`${categoryLabel} 분야 복지 혜택을 찾지 못했습니다.`);
+        return;
+      }
+
+      container.innerHTML = `<div class="home-preview-list">${combined.map((s) => renderWelfareServiceCard(s, true)).join("")}</div>`;
+      return;
+    }
+
     const localHtml = localServices.length > 0
-      ? localServices.map(renderWelfareServiceCard).join("")
-      : mascotLoadingHtml(`${categoryLabel} 분야 지자체 복지서비스를 찾지 못했습니다.`);
+      ? `<div class="browse-grid browse-welfare-grid">${localServices.map((s) => renderWelfareServiceCard(s, true)).join("")}</div>`
+      : emptyLocal;
     const nationalHtml = nationalServices.length > 0
-      ? nationalServices.map(renderWelfareServiceCard).join("")
-      : mascotLoadingHtml(`${categoryLabel} 분야 중앙부처 복지서비스를 찾지 못했습니다.`);
+      ? `<div class="browse-grid browse-welfare-grid">${nationalServices.map((s) => renderWelfareServiceCard(s, true)).join("")}</div>`
+      : emptyNational;
 
     container.innerHTML = `
-      <div class="welfare-services${preview ? "" : " welfare-services-browse"}">
+      <div class="welfare-services welfare-services-browse">
         <section class="welfare-block">
           <h4 class="welfare-subheading">우리 지역 · 지자체 복지</h4>
           <p class="welfare-source-note">${escapeHtml(categoryLabel)} · 지자체복지서비스 API</p>
@@ -996,3 +1026,32 @@ async function chatWithAgent(message, history) {
 
   return data;
 }
+
+function getSiteFooterHtml() {
+  return `
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <nav class="site-footer-nav" aria-label="하단 정보">
+          <a href="terms.html">이용약관</a>
+          <span class="footer-divider" aria-hidden="true">·</span>
+          <a href="privacy.html">개인정보처리방침</a>
+          <span class="footer-divider" aria-hidden="true">·</span>
+          <a href="team.html">팀 소개</a>
+        </nav>
+        <p class="site-footer-copy">© ${new Date().getFullYear()} 시니어 디지털 보안관</p>
+        <div class="site-footer-brand">
+          <img src="${MASCOT_POTATO_SRC}" alt="" class="footer-potato" width="72" height="72" loading="lazy" />
+          <p class="site-footer-provider">샤이한 열정 감자가 제공하는 페이지입니다</p>
+        </div>
+      </div>
+    </footer>
+  `;
+}
+
+function injectSiteFooter() {
+  const layout = document.querySelector(".app-layout");
+  if (!layout || layout.querySelector(".site-footer")) return;
+  layout.insertAdjacentHTML("beforeend", getSiteFooterHtml());
+}
+
+document.addEventListener("DOMContentLoaded", injectSiteFooter);
