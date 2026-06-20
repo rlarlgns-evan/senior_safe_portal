@@ -468,13 +468,6 @@ const HomeModule = {
       ).reload,
     );
   },
-
-  initLocationServices() {
-    dom.locationButton?.addEventListener("click", () => {
-      cachedUserLocation = null;
-      initHomeLocationServices(true);
-    });
-  },
 };
 
 // ── Event bindings & boot ──
@@ -493,8 +486,6 @@ function bindEvents() {
  */
 function initApp() {
   HomeModule.initCategoryTabs();
-  HomeModule.initLocationServices();
-  initHomeLocationServices();
   ChatModule.renderChatBubble(
     "안녕하세요! 저는 디지털 보안관 단디예요. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.",
     "bot",

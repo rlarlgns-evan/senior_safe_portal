@@ -14,8 +14,8 @@ const SITE_NAV_ITEMS = [
   { id: "youtube", href: "youtube.html", label: "유튜브" },
   { id: "news", href: "news.html", label: "뉴스" },
   { id: "welfare", href: "welfare.html", label: "복지정보" },
-  { id: "info", href: "community.html", label: "정보" },
   { id: "board", href: "board.html", label: "게시판" },
+  { id: "info", href: "community.html", label: "정보" },
 ];
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -57,6 +57,7 @@ function normalizeUrl(rawUrl) {
 
 async function getInvokeErrorMessage(error, data) {
   if (data?.message) return data.message;
+  if (typeof data?.error === "string") return data.error;
 
   const response = error?.context;
   if (response && typeof response.json === "function") {
@@ -194,8 +195,6 @@ const NEWS_CATEGORIES = [
 
 const WELFARE_CATEGORIES = [
   { id: "all", label: "전체", query: "all" },
-  { id: "senior65", label: "65세+", query: "senior65" },
-  { id: "middle", label: "50·60대", query: "middle" },
   { id: "care", label: "돌봄·요양", query: "care" },
   { id: "pension", label: "연금·수당", query: "pension" },
   { id: "health", label: "건강·의료", query: "health" },
@@ -203,8 +202,6 @@ const WELFARE_CATEGORIES = [
 ];
 
 const WELFARE_CATEGORY_KEYWORDS = {
-  senior65: ["65세", "노인", "어르신", "고령", "경로", "기초연금", "노년", "실버"],
-  middle: ["50대", "60대", "중장년", "장년", "퇴직", "노후"],
   care: ["돌봄", "요양", "장기요양", "재가", "치매", "보호", "독거", "케어", "간병"],
   pension: ["연금", "수당", "급여", "기초생활", "생계", "소득", "지원금"],
   health: ["건강", "의료", "검진", "치료", "재활", "병원", "약"],
@@ -290,6 +287,12 @@ function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn, 
         renderTabs();
         await loadCategory();
       });
+    });
+
+    tabsContainer.querySelector(".category-tab-active")?.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+      behavior: "smooth",
     });
   }
 
@@ -639,17 +642,22 @@ function normalizeWelfareAreaName(value) {
 }
 
 function filterLocalWelfareByRegion(services, apiData) {
-  if (!Array.isArray(services) || !apiData?.region) return [];
+  if (!Array.isArray(services)) return [];
+  if (!apiData?.region && !apiData?.ctprvnCd) {
+    return services.filter((service) => service.source !== "national");
+  }
 
   const targetRegion = normalizeWelfareAreaName(apiData.region);
+  const targetPrefix = targetRegion.slice(0, 2);
+
   return services.filter((service) => {
     if (service.source === "national") return false;
     if (!service.region?.trim()) return false;
+
     const serviceRegion = normalizeWelfareAreaName(service.region);
-    return (
-      serviceRegion.includes(targetRegion.slice(0, 2)) ||
-      targetRegion.includes(serviceRegion.slice(0, 2))
-    );
+    if (!serviceRegion || !targetPrefix) return false;
+
+    return serviceRegion.slice(0, 2) === targetPrefix;
   });
 }
 
@@ -734,8 +742,9 @@ async function fetchWeather(latitude, longitude) {
   return fetchWeatherDirect(latitude, longitude);
 }
 
-async function fetchWelfareInfo(region, city, category = "all", limit = 4, coords = null) {
+async function fetchWelfareInfo(region, city, category = "all", limit = 4, coords = null, options = {}) {
   const body = { region, city, category, limit };
+  if (options.preview) body.preview = true;
   if (coords && Number.isFinite(coords.latitude) && Number.isFinite(coords.longitude)) {
     body.latitude = coords.latitude;
     body.longitude = coords.longitude;
@@ -745,6 +754,10 @@ async function fetchWelfareInfo(region, city, category = "all", limit = 4, coord
 
   if (error) {
     throw new Error(await getInvokeErrorMessage(error, data));
+  }
+
+  if (data?.error && !Array.isArray(data?.services)) {
+    throw new Error(data.message || data.error);
   }
 
   if (!Array.isArray(data?.services) || !Array.isArray(data?.nationalServices)) {
@@ -871,7 +884,14 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
 
   try {
     const fetchLimit = preview ? 6 : BROWSE_WELFARE_LIMIT;
-    const data = await fetchWelfareInfo(weather.region, weather.city, categoryId, fetchLimit, coords);
+    const data = await fetchWelfareInfo(
+      weather.region,
+      weather.city,
+      categoryId,
+      fetchLimit,
+      coords,
+      { preview },
+    );
 
     if (locationLabel) {
       locationLabel.textContent = formatWelfareLocationLabel(data, weather.label, locationSource);
@@ -894,6 +914,14 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
 
     if (preview) {
       if (localServices.length === 0) {
+        const nationalPreview = nationalServices.slice(0, HOME_WELFARE_PREVIEW);
+        if (nationalPreview.length > 0) {
+          container.innerHTML = `
+            <p class="welfare-source-note">우리 지역 지자체 복지를 찾지 못해 전국 복지를 보여드립니다.</p>
+            <div class="home-preview-list">${nationalPreview.map((s) => renderWelfareServiceCard(s, true)).join("")}</div>
+          `;
+          return;
+        }
         container.innerHTML = emptyLocal;
         return;
       }
@@ -928,8 +956,11 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
         ${renderWelfareQuickLinks(data.links)}
       </div>
     `;
-  } catch {
-    container.innerHTML = mascotLoadingHtml("복지 정보를 불러오지 못했습니다. Supabase에 search-welfare 배포 및 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.");
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : "복지 정보를 불러오지 못했습니다.";
+    container.innerHTML = mascotLoadingHtml(
+      `${detail} · Supabase search-welfare 배포 및 DATA_GO_KR_SERVICE_KEY(공공데이터포털 인증키)를 확인해 주세요.`,
+    );
   }
 }
 
@@ -984,14 +1015,23 @@ async function initHomeLocationServices(forcePrompt = false) {
       if (!weather) {
         weather = await fetchLocationLabelDirect(location.latitude, location.longitude);
       }
+    } catch {
+      welfareContainer.innerHTML = mascotLoadingHtml("위치 정보를 확인하지 못했습니다. 위치 권한 또는 인터넷 연결을 확인해 주세요.");
+      return;
+    }
+
+    try {
       cachedWelfareContext = { weather, locationSource: location.source, coords: location };
       if (welfareCategoryReload) {
         await welfareCategoryReload();
       } else {
         await loadHomeWelfareInfo(welfareContainer, "all");
       }
-    } catch {
-      welfareContainer.innerHTML = mascotLoadingHtml("복지 정보를 불러오지 못했습니다. search-welfare 함수와 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.");
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : "복지 정보를 불러오지 못했습니다.";
+      welfareContainer.innerHTML = mascotLoadingHtml(
+        `${detail} · search-welfare 함수와 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.`,
+      );
     }
   }
 }
@@ -1080,6 +1120,24 @@ function getSiteHeaderHtml() {
           <button type="button" id="login-button" class="auth-button auth-login btn btn--primary">로그인</button>
           <button type="button" id="logout-button" class="auth-button auth-logout btn btn--secondary hidden">로그아웃</button>
         </div>
+        <aside class="header-weather" aria-label="오늘의 날씨">
+          <div id="weather-widget" class="weather-card weather-card--header" aria-live="polite">
+            <div class="weather-icon-wrap" aria-hidden="true">
+              <span id="weather-icon" class="material-symbols-outlined">partly_cloudy_day</span>
+            </div>
+            <div class="weather-details">
+              <div class="weather-primary">
+                <span id="weather-temp" class="weather-temp">--°</span>
+                <span id="weather-main" class="weather-location">날씨 확인 중...</span>
+              </div>
+              <p id="weather-sub" class="weather-meta">위치를 불러오고 있습니다</p>
+            </div>
+            <button type="button" id="location-button" class="weather-locate-btn btn btn--secondary hidden" aria-label="내 위치로 날씨 보기">
+              <span class="material-symbols-outlined" aria-hidden="true">my_location</span>
+              <span class="weather-locate-label">내 위치</span>
+            </button>
+          </div>
+        </aside>
         <button type="button" id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobile-nav">
           <span class="material-symbols-outlined" aria-hidden="true">menu</span>
         </button>
@@ -1295,10 +1353,22 @@ function closeMobileNavMenu() {
   toggle?.setAttribute("aria-expanded", "false");
 }
 
+function initSiteWeather() {
+  if (!document.getElementById("weather-widget")) return;
+
+  document.getElementById("location-button")?.addEventListener("click", () => {
+    cachedUserLocation = null;
+    initHomeLocationServices(true);
+  });
+
+  initHomeLocationServices();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   injectSiteHeader();
   injectLoginModal();
   initSiteNavigation();
   SiteAuth.init();
   injectSiteFooter();
+  initSiteWeather();
 });

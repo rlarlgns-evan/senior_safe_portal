@@ -25,13 +25,16 @@
       <p>무엇이든 안전하게 검색하세요</p>
     </header>
 
-    <form id="results-search-form" class="results-search-form" novalidate style="margin-bottom: 1.5rem;">
-      <label for="results-search-input" class="form-label">검색어 또는 의심되는 링크를 입력하세요</label>
-      <div class="results-search-row">
-        <input id="results-search-input" type="text" class="search-input" style="flex: 1; border-radius: var(--radius-btn);" placeholder="예: 건강, https://example.com" autocomplete="off" />
-        <button type="submit" class="search-button btn btn--primary">
+    <form id="results-search-form" class="search-form results-search-form" novalidate style="margin-bottom: 1.5rem;">
+      <label for="results-search-input" class="sr-only">검색어 또는 의심되는 링크를 입력하세요</label>
+      <div class="search-row">
+        <span class="search-mark" aria-hidden="true">
+          <img src="assets/mascot-sheriff.png" alt="" class="search-mark-img" width="32" height="32" />
+        </span>
+        <input id="results-search-input" type="text" class="search-input" placeholder="예: 건강, https://example.com" autocomplete="off" />
+        <button type="submit" class="search-submit-chip" aria-label="검색하기">
           <span class="material-symbols-outlined" aria-hidden="true">search</span>
-          검색하기
+          <span class="search-submit-label">검색</span>
         </button>
       </div>
     </form>

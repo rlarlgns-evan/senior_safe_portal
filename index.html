@@ -23,32 +23,16 @@
           <form id="search-form" class="search-form" novalidate>
             <label for="search-input" class="sr-only">검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요</label>
             <div class="search-row">
+              <span class="search-mark" aria-hidden="true">
+                <img src="assets/mascot-sheriff.png" alt="" class="search-mark-img" width="32" height="32" />
+              </span>
               <input id="search-input" type="text" class="search-input" placeholder="검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요" autocomplete="off" />
-              <button type="submit" class="search-button btn btn--primary">
+              <button type="submit" class="search-submit-chip" aria-label="검색하기">
                 <span class="material-symbols-outlined" aria-hidden="true">search</span>
-                검색하기
+                <span class="search-submit-label">검색</span>
               </button>
             </div>
           </form>
-
-          <aside class="hero-weather-bar" aria-label="오늘의 날씨">
-            <div id="weather-widget" class="weather-card" aria-live="polite">
-              <div class="weather-icon-wrap" aria-hidden="true">
-                <span id="weather-icon" class="material-symbols-outlined">partly_cloudy_day</span>
-              </div>
-              <div class="weather-details">
-                <div class="weather-primary">
-                  <span id="weather-temp" class="weather-temp">--°</span>
-                  <span id="weather-main" class="weather-location">날씨 확인 중...</span>
-                </div>
-                <p id="weather-sub" class="weather-meta">위치를 불러오고 있습니다</p>
-              </div>
-              <button type="button" id="location-button" class="weather-locate-btn btn btn--secondary hidden" aria-label="내 위치로 날씨 보기">
-                <span class="material-symbols-outlined" aria-hidden="true">my_location</span>
-                <span class="weather-locate-label">내 위치</span>
-              </button>
-            </div>
-          </aside>
         </div>
       </section>
 
