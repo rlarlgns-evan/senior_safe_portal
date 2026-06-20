@@ -35,18 +35,44 @@ create policy "board_posts_delete_own"
   on public.board_posts for delete
   using (auth.uid() = user_id);
 
--- 조회수 증가 (글 열람 시)
-create or replace function public.increment_post_view(post_id uuid)
-returns void
+-- view_count 열만 UPDATE 허용 (RPC 없이 PostgREST update 사용)
+revoke update on public.board_posts from anon, authenticated;
+grant update (view_count) on public.board_posts to anon, authenticated;
+
+drop policy if exists "board_posts_update_view_count" on public.board_posts;
+create policy "board_posts_update_view_count"
+  on public.board_posts for update
+  using (true)
+  with check (true);
+
+-- 작성자가 아닌 경우 view_count +1 만 허용
+create or replace function public.board_posts_update_guard()
+returns trigger
 language plpgsql
-security definer
 set search_path = public
 as $$
 begin
-  update public.board_posts
-  set view_count = view_count + 1
-  where id = post_id;
+  if auth.uid() is distinct from old.user_id then
+    if new.title is distinct from old.title
+       or new.content is distinct from old.content
+       or new.author_name is distinct from old.author_name
+       or coalesce(new.author_id, '') is distinct from coalesce(old.author_id, '')
+       or new.user_id is distinct from old.user_id
+       or new.created_at is distinct from old.created_at
+       or new.view_count is distinct from old.view_count + 1
+    then
+      raise exception 'not authorized';
+    end if;
+  end if;
+  return new;
 end;
 $$;
 
-grant execute on function public.increment_post_view(uuid) to anon, authenticated;
+drop trigger if exists board_posts_update_guard on public.board_posts;
+create trigger board_posts_update_guard
+  before update on public.board_posts
+  for each row
+  execute function public.board_posts_update_guard();
+
+-- 예전 SECURITY DEFINER RPC 제거 (Security Advisor 경고 해소)
+drop function if exists public.increment_post_view(uuid);

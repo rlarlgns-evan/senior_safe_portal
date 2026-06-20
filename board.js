@@ -146,11 +146,16 @@ function renderBoardTable(posts) {
   });
 }
 
-async function incrementViewCount(postId) {
+async function incrementViewCount(postId, currentCount = 0) {
   try {
-    await supabaseClient.rpc("increment_post_view", { post_id: postId });
+    const { error } = await supabaseClient
+      .from(BOARD_TABLE)
+      .update({ view_count: (currentCount ?? 0) + 1 })
+      .eq("id", postId);
+
+    if (error) throw error;
   } catch {
-    // RPC 미설치 시 조회수 증가 생략
+    // view_count UPDATE 권한·RLS 미설치 시 조회수 증가 생략
   }
 }
 
@@ -171,7 +176,7 @@ async function openPostDetail(postId) {
 
   setBoardStatus("");
   viewingPostId = postId;
-  await incrementViewCount(postId);
+  await incrementViewCount(postId, data.view_count);
 
   const titleEl = document.getElementById("board-detail-title");
   const metaEl = document.querySelector(".board-detail-meta");
