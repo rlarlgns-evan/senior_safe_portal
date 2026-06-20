@@ -1,8 +1,6 @@
 /**
- * 홈 SPA — ViewRouter · 검색 · 챗봇
+ * 홈 SPA — ViewRouter · 검색
  */
-
-/** @typedef {'user' | 'bot'} ChatSender */
 
 const homeDom = {
   mobileMenuToggle: document.getElementById("mobile-menu-toggle"),
@@ -21,17 +19,9 @@ const homeDom = {
   errorBox: document.getElementById("error-box"),
   errorMessage: document.getElementById("error-message"),
   errorClose: document.getElementById("error-close"),
-  chatWindow: document.getElementById("chat-window"),
-  chatFab: document.getElementById("chat-fab"),
-  chatClose: document.getElementById("chat-close"),
-  chatForm: document.getElementById("chat-form"),
-  chatInput: document.getElementById("chat-input"),
-  chatMessages: document.getElementById("chat-messages"),
 };
 
 let searchInProgress = false;
-/** @type {Array<{role: string, content: string}>} */
-const chatHistory = [];
 
 const ViewRouter = {
   current: "home",
@@ -146,173 +136,6 @@ const SearchModule = {
   },
 };
 
-function formatChatTime(date = new Date()) {
-  return date.toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit", hour12: true });
-}
-
-const ChatModule = {
-  renderChatBubble(text, sender, options = {}) {
-    const row = document.createElement("div");
-    row.className = sender === "bot"
-      ? "chat-message-row chat-message-row--bot"
-      : "chat-message-row chat-message-row--user";
-
-    const content = document.createElement("div");
-    content.className = "chat-message-content";
-
-    const time = document.createElement("span");
-    time.className = "chat-time";
-    time.textContent = formatChatTime();
-
-    const bubble = document.createElement("div");
-    bubble.className = sender === "bot"
-      ? `chat-bubble bot${options.featured ? " chat-bubble--featured" : ""}`
-      : "chat-bubble user";
-    bubble.textContent = String(text ?? "").slice(0, AppConfig.MAX_CHAT_LENGTH);
-
-    if (sender === "bot") {
-      const avatar = document.createElement("img");
-      avatar.src = MASCOT_SRC;
-      avatar.alt = "";
-      avatar.className = "chat-mascot-avatar";
-      avatar.setAttribute("loading", "lazy");
-      content.appendChild(time);
-      content.appendChild(bubble);
-      row.appendChild(avatar);
-      row.appendChild(content);
-    } else {
-      const userAvatar = document.createElement("div");
-      userAvatar.className = "chat-user-avatar";
-      userAvatar.setAttribute("aria-hidden", "true");
-      const icon = document.createElement("span");
-      icon.className = "material-symbols-outlined";
-      icon.textContent = "person";
-      userAvatar.appendChild(icon);
-      content.appendChild(bubble);
-      content.appendChild(time);
-      row.appendChild(content);
-      row.appendChild(userAvatar);
-    }
-
-    homeDom.chatMessages?.appendChild(row);
-    if (homeDom.chatMessages) homeDom.chatMessages.scrollTop = homeDom.chatMessages.scrollHeight;
-
-    return bubble;
-  },
-
-  setSubmitting(isSubmitting) {
-    const submitButton = homeDom.chatForm?.querySelector(".chat-send-btn");
-    if (submitButton) submitButton.disabled = isSubmitting;
-    if (homeDom.chatInput) homeDom.chatInput.disabled = isSubmitting;
-  },
-
-  renderLinkResultAction() {
-    const detailRow = document.createElement("div");
-    detailRow.className = "chat-message-row chat-message-row--bot";
-
-    const avatar = document.createElement("img");
-    avatar.src = MASCOT_SRC;
-    avatar.alt = "";
-    avatar.className = "chat-mascot-avatar";
-    avatar.setAttribute("loading", "lazy");
-
-    const content = document.createElement("div");
-    content.className = "chat-message-content";
-
-    const detailBubble = document.createElement("div");
-    detailBubble.className = "chat-bubble bot chat-action";
-
-    const resultButton = document.createElement("button");
-    resultButton.type = "button";
-    resultButton.className = "chat-action-btn";
-    resultButton.textContent = "📋 상세 검사 결과 보기";
-    resultButton.addEventListener("click", () => {
-      ResultsModule.renderFromStorage();
-      ViewRouter.showResults();
-    });
-
-    detailBubble.appendChild(resultButton);
-    content.appendChild(detailBubble);
-    detailRow.appendChild(avatar);
-    detailRow.appendChild(content);
-    homeDom.chatMessages?.appendChild(detailRow);
-
-    if (homeDom.chatMessages) homeDom.chatMessages.scrollTop = homeDom.chatMessages.scrollHeight;
-  },
-
-  sendSuggestion(text) {
-    if (!homeDom.chatInput || ChatModule.isBusy()) return;
-    homeDom.chatInput.value = text;
-    homeDom.chatForm?.requestSubmit();
-  },
-
-  isBusy() {
-    return Boolean(homeDom.chatForm?.querySelector(".chat-send-btn:disabled"));
-  },
-
-  async handleChatSubmit(event) {
-    event.preventDefault();
-
-    try {
-      const text = validateTextInput(
-        homeDom.chatInput?.value ?? "",
-        AppConfig.MAX_CHAT_LENGTH,
-        "메시지를 입력해 주세요.",
-      );
-
-      AlertUI.hideError();
-      ChatModule.renderChatBubble(text, "user");
-      if (homeDom.chatInput) homeDom.chatInput.value = "";
-      chatHistory.push({ role: "user", content: text });
-
-      const thinkingBubble = ChatModule.renderChatBubble("단디가 생각하고 있습니다...", "bot");
-      ChatModule.setSubmitting(true);
-
-      const data = await chatWithAgent(text, chatHistory.slice(0, -1));
-      thinkingBubble.textContent = String(data.reply ?? "").slice(0, AppConfig.MAX_CHAT_LENGTH);
-      chatHistory.push({ role: "assistant", content: data.reply });
-
-      if (data.linkAnalysis && !Array.isArray(data.linkAnalysis)) {
-        const safeUrl = validateLinkAnalysisUrl(data.linkAnalysis.url);
-
-        if (safeUrl) {
-          saveSearchResults({
-            query: safeUrl,
-            type: "link",
-            summary: data.linkAnalysis.status === "위험"
-              ? "⚠️ 챗봇 링크 검사 · 위험 신호 감지"
-              : "✅ 챗봇 링크 검사 · 비교적 안전",
-            items: [linkAnalysisToItem(data.linkAnalysis, safeUrl)],
-          });
-          ChatModule.renderLinkResultAction();
-        }
-      }
-    } catch (err) {
-      chatHistory.pop();
-      const lastBotRow = homeDom.chatMessages?.querySelector(".chat-message-row--bot:last-child .chat-bubble");
-      if (lastBotRow) {
-        lastBotRow.textContent = sanitizeUserFacingMessage(
-          err,
-          "죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
-        );
-      }
-    } finally {
-      ChatModule.setSubmitting(false);
-    }
-  },
-
-  toggleChatWindow() {
-    homeDom.chatWindow?.classList.toggle("hidden");
-    if (homeDom.chatWindow && !homeDom.chatWindow.classList.contains("hidden")) {
-      homeDom.chatInput?.focus();
-    }
-  },
-
-  closeChatWindow() {
-    homeDom.chatWindow?.classList.add("hidden");
-  },
-};
-
 const HomeModule = {
   initCategoryTabs() {
     const youtubeMore = document.getElementById("youtube-more");
@@ -359,13 +182,6 @@ function bindHomeEvents() {
   homeDom.searchForm?.addEventListener("submit", (e) => SearchModule.handleSearchSubmit(e));
   homeDom.loadingCancel?.addEventListener("click", () => SearchModule.handleLoadingCancel());
   homeDom.errorClose?.addEventListener("click", () => AlertUI.hideError());
-  homeDom.chatFab?.addEventListener("click", () => ChatModule.toggleChatWindow());
-  homeDom.chatClose?.addEventListener("click", () => ChatModule.closeChatWindow());
-  homeDom.chatForm?.addEventListener("submit", (e) => ChatModule.handleChatSubmit(e));
-
-  document.querySelectorAll("[data-chat-prompt]").forEach((chip) => {
-    chip.addEventListener("click", () => ChatModule.sendSuggestion(chip.dataset.chatPrompt || ""));
-  });
 
   ResultsModule.bindEvents();
 
@@ -382,15 +198,11 @@ function bindHomeEvents() {
 function initHomePage() {
   ViewRouter.initFromLocation();
   HomeModule.initCategoryTabs();
-  ChatModule.renderChatBubble(
-    "안녕하세요! 저는 디지털 보안관 단디예요. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.",
-    "bot",
-    { featured: true },
-  );
+  initSiteChat({
+    onLinkResult: () => {
+      ResultsModule.renderFromStorage();
+      ViewRouter.showResults();
+    },
+  });
   bindHomeEvents();
-
-  if (new URLSearchParams(location.search).get("consult") === "1") {
-    homeDom.chatWindow?.classList.remove("hidden");
-    homeDom.chatInput?.focus();
-  }
 }

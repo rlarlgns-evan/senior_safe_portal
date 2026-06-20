@@ -14,8 +14,8 @@ const RESULTS_STATUS_CONFIG = {
     label: "주의",
     icon: "warning",
     cardBg: "var(--color-warning-bg)",
-    cardBorder: "#d97706",
-    titleColor: "#92400e",
+    cardBorder: "var(--color-warning-border)",
+    titleColor: "var(--color-warning-text)",
   },
   danger: {
     label: "위험",
@@ -104,7 +104,7 @@ const ResultsModule = {
         <div class="result-card-grid">
           <div class="result-thumb-panel">
             ${this.renderThumbnail(item)}
-            <span class="result-badge" style="background: ${cfg.cardBorder}; color: #fff;">
+            <span class="result-badge" style="background: ${cfg.cardBorder}; color: var(--color-text-on-primary);">
               <span class="material-symbols-outlined">${cfg.icon}</span>
               ${cfg.label}
             </span>

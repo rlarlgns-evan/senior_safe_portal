@@ -16,7 +16,7 @@
   <header class="site-header global-header" role="banner" data-header-static="true">
     <div class="site-header-row">
       <a class="site-brand" href="index.html" id="spa-home-link" aria-label="홈으로 이동">
-        <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="88" height="88" />
+        <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="112" height="112" />
         <span class="site-brand-text">시니어 디지털 보안관</span>
       </a>
       <nav class="top-nav" aria-label="주요 메뉴" data-auto-nav></nav>
@@ -174,49 +174,6 @@
     </main>
   </div>
 
-  <div class="chat-fab-wrap" id="floating-chat-container">
-    <div id="chat-window" class="chat-window hidden" role="dialog" aria-labelledby="chat-title">
-      <div class="chat-header">
-        <div class="chat-header-info">
-          <div class="chat-header-avatar">
-            <img src="assets/mascot-sheriff.png" alt="" class="chat-header-mascot" width="44" height="44" />
-          </div>
-          <div class="chat-header-text">
-            <h3 id="chat-title">보안관 단디</h3>
-            <p class="chat-header-status">
-              <span class="chat-status-dot" aria-hidden="true"></span>
-              상담 가능
-            </p>
-          </div>
-        </div>
-        <button type="button" id="chat-close" class="chat-minimize-btn" aria-label="챗봇 최소화">
-          <span class="material-symbols-outlined" aria-hidden="true">remove</span>
-        </button>
-      </div>
-      <div id="chat-messages" class="chat-messages" role="log" aria-live="polite"></div>
-      <div class="chat-footer">
-        <div class="chat-suggestions" role="group" aria-label="빠른 질문">
-          <button type="button" class="chat-chip" data-chat-prompt="보이스피싱이 뭐예요? 어떻게 예방하나요?">🛡️ 보이스피싱이 뭐예요?</button>
-          <button type="button" class="chat-chip" data-chat-prompt="의심스러운 링크를 받았을 때 어떻게 확인하나요?">🔗 링크 검사법</button>
-          <button type="button" class="chat-chip" data-chat-prompt="문자·카톡 사기를 당하지 않으려면 어떻게 해야 하나요?">📱 문자 사기 예방</button>
-        </div>
-        <form id="chat-form" class="chat-form">
-          <label for="chat-input" class="sr-only">메시지 또는 링크 입력</label>
-          <div class="chat-input-wrap">
-            <textarea id="chat-input" rows="1" class="chat-input" placeholder="메시지를 입력하세요..." autocomplete="off"></textarea>
-            <button type="submit" class="chat-send-btn" aria-label="메시지 보내기">
-              <span class="material-symbols-outlined" aria-hidden="true">send</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-    <button type="button" id="chat-fab" class="chat-fab chat-fab--mascot btn btn--accent">
-      <img src="assets/mascot-sheriff.png" alt="" class="chat-fab-img" width="58" height="58" />
-      <span>보안관 단디에게 물어보기</span>
-    </button>
-  </div>
-
   <div id="login-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
     <div class="modal-panel card">
       <button type="button" id="login-modal-close" class="modal-close btn btn--danger" aria-label="로그인 창 닫기">닫기</button>
@@ -257,6 +214,7 @@
   <script src="js/sheriff-core.js"></script>
   <script src="js/pages/results.js"></script>
   <script src="js/pages/home.js"></script>
+  <script src="js/chat.js"></script>
   <script src="js/bootstrap.js"></script>
 </body>
 </html>
