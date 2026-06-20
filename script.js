@@ -229,8 +229,18 @@ document.querySelectorAll("[data-section]").forEach((link) => {
 // ── 초기화 ──
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadHomeYoutubeRecommendations(youtubeContent);
-  loadHomeNewsRecommendations(newsContent);
+  setupCategoryTabs(
+    document.getElementById("youtube-categories"),
+    YOUTUBE_CATEGORIES,
+    youtubeContent,
+    loadHomeYoutubeRecommendations,
+  );
+  setupCategoryTabs(
+    document.getElementById("news-categories"),
+    NEWS_CATEGORIES,
+    newsContent,
+    loadHomeNewsRecommendations,
+  );
   addChatBubble("안녕하세요! 저는 시니어 디지털 보안관입니다. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.", "bot");
   initAuth();
 });

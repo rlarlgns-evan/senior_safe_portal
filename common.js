@@ -145,19 +145,68 @@ function videoResultToItem(video) {
   };
 }
 
-const SENIOR_HOME_YOUTUBE_QUERIES = [
-  "시니어 건강 운동",
-  "트로트 명곡 모음",
-  "어르신 스트레칭",
-  "보이스피싱 예방",
-  "임영웅 라이브",
-  "무릎 관절 운동",
-  "국민건강보험 어르신",
-  "노년기 두뇌 훈련",
+const YOUTUBE_CATEGORIES = [
+  { id: "music", label: "음악", query: "트로트 명곡 어르신" },
+  { id: "affairs", label: "시사", query: "시사 뉴스 브리핑" },
+  { id: "entertainment", label: "예능", query: "예능 프로 그리고" },
+  { id: "documentary", label: "다큐", query: "다큐멘터리 역사" },
+  { id: "health", label: "건강", query: "시니어 건강 운동" },
 ];
 
-function pickSeniorHomeQuery() {
-  return SENIOR_HOME_YOUTUBE_QUERIES[Math.floor(Math.random() * SENIOR_HOME_YOUTUBE_QUERIES.length)];
+const NEWS_CATEGORIES = [
+  { id: "affairs", label: "시사", query: "국정 시사" },
+  { id: "society", label: "사회", query: "사회 뉴스" },
+  { id: "health", label: "건강", query: "어르신 건강" },
+  { id: "welfare", label: "복지", query: "기초연금 노인 복지" },
+  { id: "life", label: "생활", query: "생활 정보" },
+];
+
+function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn) {
+  let activeId = categories[0].id;
+  let loading = false;
+
+  function renderTabs() {
+    tabsContainer.innerHTML = categories.map((cat) => `
+      <button
+        type="button"
+        class="category-tab${cat.id === activeId ? " category-tab-active" : ""}"
+        data-category="${cat.id}"
+        role="tab"
+        aria-selected="${cat.id === activeId}"
+      >${escapeHtml(cat.label)}</button>
+    `).join("");
+
+    tabsContainer.querySelectorAll(".category-tab").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const nextId = button.dataset.category;
+        if (loading || nextId === activeId) return;
+
+        activeId = nextId;
+        renderTabs();
+        await loadCategory();
+      });
+    });
+  }
+
+  async function loadCategory() {
+    const category = categories.find((cat) => cat.id === activeId);
+    if (!category) return;
+
+    loading = true;
+    tabsContainer.querySelectorAll(".category-tab").forEach((button) => {
+      button.disabled = true;
+    });
+
+    try {
+      await loadFn(contentContainer, category.query);
+    } finally {
+      loading = false;
+      renderTabs();
+    }
+  }
+
+  renderTabs();
+  loadCategory();
 }
 
 function renderYoutubeHomeCard(item) {
@@ -189,11 +238,10 @@ function renderYoutubeHomeCard(item) {
   `;
 }
 
-async function loadHomeYoutubeRecommendations(container) {
+async function loadHomeYoutubeRecommendations(container, query) {
   container.innerHTML = `<p class="youtube-loading">어르신을 위한 안전한 영상을 찾고 있습니다...</p>`;
 
   try {
-    const query = pickSeniorHomeQuery();
     const videos = await searchVideos(query);
     const items = videos.map(videoResultToItem);
 
@@ -219,20 +267,6 @@ async function searchNews(query) {
   return data.articles;
 }
 
-const SENIOR_HOME_NEWS_QUERIES = [
-  "기초연금",
-  "어르신 건강",
-  "노인 복지",
-  "독감 예방접종",
-  "시니어 디지털",
-  "보이스피싱",
-  "국민연금",
-];
-
-function pickSeniorHomeNewsQuery() {
-  return SENIOR_HOME_NEWS_QUERIES[Math.floor(Math.random() * SENIOR_HOME_NEWS_QUERIES.length)];
-}
-
 function renderNewsHomeCard(article) {
   const href = article.originallink || article.link;
   return `
@@ -250,11 +284,10 @@ function renderNewsHomeCard(article) {
   `;
 }
 
-async function loadHomeNewsRecommendations(container) {
+async function loadHomeNewsRecommendations(container, query) {
   container.innerHTML = `<p class="youtube-loading">오늘의 뉴스를 불러오고 있습니다...</p>`;
 
   try {
-    const query = pickSeniorHomeNewsQuery();
     const articles = await searchNews(query);
 
     if (articles.length === 0) {
