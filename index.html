@@ -1,41 +1,196 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="시니어 디지털 보안관 - 링크 스미싱 분석" />
-  <title>시니어 디지털 보안관 | 링크 안전 검사</title>
+  <title>시니어 디지털 보안관</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            headline: ["Space Grotesk", "sans-serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Space Grotesk", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
 </head>
-<body>
-  <main class="app-shell">
-    <section id="input-view" class="view-card" aria-labelledby="input-title">
-      <h1 id="input-title" class="main-title">🛡️ 시니어 디지털 보안관</h1>
-      <p class="sub-title">링크 스미싱/사기 여부를 쉽게 확인하세요.</p>
+<body class="bg-white text-[#1a1a1a] min-h-screen flex">
 
-      <form id="analyze-form" class="analyze-form" novalidate>
-        <label for="url-input" class="static-label">의심되는 인터넷 주소(링크)를 붙여넣으세요.</label>
-        <input
-          id="url-input"
-          class="url-input"
-          type="url"
-          inputmode="url"
-          autocomplete="off"
-          aria-describedby="input-help"
-          placeholder="https://example.com"
-        />
-        <p id="input-help" class="help-text">문자나 카카오톡에서 받은 링크를 그대로 붙여넣어도 됩니다.</p>
-        <button type="submit" class="primary-button">안전 검사 시작</button>
+  <!-- 사이드 네비게이션 (데스크톱) -->
+  <nav class="bg-[#fafafa] font-headline text-[20px] font-bold w-80 fixed left-0 top-0 bottom-0 shadow-lg hidden lg:flex flex-col border-r border-[#e5e7eb] z-40" aria-label="주요 메뉴">
+    <div class="p-8">
+      <h1 class="text-[36px] font-headline mb-2 flex items-center gap-2">
+        <span class="material-symbols-outlined text-[48px] text-[#ff5c00]" aria-hidden="true">shield</span>
+        디지털 보안관
+      </h1>
+      <p class="text-[22px] font-body text-[#4a4a4a] mb-8">오늘도 안전하게 모십니다</p>
+    </div>
+    <div class="flex-1 overflow-y-auto space-y-6 px-4">
+      <a class="nav-link nav-active" href="#home-section" data-section="home">
+        <span class="material-symbols-outlined text-[40px]" aria-hidden="true">home</span> 홈
+      </a>
+      <a class="nav-link" href="#youtube-section" data-section="youtube">
+        <span class="material-symbols-outlined text-[40px] text-[#4a4a4a]" aria-hidden="true">smart_display</span> 안심 유튜브
+      </a>
+      <a class="nav-link" href="#news-section" data-section="news">
+        <span class="material-symbols-outlined text-[40px] text-[#4a4a4a]" aria-hidden="true">gavel</span> 신뢰 뉴스
+      </a>
+      <a class="nav-link" href="#consult-section" data-section="consult">
+        <span class="material-symbols-outlined text-[40px] text-[#4a4a4a]" aria-hidden="true">smart_toy</span> 보안관 상담
+      </a>
+    </div>
+  </nav>
+
+  <!-- 메인 콘텐츠 -->
+  <main class="flex-1 lg:ml-80 pb-24 lg:pb-0" id="home-section">
+
+    <!-- 헤더 & 검색 -->
+    <header class="bg-white border-b border-[#e5e7eb] p-8 lg:p-16 text-center flex flex-col items-center justify-center min-h-[420px]">
+      <h2 class="text-[36px] lg:text-[48px] font-headline flex items-center gap-4 justify-center mb-6 font-bold">
+        <span class="material-symbols-outlined text-[56px] lg:text-[72px] text-[#ff5c00]" aria-hidden="true">shield</span>
+        시니어 디지털 보안관
+      </h2>
+      <p class="text-[22px] lg:text-[26px] font-body text-[#4a4a4a] mb-8">무엇이든 안전하게 검색하세요</p>
+
+      <form id="search-form" class="w-full max-w-5xl mb-12" novalidate>
+        <label for="search-input" class="static-label block text-left mb-3 text-[22px] font-bold text-[#1a1a1a]">
+          검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요.
+        </label>
+        <div class="relative flex items-center">
+          <input
+            id="search-input"
+            class="w-full h-[80px] lg:h-[100px] pl-8 pr-[200px] lg:pr-[240px] rounded-full border-4 border-[#e5e7eb] focus:border-[#ff5c00] focus:ring-4 focus:ring-[#ffdad6] text-[20px] lg:text-[26px] font-body bg-white shadow-lg"
+            type="text"
+            placeholder="예: 건강 정보, https://example.com"
+            autocomplete="off"
+          />
+          <button type="submit" class="absolute right-3 top-3 bottom-3 bg-[#ff5c00] text-white rounded-full px-6 lg:px-10 text-[20px] lg:text-[26px] font-bold flex items-center gap-2 hover:bg-[#e63b2e] border-2 border-[#cc0000] min-h-[56px]">
+            <span class="material-symbols-outlined text-[32px] lg:text-[36px]" aria-hidden="true">search</span>
+            검색하기
+          </button>
+        </div>
+        <p class="help-text text-left mt-3 text-[18px] text-[#4a4a4a]">링크를 붙여넣으면 안전 검사를, 일반 검색어는 유튜브 추천을 보여드립니다.</p>
       </form>
-    </section>
 
-    <section id="result-view" class="view-card hidden" aria-labelledby="result-title">
-      <button id="back-button" class="back-button" type="button">⬅ 처음으로 돌아가기</button>
-      <h2 id="result-title" class="result-title">분석 결과</h2>
-      <div id="verdict-container" class="verdict-container" aria-live="polite"></div>
-    </section>
+      <!-- 생활 정보 위젯 -->
+      <div class="w-full max-w-5xl flex flex-col sm:flex-row gap-6 justify-center">
+        <div class="bg-white border-2 border-[#e5e7eb] rounded-2xl p-6 lg:p-8 flex items-center gap-6 shadow-md w-full max-w-sm mx-auto">
+          <span class="material-symbols-outlined text-[48px] lg:text-[56px] text-[#ff5c00]" aria-hidden="true">partly_cloudy_day</span>
+          <div>
+            <div class="text-[24px] lg:text-[28px] font-bold">서울 22°C</div>
+            <div class="text-[20px] lg:text-[22px] text-[#4a4a4a]">맑음</div>
+          </div>
+        </div>
+        <div class="bg-white border-2 border-[#e5e7eb] rounded-2xl p-6 lg:p-8 flex items-center gap-6 shadow-md w-full max-w-sm mx-auto">
+          <span class="material-symbols-outlined text-[48px] lg:text-[56px] text-[#cc0000]" aria-hidden="true">medication</span>
+          <div>
+            <div class="text-[24px] lg:text-[28px] font-bold">혈압약</div>
+            <div class="text-[20px] lg:text-[22px] text-[#4a4a4a]">오후 1시</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 그리드 콘텐츠 -->
+    <div class="p-6 lg:p-12 max-w-[1800px] mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+
+        <!-- 안심 유튜브 -->
+        <section id="youtube-section" class="flex flex-col gap-8" aria-labelledby="youtube-heading">
+          <div class="flex items-center justify-between pb-4 border-b-4 border-[#e5e7eb]">
+            <h3 id="youtube-heading" class="text-[28px] lg:text-[36px] font-headline flex items-center gap-3 font-bold">
+              <span class="material-symbols-outlined text-[#ff5c00] text-[40px] lg:text-[48px]" aria-hidden="true">smart_display</span>
+              안심 유튜브 추천
+            </h3>
+          </div>
+          <div id="youtube-content" class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8"></div>
+        </section>
+
+        <!-- 신뢰 뉴스 -->
+        <section id="news-section" class="flex flex-col gap-8" aria-labelledby="news-heading">
+          <div class="flex items-center justify-between pb-4 border-b-4 border-[#e5e7eb]">
+            <h3 id="news-heading" class="text-[28px] lg:text-[36px] font-headline flex items-center gap-3 font-bold">
+              <span class="material-symbols-outlined text-[#ff5c00] text-[40px] lg:text-[48px]" aria-hidden="true">newspaper</span>
+              오늘의 주요 뉴스
+            </h3>
+          </div>
+          <div id="news-content" class="space-y-6"></div>
+        </section>
+      </div>
+    </div>
   </main>
 
+  <!-- 모바일 하단 네비 -->
+  <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-3 bg-white h-24 rounded-t-xl shadow-2xl border-t border-[#e5e7eb] lg:hidden" aria-label="모바일 메뉴">
+    <a class="mobile-nav-link mobile-nav-active" href="#home-section" data-section="home">
+      <span class="material-symbols-outlined text-[32px]" aria-hidden="true">home</span> 홈
+    </a>
+    <a class="mobile-nav-link" href="#youtube-section" data-section="youtube">
+      <span class="material-symbols-outlined text-[32px] text-[#4a4a4a]" aria-hidden="true">play_circle</span> 유튜브
+    </a>
+    <a class="mobile-nav-link" href="#news-section" data-section="news">
+      <span class="material-symbols-outlined text-[32px] text-[#4a4a4a]" aria-hidden="true">newspaper</span> 뉴스
+    </a>
+    <a class="mobile-nav-link" href="#" data-section="consult">
+      <span class="material-symbols-outlined text-[32px] text-[#4a4a4a]" aria-hidden="true">support_agent</span> 상담
+    </a>
+  </nav>
+
+  <!-- 플로팅 챗봇 -->
+  <div class="fixed bottom-28 right-4 lg:right-8 z-50 flex flex-col items-end gap-4" id="floating-chat-container">
+    <div class="hidden w-[min(100vw-2rem,450px)] h-[min(80vh,650px)] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border-4 border-[#ff5c00]" id="chat-window" role="dialog" aria-labelledby="chat-title">
+      <div class="bg-[#ff5c00] p-5 lg:p-6 text-white flex items-center justify-between border-b-4 border-[#1a1a1a]">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-[40px] lg:text-[48px]" aria-hidden="true">smart_toy</span>
+          <div>
+            <h3 id="chat-title" class="text-[22px] lg:text-[26px] font-bold">디지털 보안관 챗봇</h3>
+            <p class="text-[18px] lg:text-[20px] opacity-90">의심 문자·링크를 붙여넣어 주세요</p>
+          </div>
+        </div>
+        <button type="button" id="chat-close" class="hover:bg-[#e63b2e] p-2 rounded-full min-w-[48px] min-h-[48px]" aria-label="챗봇 닫기">
+          <span class="material-symbols-outlined text-[36px] lg:text-[40px]" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div id="chat-messages" class="flex-1 p-5 lg:p-8 overflow-y-auto space-y-6 bg-white" role="log" aria-live="polite"></div>
+      <form id="chat-form" class="p-4 lg:p-6 border-t-4 border-[#e5e7eb] bg-white">
+        <label for="chat-input" class="static-label block mb-2 text-[18px] font-bold">메시지 또는 링크 입력</label>
+        <div class="relative">
+          <textarea
+            id="chat-input"
+            rows="3"
+            class="w-full pl-4 pr-4 py-3 rounded-2xl border-4 border-[#e5e7eb] focus:border-[#ff5c00] text-[18px] lg:text-[22px] font-bold resize-none"
+            placeholder="의심스러운 문자 내용..."
+          ></textarea>
+        </div>
+        <button type="submit" class="mt-3 w-full min-h-[56px] bg-[#ff5c00] text-white rounded-full text-[20px] font-bold border-2 border-[#cc0000] hover:bg-[#e63b2e]">
+          🔍 안전 확인하기
+        </button>
+      </form>
+    </div>
+    <button type="button" id="chat-fab" class="bg-[#ff5c00] text-white rounded-full px-6 lg:px-8 py-4 lg:py-6 shadow-2xl hover:bg-[#e63b2e] flex items-center gap-3 border-4 border-[#1a1a1a] min-h-[64px]">
+      <span class="material-symbols-outlined text-[40px] lg:text-[48px]" aria-hidden="true">support_agent</span>
+      <span class="text-[20px] lg:text-[28px] font-bold">보안관에게 물어보기</span>
+    </button>
+  </div>
+
+  <!-- 링크 분석 결과 화면 (오버레이) -->
+  <div id="result-view" class="result-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="result-title">
+    <div class="result-panel">
+      <button id="back-button" type="button" class="back-button">⬅ 처음으로 돌아가기</button>
+      <h2 id="result-title" class="result-title">링크 안전 검사 결과</h2>
+      <div id="verdict-container" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <!-- 로딩 모달 (자동 닫힘 없음) -->
   <div id="loading-overlay" class="loading-overlay hidden" role="dialog" aria-modal="true" aria-live="assertive">
     <div class="loading-box">
       <div class="loading-spinner" aria-hidden="true"></div>
@@ -43,6 +198,7 @@
     </div>
   </div>
 
+  <!-- 오류 메시지 (X로 닫기) -->
   <div id="error-box" class="error-box hidden" role="alert">
     <div class="error-content">
       <p id="error-message"></p>
