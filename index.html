@@ -19,23 +19,25 @@
           <span class="site-brand-text">시니어 디지털 보안관</span>
         </a>
 
-        <nav class="top-nav" aria-label="주요 메뉴">
-          <a class="top-nav-link nav-active" href="#home-section" data-section="home">홈</a>
-          <a class="top-nav-link" href="#youtube-section" data-section="youtube">유튜브</a>
-          <a class="top-nav-link" href="#news-section" data-section="news">뉴스</a>
-          <a class="top-nav-link" href="#welfare-section" data-section="welfare">복지정보</a>
-          <a class="top-nav-link" href="#" data-section="consult">상담</a>
-        </nav>
+        <div class="header-end">
+          <nav class="top-nav" aria-label="주요 메뉴">
+            <a class="top-nav-link nav-active" href="#home-section" data-section="home">홈</a>
+            <a class="top-nav-link" href="#youtube-section" data-section="youtube">유튜브</a>
+            <a class="top-nav-link" href="#news-section" data-section="news">뉴스</a>
+            <a class="top-nav-link" href="#welfare-section" data-section="welfare">복지정보</a>
+            <a class="top-nav-link" href="#" data-section="consult">상담</a>
+          </nav>
 
-        <div class="auth-area" id="auth-area">
-          <span id="user-greeting" class="user-greeting hidden"></span>
-          <button type="button" id="login-button" class="auth-button auth-login">로그인</button>
-          <button type="button" id="logout-button" class="auth-button auth-logout hidden">로그아웃</button>
+          <div class="auth-area" id="auth-area">
+            <span id="user-greeting" class="user-greeting hidden"></span>
+            <button type="button" id="login-button" class="auth-button auth-login">로그인</button>
+            <button type="button" id="logout-button" class="auth-button auth-logout hidden">로그아웃</button>
+          </div>
+
+          <button type="button" id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="메뉴 열기" aria-expanded="false">
+            <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+          </button>
         </div>
-
-        <button type="button" id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="메뉴 열기" aria-expanded="false">
-          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-        </button>
       </div>
 
       <nav id="mobile-nav" class="mobile-nav hidden" aria-label="모바일 메뉴">
@@ -51,6 +53,24 @@
 
       <!-- 검색 영역 -->
       <section class="hero-section">
+        <div class="hero-weather-bar">
+          <div id="weather-widget" class="weather-card" aria-live="polite">
+            <div class="weather-icon-wrap" aria-hidden="true">
+              <span id="weather-icon" class="material-symbols-outlined">partly_cloudy_day</span>
+            </div>
+            <div class="weather-details">
+              <div class="weather-primary">
+                <span id="weather-temp" class="weather-temp">--°</span>
+                <span id="weather-main" class="weather-location">날씨 확인 중...</span>
+              </div>
+              <p id="weather-sub" class="weather-meta">위치를 불러오고 있습니다</p>
+            </div>
+            <button type="button" id="location-button" class="weather-locate-btn hidden" aria-label="내 위치로 날씨 보기" title="내 위치 사용">
+              <span class="material-symbols-outlined" aria-hidden="true">my_location</span>
+            </button>
+          </div>
+        </div>
+
         <p class="hero-subtitle">무엇이든 안전하게 검색하세요</p>
 
         <form id="search-form" class="search-form" novalidate>
@@ -64,35 +84,6 @@
           </div>
           <p class="form-help">링크는 안전 검사 · 일반 검색어는 유튜브 추천</p>
         </form>
-
-        <div class="widget-row">
-          <div id="weather-widget" class="info-widget">
-            <span id="weather-icon" class="material-symbols-outlined widget-icon" aria-hidden="true">partly_cloudy_day</span>
-            <div>
-              <div id="weather-main" class="widget-main">날씨 확인 중...</div>
-              <div id="weather-sub" class="widget-sub">위치를 불러오고 있습니다</div>
-            </div>
-          </div>
-          <button type="button" id="location-button" class="info-widget location-button hidden" aria-label="위치 허용하기">
-            <span class="material-symbols-outlined widget-icon" aria-hidden="true">my_location</span>
-            <div>
-              <div class="widget-main">내 위치 사용</div>
-              <div class="widget-sub">날씨·복지 맞춤 정보</div>
-            </div>
-          </button>
-        </div>
-      </section>
-
-      <!-- 카테고리 (유튜브 · 뉴스) — 상단 한 줄 -->
-      <section class="content-category-bar" aria-label="콘텐츠 카테고리">
-        <div class="category-group">
-          <span class="category-group-label">유튜브</span>
-          <div id="youtube-categories" class="category-tabs" role="tablist" aria-label="유튜브 카테고리"></div>
-        </div>
-        <div class="category-group">
-          <span class="category-group-label">뉴스</span>
-          <div id="news-categories" class="category-tabs" role="tablist" aria-label="뉴스 카테고리"></div>
-        </div>
       </section>
 
       <!-- 콘텐츠 3칸: 유튜브 · 뉴스 · 복지정보 -->
@@ -104,7 +95,9 @@
               유튜브
             </h3>
           </div>
+          <div id="youtube-categories" class="category-tabs" role="tablist" aria-label="유튜브 카테고리"></div>
           <div id="youtube-content" class="youtube-grid"></div>
+          <a id="youtube-more" class="section-more-link" href="youtube.html">더보기</a>
         </section>
 
         <section id="news-section" class="content-section content-column" aria-labelledby="news-heading">
@@ -114,7 +107,9 @@
               뉴스
             </h3>
           </div>
+          <div id="news-categories" class="category-tabs" role="tablist" aria-label="뉴스 카테고리"></div>
           <div id="news-content" class="news-list"></div>
+          <a id="news-more" class="section-more-link" href="news.html">더보기</a>
         </section>
 
         <section id="welfare-section" class="content-section content-column welfare-section" aria-labelledby="welfare-heading">
@@ -125,9 +120,11 @@
             </h3>
             <p id="welfare-location-label" class="welfare-location-label">📍 위치 확인 중...</p>
           </div>
+          <div id="welfare-categories" class="category-tabs" role="tablist" aria-label="복지 카테고리"></div>
           <div id="welfare-content" class="welfare-content">
             <p class="youtube-loading">근처 복지 시설과 혜택 정보를 찾고 있습니다...</p>
           </div>
+          <a id="welfare-more" class="section-more-link" href="welfare.html">더보기</a>
         </section>
       </div>
     </main>

@@ -120,8 +120,10 @@ async function analyzeLink(url) {
   return data;
 }
 
-async function searchVideos(query) {
-  const { data, error } = await supabaseClient.functions.invoke("search-videos", { body: { query } });
+async function searchVideos(query, limit = 5) {
+  const { data, error } = await supabaseClient.functions.invoke("search-videos", {
+    body: { query, limit },
+  });
   if (error) {
     throw new Error(await getInvokeErrorMessage(error, data));
   }
@@ -131,8 +133,12 @@ async function searchVideos(query) {
   return data.videos;
 }
 
+function isVideoSafe(video) {
+  return video.status !== "위험";
+}
+
 function videoResultToItem(video) {
-  const isDanger = video.status === "위험";
+  const isDanger = !isVideoSafe(video);
   return {
     status: isDanger ? "danger" : "safe",
     title: video.title,
@@ -161,9 +167,83 @@ const NEWS_CATEGORIES = [
   { id: "life", label: "생활", query: "생활 정보" },
 ];
 
-function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn) {
+const WELFARE_CATEGORIES = [
+  { id: "all", label: "전체", query: "all" },
+  { id: "senior65", label: "65세+", query: "senior65" },
+  { id: "middle", label: "50·60대", query: "middle" },
+  { id: "care", label: "돌봄·요양", query: "care" },
+  { id: "pension", label: "연금·수당", query: "pension" },
+  { id: "health", label: "건강·의료", query: "health" },
+  { id: "housing", label: "주거·생활", query: "housing" },
+];
+
+const WELFARE_CATEGORY_KEYWORDS = {
+  senior65: ["65세", "노인", "어르신", "고령", "경로", "기초연금", "노년", "실버"],
+  middle: ["50대", "60대", "중장년", "장년", "퇴직", "노후"],
+  care: ["돌봄", "요양", "장기요양", "재가", "치매", "보호", "독거", "케어", "간병"],
+  pension: ["연금", "수당", "급여", "기초생활", "생계", "소득", "지원금"],
+  health: ["건강", "의료", "검진", "치료", "재활", "병원", "약"],
+  housing: ["주거", "주택", "생활", "임대", "수리", "난방", "에너지"],
+};
+
+const HOME_YOUTUBE_PREVIEW = 3;
+const HOME_NEWS_PREVIEW = 3;
+const HOME_WELFARE_PREVIEW = 2;
+const BROWSE_YOUTUBE_LIMIT = 20;
+const BROWSE_NEWS_LIMIT = 20;
+const BROWSE_WELFARE_LIMIT = 10;
+
+function buildBrowsePageUrl(page, categoryId) {
+  const params = new URLSearchParams();
+  if (categoryId) params.set("category", categoryId);
+  const query = params.toString();
+  return `${page}.html${query ? `?${query}` : ""}`;
+}
+
+function findCategoryById(categories, categoryId) {
+  return categories.find((cat) => cat.id === categoryId) || categories[0];
+}
+
+function getCategoryQuery(categories, categoryId) {
+  return findCategoryById(categories, categoryId).query;
+}
+
+let cachedWelfareContext = null;
+let welfareCategoryReload = null;
+
+function bindWelfareCategoryReload(reloadFn) {
+  welfareCategoryReload = reloadFn;
+  if (cachedWelfareContext) reloadFn();
+}
+
+function filterWelfareServices(services, categoryId) {
+  if (!Array.isArray(services) || categoryId === "all") return services;
+
+  const keywords = WELFARE_CATEGORY_KEYWORDS[categoryId];
+  if (!keywords?.length) return services;
+
+  return services.filter((service) => {
+    const haystack = [
+      service.servNm,
+      service.summary,
+      service.target,
+      service.benefit,
+      service.criteria,
+      service.department,
+    ].filter(Boolean).join(" ");
+    return keywords.some((keyword) => haystack.includes(keyword));
+  });
+}
+
+function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn, options = {}) {
   let activeId = categories[0].id;
   let loading = false;
+
+  function notifyCategoryChange() {
+    if (typeof options.onCategoryChange === "function") {
+      options.onCategoryChange(activeId);
+    }
+  }
 
   function renderTabs() {
     tabsContainer.innerHTML = categories.map((cat) => `
@@ -198,7 +278,8 @@ function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn) 
     });
 
     try {
-      await loadFn(contentContainer, category.query);
+      await loadFn(contentContainer, category.query, { preview: options.preview !== false });
+      notifyCategoryChange();
     } finally {
       loading = false;
       renderTabs();
@@ -207,19 +288,39 @@ function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn) 
 
   renderTabs();
   loadCategory();
+
+  return { reload: loadCategory, getActiveId: () => activeId };
 }
 
-function renderYoutubeHomeCard(item) {
+function renderYoutubeThumbnailCard(item) {
   if (item.status === "danger") {
     return `
-      <article class="blocked-card-ui">
-        <p class="card-title" style="color:#dc2626">🚨 보안관 차단: 검증되지 않은 영상</p>
-        <p class="card-meta" style="color:#7f1d1d;margin-bottom:0.35rem">${escapeHtml(item.title)}</p>
-        <p class="card-meta" style="color:#7f1d1d">${escapeHtml(item.reason)}</p>
+      <article class="browse-yt-card browse-yt-card-blocked" title="${escapeHtml(item.title)}">
+        <div class="browse-yt-thumb browse-yt-thumb-blocked">
+          <span class="material-symbols-outlined" aria-hidden="true">block</span>
+          <span>차단됨</span>
+        </div>
+        <p class="browse-yt-label">${escapeHtml(item.title)}</p>
       </article>
     `;
   }
 
+  return `
+    <a class="browse-yt-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(item.title)}">
+      <article class="browse-yt-card">
+        <div class="browse-yt-thumb">
+          <img src="${escapeHtml(item.thumbnail)}" alt="" loading="lazy" />
+          <span class="browse-yt-safe">
+            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+          </span>
+        </div>
+        <p class="browse-yt-label">${escapeHtml(item.title)}</p>
+      </article>
+    </a>
+  `;
+}
+
+function renderYoutubeHomeCard(item) {
   return `
     <a class="video-card-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">
       <article class="video-card-ui">
@@ -238,11 +339,52 @@ function renderYoutubeHomeCard(item) {
   `;
 }
 
-async function loadHomeYoutubeRecommendations(container, query) {
+async function fetchSafeYoutubeItems(query, neededCount) {
+  const seenIds = new Set();
+  const safeItems = [];
+  const queryVariants = [
+    query,
+    `${query} 공식`,
+    `${query} 추천`,
+  ];
+
+  for (const searchQuery of queryVariants) {
+    if (safeItems.length >= neededCount) break;
+
+    const videos = await searchVideos(searchQuery, 15);
+    for (const video of videos) {
+      if (!isVideoSafe(video)) continue;
+
+      const item = videoResultToItem(video);
+      if (seenIds.has(item.videoId)) continue;
+
+      seenIds.add(item.videoId);
+      safeItems.push(item);
+      if (safeItems.length >= neededCount) break;
+    }
+  }
+
+  return safeItems.slice(0, neededCount);
+}
+
+async function loadHomeYoutubeRecommendations(container, query, options = {}) {
+  const preview = options.preview !== false;
   container.innerHTML = `<p class="youtube-loading">어르신을 위한 안전한 영상을 찾고 있습니다...</p>`;
 
   try {
-    const videos = await searchVideos(query);
+    if (preview) {
+      const safeItems = await fetchSafeYoutubeItems(query, HOME_YOUTUBE_PREVIEW);
+
+      if (safeItems.length === 0) {
+        container.innerHTML = `<p class="youtube-loading">안전한 추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.</p>`;
+        return;
+      }
+
+      container.innerHTML = safeItems.map(renderYoutubeHomeCard).join("");
+      return;
+    }
+
+    const videos = await searchVideos(query, BROWSE_YOUTUBE_LIMIT);
     const items = videos.map(videoResultToItem);
 
     if (items.length === 0) {
@@ -250,14 +392,16 @@ async function loadHomeYoutubeRecommendations(container, query) {
       return;
     }
 
-    container.innerHTML = items.map(renderYoutubeHomeCard).join("");
+    container.innerHTML = `<div class="browse-youtube-grid">${items.map(renderYoutubeThumbnailCard).join("")}</div>`;
   } catch {
     container.innerHTML = `<p class="youtube-loading">영상을 불러오지 못했습니다. 검색창에서 직접 검색해 보세요.</p>`;
   }
 }
 
-async function searchNews(query) {
-  const { data, error } = await supabaseClient.functions.invoke("search-news", { body: { query } });
+async function searchNews(query, display = 5) {
+  const { data, error } = await supabaseClient.functions.invoke("search-news", {
+    body: { query, display },
+  });
   if (error) {
     throw new Error(await getInvokeErrorMessage(error, data));
   }
@@ -295,18 +439,24 @@ function renderNewsHomeCard(article) {
   `;
 }
 
-async function loadHomeNewsRecommendations(container, query) {
+async function loadHomeNewsRecommendations(container, query, options = {}) {
+  const preview = options.preview !== false;
   container.innerHTML = `<p class="youtube-loading">오늘의 뉴스를 불러오고 있습니다...</p>`;
 
   try {
-    const articles = await searchNews(query);
+    const articles = await searchNews(query, preview ? 5 : BROWSE_NEWS_LIMIT);
+    const visibleArticles = preview ? articles.slice(0, HOME_NEWS_PREVIEW) : articles;
 
-    if (articles.length === 0) {
+    if (visibleArticles.length === 0) {
       container.innerHTML = `<p class="youtube-loading">뉴스를 찾지 못했습니다. 잠시 후 새로고침해 주세요.</p>`;
       return;
     }
 
-    container.innerHTML = articles.slice(0, 5).map(renderNewsHomeCard).join("");
+    if (preview) {
+      container.innerHTML = visibleArticles.map(renderNewsHomeCard).join("");
+    } else {
+      container.innerHTML = `<div class="browse-news-list">${visibleArticles.map(renderNewsHomeCard).join("")}</div>`;
+    }
   } catch {
     container.innerHTML = `<p class="youtube-loading">뉴스를 불러오지 못했습니다. Supabase에 search-news 배포 및 네이버 API 키를 확인해 주세요.</p>`;
   }
@@ -442,9 +592,9 @@ async function fetchWeather(latitude, longitude) {
   return fetchWeatherDirect(latitude, longitude);
 }
 
-async function fetchWelfareInfo(region, city) {
+async function fetchWelfareInfo(region, city, category = "all", limit = 4) {
   const { data, error } = await supabaseClient.functions.invoke("search-welfare", {
-    body: { region, city },
+    body: { region, city, category, limit },
   });
 
   if (error) {
@@ -509,14 +659,16 @@ function weatherCodeToIcon(code) {
 function renderWeatherWidget(weather, locationSource) {
   const mainEl = document.getElementById("weather-main");
   const subEl = document.getElementById("weather-sub");
+  const tempEl = document.getElementById("weather-temp");
   const iconEl = document.getElementById("weather-icon");
   const locationButton = document.getElementById("location-button");
 
   if (!mainEl || !subEl || !iconEl) return;
 
-  mainEl.textContent = `${weather.label} ${weather.temperature}°C`;
-  const locationNote = locationSource === "default" ? " · 기본 위치(서울)" : " · 내 위치";
-  subEl.textContent = `📍 ${weather.condition} · 체감 ${weather.apparentTemperature}°C${locationNote}`;
+  if (tempEl) tempEl.textContent = `${weather.temperature}°`;
+  mainEl.textContent = weather.label;
+  const locationNote = locationSource === "default" ? " · 기본(서울)" : "";
+  subEl.textContent = `${weather.condition} · 체감 ${weather.apparentTemperature}°C${locationNote}`;
   iconEl.textContent = weatherCodeToIcon(weather.weatherCode);
 
   if (locationButton) {
@@ -540,8 +692,16 @@ function renderWelfareQuickLinks(links) {
   `;
 }
 
-async function loadHomeWelfareInfo(container, weather, locationSource) {
+async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) {
+  const preview = options.preview !== false;
   const locationLabel = document.getElementById("welfare-location-label");
+
+  if (!cachedWelfareContext) {
+    container.innerHTML = `<p class="youtube-loading">위치 정보를 확인한 뒤 복지 정보를 불러옵니다...</p>`;
+    return;
+  }
+
+  const { weather, locationSource } = cachedWelfareContext;
   const suffix = locationSource === "default" ? " (기본 위치 · 서울)" : "";
 
   if (locationLabel) {
@@ -551,24 +711,35 @@ async function loadHomeWelfareInfo(container, weather, locationSource) {
   container.innerHTML = `<p class="youtube-loading">우리 지역 복지 혜택을 찾고 있습니다...</p>`;
 
   try {
-    const data = await fetchWelfareInfo(weather.region, weather.city);
-    const localHtml = data.services.length > 0
-      ? data.services.map(renderWelfareServiceCard).join("")
-      : `<p class="youtube-loading">해당 지역 지자체 복지서비스를 찾지 못했습니다.</p>`;
-    const nationalHtml = data.nationalServices.length > 0
-      ? data.nationalServices.map(renderWelfareServiceCard).join("")
-      : `<p class="youtube-loading">중앙부처 복지서비스를 찾지 못했습니다.</p>`;
+    const fetchLimit = preview ? 4 : BROWSE_WELFARE_LIMIT;
+    const data = await fetchWelfareInfo(weather.region, weather.city, categoryId, fetchLimit);
+    let localServices = filterWelfareServices(data.services, categoryId);
+    let nationalServices = filterWelfareServices(data.nationalServices, categoryId);
+
+    if (preview) {
+      localServices = localServices.slice(0, HOME_WELFARE_PREVIEW);
+      nationalServices = nationalServices.slice(0, HOME_WELFARE_PREVIEW);
+    }
+
+    const categoryLabel = WELFARE_CATEGORIES.find((cat) => cat.id === categoryId)?.label ?? "전체";
+
+    const localHtml = localServices.length > 0
+      ? localServices.map(renderWelfareServiceCard).join("")
+      : `<p class="youtube-loading">${escapeHtml(categoryLabel)} 분야 지자체 복지서비스를 찾지 못했습니다.</p>`;
+    const nationalHtml = nationalServices.length > 0
+      ? nationalServices.map(renderWelfareServiceCard).join("")
+      : `<p class="youtube-loading">${escapeHtml(categoryLabel)} 분야 중앙부처 복지서비스를 찾지 못했습니다.</p>`;
 
     container.innerHTML = `
-      <div class="welfare-services">
+      <div class="welfare-services${preview ? "" : " welfare-services-browse"}">
         <section class="welfare-block">
           <h4 class="welfare-subheading">우리 지역 · 지자체 복지</h4>
-          <p class="welfare-source-note">지자체복지서비스 API · 노년·보호·돌봄 분야</p>
+          <p class="welfare-source-note">${escapeHtml(categoryLabel)} · 지자체복지서비스 API</p>
           ${localHtml}
         </section>
         <section class="welfare-block">
           <h4 class="welfare-subheading">전국 · 중앙부처 복지</h4>
-          <p class="welfare-source-note">복지서비스정보 API · 어르신 관련 혜택</p>
+          <p class="welfare-source-note">${escapeHtml(categoryLabel)} · 복지서비스정보 API</p>
           ${nationalHtml}
         </section>
         ${renderWelfareQuickLinks(data.links)}
@@ -579,14 +750,38 @@ async function loadHomeWelfareInfo(container, weather, locationSource) {
   }
 }
 
+async function initBrowseWelfareLocation(forcePrompt = false) {
+  const location = await requestUserLocation(forcePrompt);
+  let weather = null;
+
+  try {
+    weather = await fetchWeather(location.latitude, location.longitude);
+  } catch {
+    weather = await fetchLocationLabelDirect(location.latitude, location.longitude);
+  }
+
+  cachedWelfareContext = { weather, locationSource: location.source };
+
+  const locationLabel = document.getElementById("browse-welfare-location");
+  if (locationLabel) {
+    const suffix = location.source === "default" ? " (기본 위치 · 서울)" : "";
+    locationLabel.textContent = `📍 ${weather.label}${suffix}`;
+  }
+
+  return cachedWelfareContext;
+}
+
 async function initHomeLocationServices(forcePrompt = false) {
   const welfareContainer = document.getElementById("welfare-content");
   const mainEl = document.getElementById("weather-main");
   const subEl = document.getElementById("weather-sub");
+  const tempEl = document.getElementById("weather-temp");
   const locationButton = document.getElementById("location-button");
 
+  if (tempEl) tempEl.textContent = "--°";
   if (mainEl) mainEl.textContent = "날씨 확인 중...";
   if (subEl) subEl.textContent = "위치를 불러오고 있습니다";
+  if (locationButton) locationButton.classList.add("hidden");
 
   const location = await requestUserLocation(forcePrompt);
   let weather = null;
@@ -595,6 +790,7 @@ async function initHomeLocationServices(forcePrompt = false) {
     weather = await fetchWeather(location.latitude, location.longitude);
     renderWeatherWidget(weather, location.source);
   } catch {
+    if (tempEl) tempEl.textContent = "--°";
     if (mainEl) mainEl.textContent = "날씨를 불러올 수 없음";
     if (subEl) subEl.textContent = "인터넷 연결을 확인해 주세요";
     locationButton?.classList.remove("hidden");
@@ -605,7 +801,12 @@ async function initHomeLocationServices(forcePrompt = false) {
       if (!weather) {
         weather = await fetchLocationLabelDirect(location.latitude, location.longitude);
       }
-      await loadHomeWelfareInfo(welfareContainer, weather, location.source);
+      cachedWelfareContext = { weather, locationSource: location.source };
+      if (welfareCategoryReload) {
+        await welfareCategoryReload();
+      } else {
+        await loadHomeWelfareInfo(welfareContainer, "all");
+      }
     } catch {
       welfareContainer.innerHTML = `<p class="youtube-loading">복지 정보를 불러오지 못했습니다. search-welfare 함수와 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.</p>`;
     }

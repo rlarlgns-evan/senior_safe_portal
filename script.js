@@ -228,18 +228,44 @@ document.querySelectorAll("[data-section]").forEach((link) => {
 
 // ── 초기화 ──
 
+function updateSectionMoreLink(linkEl, page, categoryId) {
+  if (!linkEl) return;
+  linkEl.href = buildBrowsePageUrl(page, categoryId);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  const youtubeMore = document.getElementById("youtube-more");
+  const newsMore = document.getElementById("news-more");
+  const welfareMore = document.getElementById("welfare-more");
+
   setupCategoryTabs(
     document.getElementById("youtube-categories"),
     YOUTUBE_CATEGORIES,
     youtubeContent,
     loadHomeYoutubeRecommendations,
+    {
+      onCategoryChange: (categoryId) => updateSectionMoreLink(youtubeMore, "youtube", categoryId),
+    },
   );
   setupCategoryTabs(
     document.getElementById("news-categories"),
     NEWS_CATEGORIES,
     newsContent,
     loadHomeNewsRecommendations,
+    {
+      onCategoryChange: (categoryId) => updateSectionMoreLink(newsMore, "news", categoryId),
+    },
+  );
+  bindWelfareCategoryReload(
+    setupCategoryTabs(
+      document.getElementById("welfare-categories"),
+      WELFARE_CATEGORIES,
+      document.getElementById("welfare-content"),
+      (container, query, options) => loadHomeWelfareInfo(container, query, options),
+      {
+        onCategoryChange: (categoryId) => updateSectionMoreLink(welfareMore, "welfare", categoryId),
+      },
+    ).reload,
   );
   initHomeLocationServices();
   addChatBubble("안녕하세요! 저는 시니어 디지털 보안관입니다. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.", "bot");

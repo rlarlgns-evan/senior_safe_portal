@@ -66,12 +66,13 @@ interface VideoResult {
 async function fetchYouTubeVideos(
   query: string,
   apiKey: string,
+  maxResults = 5,
 ): Promise<YouTubeSearchItem[]> {
   const params = new URLSearchParams({
     part: "snippet",
     q: query,
     type: "video",
-    maxResults: "5",
+    maxResults: String(Math.min(Math.max(maxResults, 1), 20)),
     regionCode: "KR",
     relevanceLanguage: "ko",
     key: apiKey,
@@ -176,10 +177,11 @@ Deno.serve(async (req: Request) => {
       throw new Error("서버에 YOUTUBE_API_KEY 또는 GEMINI_API_KEY가 설정되지 않았습니다.");
     }
 
-    // 요청 본문 파싱
-    const { query } = await req.json();
+    const body = await req.json();
+    const query = typeof body?.query === "string" ? body.query.trim() : "";
+    const limit = Number(body?.limit);
 
-    if (!query || typeof query !== "string" || query.trim().length === 0) {
+    if (!query) {
       return new Response(
         JSON.stringify({ error: "검색어(query)가 필요합니다." }),
         {
@@ -189,8 +191,12 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // 1. YouTube API로 상위 5개 영상 검색
-    const youtubeItems = await fetchYouTubeVideos(query.trim(), youtubeApiKey);
+    const maxResults = Number.isFinite(limit)
+      ? Math.min(Math.max(Math.floor(limit), 1), 20)
+      : 5;
+
+    // 1. YouTube API로 영상 검색
+    const youtubeItems = await fetchYouTubeVideos(query, youtubeApiKey, maxResults);
 
     if (youtubeItems.length === 0) {
       return new Response(

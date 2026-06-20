@@ -58,6 +58,15 @@ const SENIOR_KEYWORDS = [
   "실버", "노후", "주거급여", "의료비",
 ];
 
+const WELFARE_CATEGORY_KEYWORDS: Record<string, string[]> = {
+  senior65: ["65세", "노인", "어르신", "고령", "경로", "기초연금", "노년", "실버"],
+  middle: ["50대", "60대", "중장년", "장년", "퇴직", "노후"],
+  care: ["돌봄", "요양", "장기요양", "재가", "치매", "보호", "독거", "케어", "간병"],
+  pension: ["연금", "수당", "급여", "기초생활", "생계", "소득", "지원금"],
+  health: ["건강", "의료", "검진", "치료", "재활", "병원", "약"],
+  housing: ["주거", "주택", "생활", "임대", "수리", "난방", "에너지"],
+};
+
 const CTPRVN_CODES: Record<string, { code: string; name: string }> = {
   "서울": { code: "11", name: "서울특별시" },
   "서울특별시": { code: "11", name: "서울특별시" },
@@ -266,6 +275,27 @@ function isSeniorRelated(text: string): boolean {
   return SENIOR_KEYWORDS.some((keyword) => normalized.includes(keyword));
 }
 
+function matchesWelfareCategory(
+  service: { servNm?: string; summary?: string; target?: string; benefit?: string; criteria?: string; department?: string },
+  category: string,
+): boolean {
+  if (!category || category === "all") return true;
+
+  const keywords = WELFARE_CATEGORY_KEYWORDS[category];
+  if (!keywords?.length) return true;
+
+  const haystack = [
+    service.servNm,
+    service.summary,
+    service.target,
+    service.benefit,
+    service.criteria,
+    service.department,
+  ].filter(Boolean).join(" ");
+
+  return keywords.some((keyword) => haystack.includes(keyword));
+}
+
 async function fetchOdcloudPage(
   serviceKey: string,
   path: string,
@@ -416,6 +446,11 @@ Deno.serve(async (req: Request) => {
     const region = typeof body?.region === "string" ? body.region.trim() : "";
     const city = typeof body?.city === "string" ? body.city.trim() : region;
     const servId = typeof body?.servId === "string" ? body.servId.trim() : "";
+    const category = typeof body?.category === "string" ? body.category.trim() : "all";
+    const limitParam = Number(body?.limit);
+    const serviceLimit = Number.isFinite(limitParam)
+      ? Math.min(Math.max(Math.floor(limitParam), 1), 12)
+      : 4;
 
     if (servId) {
       const detail = await fetchWelfareDetail(serviceKey, {
@@ -439,10 +474,11 @@ Deno.serve(async (req: Request) => {
     }
 
     const codes = resolveRegionCodes(region, city);
-    const summaries = await fetchWelfareList(serviceKey, codes);
+    const listSize = category === "all" ? Math.max(serviceLimit * 3, 8) : Math.max(serviceLimit * 4, 24);
+    const summaries = await fetchWelfareList(serviceKey, codes, listSize);
 
-    const detailTargets = summaries.slice(0, 4);
-    const services = await Promise.all(
+    const detailTargets = summaries.slice(0, category === "all" ? serviceLimit * 2 : serviceLimit * 3);
+    const servicesRaw = await Promise.all(
       detailTargets.map(async (summary) => {
         try {
           return await fetchWelfareDetail(serviceKey, summary);
@@ -461,7 +497,14 @@ Deno.serve(async (req: Request) => {
       }),
     );
 
-    const nationalServices = await fetchNationalWelfareServices(serviceKey, 4);
+    const services = servicesRaw
+      .filter((service) => matchesWelfareCategory(service, category))
+      .slice(0, serviceLimit);
+
+    const nationalRaw = await fetchNationalWelfareServices(serviceKey, category === "all" ? serviceLimit : serviceLimit * 2);
+    const nationalServices = nationalRaw
+      .filter((service) => matchesWelfareCategory(service, category))
+      .slice(0, serviceLimit);
 
     return new Response(
       JSON.stringify({
@@ -469,6 +512,7 @@ Deno.serve(async (req: Request) => {
         city: codes.signguNm,
         ctprvnCd: codes.ctprvnCd,
         signguCd: codes.signguCd,
+        category,
         totalCount: summaries.length,
         services,
         nationalServices,

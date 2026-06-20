@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>복지정보 전체 보기 - 시니어 디지털 보안관</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+</head>
+<body class="browse-page" data-browse="welfare">
+
+  <div class="app-layout">
+    <header class="site-header">
+      <div class="site-header-row">
+        <a class="site-brand" href="index.html">
+          <span class="material-symbols-outlined brand-icon" aria-hidden="true">shield</span>
+          <span class="site-brand-text">시니어 디지털 보안관</span>
+        </a>
+        <div class="header-end">
+          <nav class="top-nav" aria-label="주요 메뉴">
+            <a class="top-nav-link" href="index.html" data-browse-nav="home">홈</a>
+            <a class="top-nav-link" href="youtube.html" data-browse-nav="youtube">유튜브</a>
+            <a class="top-nav-link" href="news.html" data-browse-nav="news">뉴스</a>
+            <a class="top-nav-link nav-active" href="welfare.html" data-browse-nav="welfare">복지정보</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="browse-main">
+      <a class="browse-back" href="index.html#welfare-section">
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+        홈으로 돌아가기
+      </a>
+      <div class="browse-header">
+        <h1 class="browse-title">
+          <span class="material-symbols-outlined section-icon" aria-hidden="true">volunteer_activism</span>
+          복지정보 전체 보기
+        </h1>
+        <p id="browse-welfare-location" class="browse-subtitle">📍 위치 확인 중...</p>
+        <button type="button" id="browse-location-button" class="browse-location-btn">
+          <span class="material-symbols-outlined" aria-hidden="true">my_location</span>
+          내 위치로 다시 찾기
+        </button>
+      </div>
+      <div id="browse-categories" class="category-tabs browse-category-tabs" role="tablist" aria-label="복지 카테고리"></div>
+      <div id="browse-content" class="browse-content">
+        <p class="youtube-loading">복지 정보를 불러오고 있습니다...</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="common.js"></script>
+  <script src="browse.js"></script>
+</body>
+</html>
