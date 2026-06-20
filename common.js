@@ -208,6 +208,66 @@ async function loadHomeYoutubeRecommendations(container) {
   }
 }
 
+async function searchNews(query) {
+  const { data, error } = await supabaseClient.functions.invoke("search-news", { body: { query } });
+  if (error) {
+    throw new Error(await getInvokeErrorMessage(error, data));
+  }
+  if (!Array.isArray(data?.articles)) {
+    throw new Error(data?.message || "뉴스 검색 결과를 받지 못했습니다.");
+  }
+  return data.articles;
+}
+
+const SENIOR_HOME_NEWS_QUERIES = [
+  "기초연금",
+  "어르신 건강",
+  "노인 복지",
+  "독감 예방접종",
+  "시니어 디지털",
+  "보이스피싱",
+  "국민연금",
+];
+
+function pickSeniorHomeNewsQuery() {
+  return SENIOR_HOME_NEWS_QUERIES[Math.floor(Math.random() * SENIOR_HOME_NEWS_QUERIES.length)];
+}
+
+function renderNewsHomeCard(article) {
+  const href = article.originallink || article.link;
+  return `
+    <a class="news-card-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">
+      <article class="news-card-ui">
+        <div class="news-badge">
+          <span class="material-symbols-outlined" style="font-size:20px">verified</span>
+          네이버 뉴스
+        </div>
+        <h4 class="news-title">${escapeHtml(article.title)}</h4>
+        <p class="news-summary">${escapeHtml(article.summary)}</p>
+        <span class="news-link">${escapeHtml(article.pubDate || "자세히 읽기")} →</span>
+      </article>
+    </a>
+  `;
+}
+
+async function loadHomeNewsRecommendations(container) {
+  container.innerHTML = `<p class="youtube-loading">오늘의 뉴스를 불러오고 있습니다...</p>`;
+
+  try {
+    const query = pickSeniorHomeNewsQuery();
+    const articles = await searchNews(query);
+
+    if (articles.length === 0) {
+      container.innerHTML = `<p class="youtube-loading">뉴스를 찾지 못했습니다. 잠시 후 새로고침해 주세요.</p>`;
+      return;
+    }
+
+    container.innerHTML = articles.slice(0, 5).map(renderNewsHomeCard).join("");
+  } catch {
+    container.innerHTML = `<p class="youtube-loading">뉴스를 불러오지 못했습니다. Supabase에 search-news 배포 및 네이버 API 키를 확인해 주세요.</p>`;
+  }
+}
+
 async function runSearch(raw) {
   const query = raw.trim();
   if (!query) {

@@ -503,6 +503,17 @@ body {
   margin: 0;
 }
 
+.news-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.news-card-link:hover .news-card-ui {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
 .news-card-ui {
   padding: 1rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);

@@ -113,26 +113,6 @@ logoutButton.addEventListener("click", async () => {
 
 // ── 홈 추천 콘텐츠 ──
 
-function renderNews() {
-  const articles = [
-    { title: "올해부터 기초연금 월 33만원으로 인상", summary: "65세 이상 어르신 기초연금이 이번 달부터 인상되어 지급됩니다." },
-    { title: "동절기 독감 무료 예방접종 안내", summary: "가까운 보건소에서 신분증을 지참하시면 무료로 접종받으실 수 있습니다." },
-    { title: "지하철 노인 무임승차 연령 상향 논의", summary: "무임승차 연령을 65세에서 70세로 올리는 방안을 검토 중입니다." },
-  ];
-
-  newsContent.innerHTML = articles.map((a) => `
-    <article class="news-card-ui">
-      <div class="news-badge">
-        <span class="material-symbols-outlined" style="font-size:20px">verified</span>
-        검증된 소식
-      </div>
-      <h4 class="news-title">${escapeHtml(a.title)}</h4>
-      <p class="news-summary">${escapeHtml(a.summary)}</p>
-      <span class="news-link">자세히 읽기 →</span>
-    </article>
-  `).join("");
-}
-
 // ── 검색 → 결과 페이지 ──
 
 async function handleSearchSubmit(event) {
@@ -250,7 +230,7 @@ document.querySelectorAll("[data-section]").forEach((link) => {
 
 document.addEventListener("DOMContentLoaded", () => {
   loadHomeYoutubeRecommendations(youtubeContent);
-  renderNews();
+  loadHomeNewsRecommendations(newsContent);
   addChatBubble("안녕하세요! 저는 시니어 디지털 보안관입니다. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.", "bot");
   initAuth();
 });
