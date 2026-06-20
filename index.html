@@ -20,25 +20,6 @@
 
       <section class="hero-section" id="hero-section">
         <div class="hero-content">
-          <div class="hero-weather-bar">
-            <div id="weather-widget" class="weather-card" aria-live="polite">
-              <div class="weather-icon-wrap" aria-hidden="true">
-                <span id="weather-icon" class="material-symbols-outlined">partly_cloudy_day</span>
-              </div>
-              <div class="weather-details">
-                <div class="weather-primary">
-                  <span id="weather-temp" class="weather-temp">--°</span>
-                  <span id="weather-main" class="weather-location">날씨 확인 중...</span>
-                </div>
-                <p id="weather-sub" class="weather-meta">위치를 불러오고 있습니다</p>
-              </div>
-              <button type="button" id="location-button" class="weather-locate-btn btn btn--secondary hidden" aria-label="내 위치로 날씨 보기">
-                <span class="material-symbols-outlined" aria-hidden="true">my_location</span>
-                <span class="weather-locate-label">내 위치</span>
-              </button>
-            </div>
-          </div>
-
           <div class="hero-intro">
             <img src="assets/mascot-sheriff.png" alt="" class="hero-mascot" width="140" height="140" />
             <p class="hero-subtitle">무엇이든 안전하게 검색하세요</p>
@@ -55,6 +36,25 @@
             </div>
             <p id="search-help" class="form-help">링크는 안전 검사 · 일반 검색어는 유튜브 추천</p>
           </form>
+
+          <aside class="hero-weather-bar" aria-label="오늘의 날씨">
+            <div id="weather-widget" class="weather-card" aria-live="polite">
+              <div class="weather-icon-wrap" aria-hidden="true">
+                <span id="weather-icon" class="material-symbols-outlined">partly_cloudy_day</span>
+              </div>
+              <div class="weather-details">
+                <div class="weather-primary">
+                  <span id="weather-temp" class="weather-temp">--°</span>
+                  <span id="weather-main" class="weather-location">날씨 확인 중...</span>
+                </div>
+                <p id="weather-sub" class="weather-meta">위치를 불러오고 있습니다</p>
+              </div>
+              <button type="button" id="location-button" class="weather-locate-btn btn btn--secondary hidden" aria-label="내 위치로 날씨 보기">
+                <span class="material-symbols-outlined" aria-hidden="true">my_location</span>
+                <span class="weather-locate-label">내 위치</span>
+              </button>
+            </div>
+          </aside>
         </div>
       </section>
 
