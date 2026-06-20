@@ -1392,7 +1392,6 @@ function initSiteNavigation() {
   });
 
   const mobileToggle = document.getElementById("mobile-menu-toggle");
-  const mobileNav = document.getElementById("mobile-nav");
   mobileToggle?.addEventListener("click", () => {
     if (!mobileNav) return;
     const willOpen = mobileNav.classList.contains("hidden");
