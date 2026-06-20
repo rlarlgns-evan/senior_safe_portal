@@ -1333,7 +1333,7 @@ function getSiteFooterHtml() {
         </nav>
         <div class="site-footer-bottom">
           <img src="${MASCOT_POTATO_SRC}" alt="" class="footer-potato" width="40" height="40" loading="lazy" />
-          <p class="site-footer-copy">© 2026 시니어 디지털 보안관</p>
+          <p class="site-footer-copy">© 2026 샤이한 열정 감자들</p>
         </div>
       </div>
     </footer>
