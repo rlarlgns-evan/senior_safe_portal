@@ -385,7 +385,7 @@ const ChatModule = {
       if (dom.chatInput) dom.chatInput.value = "";
       chatHistory.push({ role: "user", content: text });
 
-      const thinkingBubble = ChatModule.renderChatBubble("보안관이 생각하고 있습니다...", "bot");
+      const thinkingBubble = ChatModule.renderChatBubble("단디가 생각하고 있습니다...", "bot");
       ChatModule.setSubmitting(true);
 
       const data = await chatWithAgent(text, chatHistory.slice(0, -1));
@@ -497,7 +497,7 @@ function initApp() {
   HomeModule.initLocationServices();
   initHomeLocationServices();
   ChatModule.renderChatBubble(
-    "안녕하세요! 저는 디지털 보안관 강아지예요. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.",
+    "안녕하세요! 저는 디지털 보안관 단디예요. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.",
     "bot",
   );
   bindEvents();
