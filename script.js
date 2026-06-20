@@ -492,7 +492,6 @@ function bindEvents() {
  * 앱 초기화
  */
 function initApp() {
-  applyWeatherBackground(null);
   HomeModule.initCategoryTabs();
   HomeModule.initLocationServices();
   initHomeLocationServices();

@@ -816,103 +816,6 @@ function weatherCodeToIcon(code) {
   return "partly_cloudy_day";
 }
 
-function getKoreaTime() {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Seoul",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(new Date());
-
-  return {
-    hour: Number(parts.find((part) => part.type === "hour")?.value ?? 12),
-    minute: Number(parts.find((part) => part.type === "minute")?.value ?? 0),
-  };
-}
-
-function getTimePhase(hour) {
-  if (hour >= 5 && hour < 7) return "dawn";
-  if (hour >= 7 && hour < 17) return "day";
-  if (hour >= 17 && hour < 20) return "sunset";
-  return "night";
-}
-
-function weatherCodeToScene(code) {
-  if (code === 0) return "clear";
-  if (code >= 1 && code <= 3) return "cloudy";
-  if (code >= 45 && code <= 48) return "fog";
-  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return "rain";
-  if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) return "snow";
-  if (code >= 95) return "storm";
-  return "cloudy";
-}
-
-function getSunPosition(hour, minute) {
-  const total = hour * 60 + minute;
-  const sunrise = 6 * 60;
-  const sunset = 19 * 60;
-
-  if (total < sunrise) {
-    return { x: 8, y: 78 };
-  }
-  if (total > sunset) {
-    return { x: 92, y: 78 };
-  }
-
-  const progress = (total - sunrise) / (sunset - sunrise);
-  return {
-    x: 8 + progress * 84,
-    y: 78 - Math.sin(progress * Math.PI) * 58,
-  };
-}
-
-function applyWeatherBackground(weather) {
-  const hero = document.getElementById("hero-section") || document.querySelector(".hero-section");
-  const sun = document.getElementById("weather-sun");
-  const moon = document.getElementById("weather-moon");
-  const precip = document.getElementById("weather-precip");
-  if (!hero) return;
-
-  const { hour, minute } = getKoreaTime();
-  const phase = getTimePhase(hour);
-  const scene = weather ? weatherCodeToScene(weather.weatherCode) : "clear";
-
-  hero.dataset.timePhase = phase;
-  hero.dataset.weatherScene = scene;
-
-  const isDaytime = phase === "dawn" || phase === "day" || phase === "sunset";
-  const hideSunForWeather = scene === "storm" || (scene === "rain" && phase === "day");
-  const showSun = isDaytime && !hideSunForWeather;
-  const showMoon = phase === "night" && scene !== "storm";
-
-  if (sun) {
-    sun.classList.toggle("hidden", !showSun);
-    if (showSun) {
-      const pos = getSunPosition(hour, minute);
-      sun.style.left = `${pos.x}%`;
-      sun.style.top = `${pos.y}%`;
-    }
-  }
-
-  if (moon) {
-    moon.classList.toggle("hidden", !showMoon);
-    const moonX = 12 + ((hour + minute / 60) / 24) * 76;
-    moon.style.left = `${Math.min(moonX, 88)}%`;
-    moon.style.top = phase === "night" ? "18%" : "22%";
-  }
-
-  if (precip) {
-    precip.classList.remove("hidden", "weather-precip-rain", "weather-precip-snow");
-    if (scene === "rain" || scene === "storm") {
-      precip.classList.add("weather-precip-rain");
-    } else if (scene === "snow") {
-      precip.classList.add("weather-precip-snow");
-    } else {
-      precip.classList.add("hidden");
-    }
-  }
-}
-
 function renderWeatherWidget(weather, locationSource) {
   const mainEl = document.getElementById("weather-main");
   const subEl = document.getElementById("weather-sub");
@@ -931,8 +834,6 @@ function renderWeatherWidget(weather, locationSource) {
   if (locationButton) {
     locationButton.classList.toggle("hidden", locationSource === "gps");
   }
-
-  applyWeatherBackground(weather);
 }
 
 function renderWelfareQuickLinks(links) {
@@ -1064,7 +965,6 @@ async function initHomeLocationServices(forcePrompt = false) {
   if (mainEl) mainEl.textContent = "날씨 확인 중...";
   if (subEl) subEl.textContent = "위치를 불러오고 있습니다";
   if (locationButton) locationButton.classList.add("hidden");
-  applyWeatherBackground(null);
 
   const location = await requestUserLocation(forcePrompt);
   let weather = null;
