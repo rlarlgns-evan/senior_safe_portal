@@ -374,6 +374,159 @@ body {
   color: var(--color-muted);
 }
 
+.location-button {
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.location-button:hover {
+  border-color: var(--color-primary);
+  background: #ffead5;
+}
+
+.welfare-section {
+  grid-column: 1 / -1;
+}
+
+.welfare-location-label {
+  margin: 0.25rem 0 0;
+  font-size: 0.95rem;
+  color: var(--color-muted);
+}
+
+.welfare-services {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.welfare-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.welfare-source-note {
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.welfare-detail {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  color: var(--color-text);
+  line-height: 1.45;
+}
+
+.welfare-online {
+  display: inline-block;
+  margin-top: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.welfare-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 900px) {
+  .welfare-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.welfare-subheading {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.welfare-facilities {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.welfare-card {
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.welfare-badge {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: #ffead5;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.welfare-title {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.welfare-meta,
+.welfare-address {
+  margin: 0.15rem 0;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.welfare-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.welfare-programs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.welfare-quick-links {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.welfare-quick-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+}
+
+.welfare-quick-link strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.welfare-quick-link span {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
 /* ── 콘텐츠 그리드 ── */
 .content-grid {
   display: grid;

@@ -241,9 +241,18 @@ document.addEventListener("DOMContentLoaded", () => {
     newsContent,
     loadHomeNewsRecommendations,
   );
+  initHomeLocationServices();
   addChatBubble("안녕하세요! 저는 시니어 디지털 보안관입니다. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.", "bot");
   initAuth();
 });
+
+const locationButton = document.getElementById("location-button");
+if (locationButton) {
+  locationButton.addEventListener("click", () => {
+    cachedUserLocation = null;
+    initHomeLocationServices(true);
+  });
+}
 
 searchForm.addEventListener("submit", handleSearchSubmit);
 errorClose.addEventListener("click", hideError);

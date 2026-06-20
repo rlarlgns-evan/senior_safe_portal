@@ -301,6 +301,223 @@ async function loadHomeNewsRecommendations(container, query) {
   }
 }
 
+const DEFAULT_LOCATION = {
+  latitude: 37.5665,
+  longitude: 126.9780,
+  label: "서울",
+};
+
+let cachedUserLocation = null;
+
+function requestUserLocation(forcePrompt = false) {
+  return new Promise((resolve) => {
+    if (!forcePrompt && cachedUserLocation) {
+      resolve(cachedUserLocation);
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      cachedUserLocation = { ...DEFAULT_LOCATION, source: "default" };
+      resolve(cachedUserLocation);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        cachedUserLocation = {
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          source: "gps",
+        };
+        resolve(cachedUserLocation);
+      },
+      () => {
+        cachedUserLocation = { ...DEFAULT_LOCATION, source: "default" };
+        resolve(cachedUserLocation);
+      },
+      { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 },
+    );
+  });
+}
+
+async function fetchWeather(latitude, longitude) {
+  const { data, error } = await supabaseClient.functions.invoke("get-weather", {
+    body: { latitude, longitude },
+  });
+
+  if (error) {
+    throw new Error(await getInvokeErrorMessage(error, data));
+  }
+
+  if (typeof data?.temperature !== "number") {
+    throw new Error(data?.message || "날씨 정보를 받지 못했습니다.");
+  }
+
+  return data;
+}
+
+async function fetchWelfareInfo(region, city) {
+  const { data, error } = await supabaseClient.functions.invoke("search-welfare", {
+    body: { region, city },
+  });
+
+  if (error) {
+    throw new Error(await getInvokeErrorMessage(error, data));
+  }
+
+  if (!Array.isArray(data?.services) || !Array.isArray(data?.nationalServices)) {
+    throw new Error(data?.message || "복지 정보를 받지 못했습니다.");
+  }
+
+  return data;
+}
+
+function renderWelfareServiceCard(service) {
+  const isNational = service.source === "national";
+  const badge = isNational ? "중앙부처 복지" : "지자체 복지";
+  const regionLabel = [service.region, service.city].filter(Boolean).join(" ");
+  const metaParts = isNational
+    ? [service.department, service.organization].filter(Boolean)
+    : [regionLabel, service.department].filter(Boolean);
+  const target = service.target ? `<p class="welfare-detail"><strong>지원대상</strong> ${escapeHtml(service.target)}</p>` : "";
+  const criteria = service.criteria ? `<p class="welfare-detail"><strong>선정기준</strong> ${escapeHtml(service.criteria)}</p>` : "";
+  const benefit = service.benefit ? `<p class="welfare-detail"><strong>지원내용</strong> ${escapeHtml(service.benefit)}</p>` : "";
+  const application = service.applicationMethod ? `<p class="welfare-detail"><strong>신청방법</strong> ${escapeHtml(service.applicationMethod)}</p>` : "";
+  const inquiry = service.inquiry ? `<p class="welfare-meta">☎ ${escapeHtml(service.inquiry)}</p>` : "";
+  const updated = service.updatedAt ? `<p class="welfare-meta">최종 수정 ${escapeHtml(service.updatedAt)}</p>` : "";
+  const online = service.onlineAvailable === "Y"
+    ? `<span class="welfare-online">온라인 신청 가능</span>`
+    : "";
+  const summaryText = service.summary || "";
+
+  return `
+    <article class="welfare-card">
+      <div class="welfare-badge">${badge}</div>
+      <h4 class="welfare-title">${escapeHtml(service.servNm)}</h4>
+      ${metaParts.length ? `<p class="welfare-meta">${escapeHtml(metaParts.join(" · "))}</p>` : ""}
+      ${summaryText ? `<p class="welfare-address">${escapeHtml(summaryText)}</p>` : ""}
+      ${target}
+      ${criteria}
+      ${benefit}
+      ${application}
+      ${inquiry}
+      ${updated}
+      ${online}
+      <a class="welfare-link" href="${escapeHtml(service.link)}" target="_blank" rel="noopener noreferrer">복지로에서 자세히 보기 →</a>
+    </article>
+  `;
+}
+
+function weatherCodeToIcon(code) {
+  if (code === 0) return "sunny";
+  if (code <= 3) return "partly_cloudy_day";
+  if (code <= 48) return "foggy";
+  if (code <= 67) return "rainy";
+  if (code <= 77) return "ac_unit";
+  if (code <= 82) return "rainy";
+  if (code <= 86) return "ac_unit";
+  if (code <= 99) return "thunderstorm";
+  return "partly_cloudy_day";
+}
+
+function renderWeatherWidget(weather, locationSource) {
+  const mainEl = document.getElementById("weather-main");
+  const subEl = document.getElementById("weather-sub");
+  const iconEl = document.getElementById("weather-icon");
+  const locationButton = document.getElementById("location-button");
+
+  if (!mainEl || !subEl || !iconEl) return;
+
+  mainEl.textContent = `${weather.label} ${weather.temperature}°C`;
+  subEl.textContent = `${weather.condition} · 체감 ${weather.apparentTemperature}°C`;
+  iconEl.textContent = weatherCodeToIcon(weather.weatherCode);
+
+  if (locationButton) {
+    locationButton.classList.toggle("hidden", locationSource !== "default");
+  }
+}
+
+function renderWelfareQuickLinks(links) {
+  if (!Array.isArray(links) || links.length === 0) return "";
+
+  return `
+    <div class="welfare-quick-links">
+      <h4 class="welfare-subheading">공식 복지 안내</h4>
+      ${links.map((item) => `
+        <a class="welfare-quick-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">
+          <strong>${escapeHtml(item.title)}</strong>
+          <span>${escapeHtml(item.description)}</span>
+        </a>
+      `).join("")}
+    </div>
+  `;
+}
+
+async function loadHomeWelfareInfo(container, weather, locationSource) {
+  const locationLabel = document.getElementById("welfare-location-label");
+  const suffix = locationSource === "default" ? " (기본 위치 · 서울)" : "";
+
+  if (locationLabel) {
+    locationLabel.textContent = `📍 ${weather.label}${suffix} 맞춤 복지 정보`;
+  }
+
+  container.innerHTML = `<p class="youtube-loading">우리 지역 복지 혜택을 찾고 있습니다...</p>`;
+
+  try {
+    const data = await fetchWelfareInfo(weather.region, weather.city);
+    const localHtml = data.services.length > 0
+      ? data.services.map(renderWelfareServiceCard).join("")
+      : `<p class="youtube-loading">해당 지역 지자체 복지서비스를 찾지 못했습니다.</p>`;
+    const nationalHtml = data.nationalServices.length > 0
+      ? data.nationalServices.map(renderWelfareServiceCard).join("")
+      : `<p class="youtube-loading">중앙부처 복지서비스를 찾지 못했습니다.</p>`;
+
+    container.innerHTML = `
+      <div class="welfare-services">
+        <section class="welfare-block">
+          <h4 class="welfare-subheading">우리 지역 · 지자체 복지</h4>
+          <p class="welfare-source-note">지자체복지서비스 API · 노년·보호·돌봄 분야</p>
+          ${localHtml}
+        </section>
+        <section class="welfare-block">
+          <h4 class="welfare-subheading">전국 · 중앙부처 복지</h4>
+          <p class="welfare-source-note">복지서비스정보 API · 어르신 관련 혜택</p>
+          ${nationalHtml}
+        </section>
+        ${renderWelfareQuickLinks(data.links)}
+      </div>
+    `;
+  } catch {
+    container.innerHTML = `<p class="youtube-loading">복지 정보를 불러오지 못했습니다. Supabase에 search-welfare 배포 및 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.</p>`;
+  }
+}
+
+async function initHomeLocationServices(forcePrompt = false) {
+  const welfareContainer = document.getElementById("welfare-content");
+  const mainEl = document.getElementById("weather-main");
+  const subEl = document.getElementById("weather-sub");
+
+  if (mainEl) mainEl.textContent = "날씨 확인 중...";
+  if (subEl) subEl.textContent = "위치를 불러오고 있습니다";
+
+  const location = await requestUserLocation(forcePrompt);
+
+  try {
+    const weather = await fetchWeather(location.latitude, location.longitude);
+    renderWeatherWidget(weather, location.source);
+
+    if (welfareContainer) {
+      await loadHomeWelfareInfo(welfareContainer, weather, location.source);
+    }
+  } catch {
+    if (mainEl) mainEl.textContent = "날씨를 불러올 수 없음";
+    if (subEl) subEl.textContent = "잠시 후 다시 시도해 주세요";
+    if (welfareContainer) {
+      welfareContainer.innerHTML = `<p class="youtube-loading">위치 기반 정보를 불러오지 못했습니다. get-weather 함수 배포를 확인해 주세요.</p>`;
+    }
+  }
+}
+
 async function runSearch(raw) {
   const query = raw.trim();
   if (!query) {
