@@ -1077,6 +1077,7 @@ button.search-button {
 .content-grid .category-tabs {
   flex-shrink: 0;
   margin-bottom: 0;
+  flex-wrap: nowrap;
 }
 
 .content-grid .youtube-grid,
@@ -1129,12 +1130,20 @@ button.search-button {
 
 .category-tabs {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.5rem;
   margin-bottom: 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.category-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .category-tab {
+  flex-shrink: 0;
   min-height: 44px;
   padding: 0.45rem 1.1rem;
   border: 2px solid var(--color-border);
