@@ -10,64 +10,51 @@
 </head>
 <body>
 
-  <!-- 왼쪽 카테고리 (768px 이상 항상 표시) -->
-  <aside id="sidebar" class="sidebar" aria-label="주요 메뉴">
-    <div class="sidebar-brand">
-      <span class="material-symbols-outlined brand-icon" aria-hidden="true">shield</span>
-      <div>
-        <h1 class="brand-title">디지털 보안관</h1>
-        <p class="brand-sub">오늘도 안전하게 모십니다</p>
-      </div>
-    </div>
-    <nav class="sidebar-nav">
-      <a class="nav-link nav-active" href="#home-section" data-section="home">
-        <span class="material-symbols-outlined" aria-hidden="true">home</span> 홈
-      </a>
-      <a class="nav-link" href="#youtube-section" data-section="youtube">
-        <span class="material-symbols-outlined" aria-hidden="true">smart_display</span> 유튜브
-      </a>
-      <a class="nav-link" href="#news-section" data-section="news">
-        <span class="material-symbols-outlined" aria-hidden="true">newspaper</span> 뉴스
-      </a>
-      <a class="nav-link" href="#welfare-section" data-section="welfare">
-        <span class="material-symbols-outlined" aria-hidden="true">volunteer_activism</span> 복지정보
-      </a>
-      <a class="nav-link" href="#" data-section="consult">
-        <span class="material-symbols-outlined" aria-hidden="true">smart_toy</span> 보안관 상담
-      </a>
-    </nav>
-  </aside>
-
-  <!-- 사이드바 오버레이 (모바일) -->
-  <div id="sidebar-overlay" class="sidebar-overlay hidden" aria-hidden="true"></div>
-
   <div class="app-layout">
 
-    <!-- 상단 바: 메뉴 토글 + 로그인 -->
-    <header class="top-bar">
-      <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-label="메뉴 열기">
-        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-      </button>
-      <div class="top-bar-title">시니어 디지털 보안관</div>
-      <div class="auth-area" id="auth-area">
-        <span id="user-greeting" class="user-greeting hidden"></span>
-        <button type="button" id="login-button" class="auth-button auth-login">로그인</button>
-        <button type="button" id="logout-button" class="auth-button auth-logout hidden">로그아웃</button>
+    <header class="site-header">
+      <div class="site-header-row">
+        <a class="site-brand" href="#home-section" data-section="home">
+          <span class="material-symbols-outlined brand-icon" aria-hidden="true">shield</span>
+          <span class="site-brand-text">시니어 디지털 보안관</span>
+        </a>
+
+        <nav class="top-nav" aria-label="주요 메뉴">
+          <a class="top-nav-link nav-active" href="#home-section" data-section="home">홈</a>
+          <a class="top-nav-link" href="#youtube-section" data-section="youtube">유튜브</a>
+          <a class="top-nav-link" href="#news-section" data-section="news">뉴스</a>
+          <a class="top-nav-link" href="#welfare-section" data-section="welfare">복지정보</a>
+          <a class="top-nav-link" href="#" data-section="consult">상담</a>
+        </nav>
+
+        <div class="auth-area" id="auth-area">
+          <span id="user-greeting" class="user-greeting hidden"></span>
+          <button type="button" id="login-button" class="auth-button auth-login">로그인</button>
+          <button type="button" id="logout-button" class="auth-button auth-logout hidden">로그아웃</button>
+        </div>
+
+        <button type="button" id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="메뉴 열기" aria-expanded="false">
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+        </button>
       </div>
+
+      <nav id="mobile-nav" class="mobile-nav hidden" aria-label="모바일 메뉴">
+        <a class="mobile-nav-link mobile-nav-active" href="#home-section" data-section="home">홈</a>
+        <a class="mobile-nav-link" href="#youtube-section" data-section="youtube">유튜브</a>
+        <a class="mobile-nav-link" href="#news-section" data-section="news">뉴스</a>
+        <a class="mobile-nav-link" href="#welfare-section" data-section="welfare">복지정보</a>
+        <a class="mobile-nav-link" href="#" data-section="consult">상담</a>
+      </nav>
     </header>
 
     <main class="main-content" id="home-section">
 
       <!-- 검색 영역 -->
       <section class="hero-section">
-        <h2 class="hero-title">
-          <span class="material-symbols-outlined hero-icon" aria-hidden="true">shield</span>
-          시니어 디지털 보안관
-        </h2>
         <p class="hero-subtitle">무엇이든 안전하게 검색하세요</p>
 
         <form id="search-form" class="search-form" novalidate>
-          <label for="search-input" class="form-label">검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요.</label>
+          <label for="search-input" class="form-label">검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요</label>
           <div class="search-row">
             <input id="search-input" type="text" class="search-input" placeholder="예: 건강 정보, https://example.com" autocomplete="off" />
             <button type="submit" class="search-button">
@@ -75,7 +62,7 @@
               검색하기
             </button>
           </div>
-          <p class="form-help">링크는 안전 검사, 일반 검색어는 유튜브 추천을 보여드립니다.</p>
+          <p class="form-help">링크는 안전 검사 · 일반 검색어는 유튜브 추천</p>
         </form>
 
         <div class="widget-row">
@@ -135,25 +122,6 @@
       </div>
     </main>
   </div>
-
-  <!-- 모바일 하단 네비 -->
-  <nav class="mobile-bottom-nav" aria-label="모바일 메뉴">
-    <a class="mobile-nav-link mobile-nav-active" href="#home-section" data-section="home">
-      <span class="material-symbols-outlined" aria-hidden="true">home</span> 홈
-    </a>
-    <a class="mobile-nav-link" href="#youtube-section" data-section="youtube">
-      <span class="material-symbols-outlined" aria-hidden="true">play_circle</span> 유튜브
-    </a>
-    <a class="mobile-nav-link" href="#news-section" data-section="news">
-      <span class="material-symbols-outlined" aria-hidden="true">newspaper</span> 뉴스
-    </a>
-    <a class="mobile-nav-link" href="#welfare-section" data-section="welfare">
-      <span class="material-symbols-outlined" aria-hidden="true">volunteer_activism</span> 복지
-    </a>
-    <a class="mobile-nav-link" href="#" data-section="consult">
-      <span class="material-symbols-outlined" aria-hidden="true">support_agent</span> 상담
-    </a>
-  </nav>
 
   <!-- 플로팅 챗봇 -->
   <div class="chat-fab-wrap" id="floating-chat-container">

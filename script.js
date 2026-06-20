@@ -3,9 +3,8 @@
  */
 
 // DOM
-const sidebar = document.getElementById("sidebar");
-const sidebarOverlay = document.getElementById("sidebar-overlay");
-const sidebarToggle = document.getElementById("sidebar-toggle");
+const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+const mobileNav = document.getElementById("mobile-nav");
 const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("search-input");
 const youtubeContent = document.getElementById("youtube-content");
@@ -35,20 +34,21 @@ function hideLoading() { loadingOverlay.classList.add("hidden"); }
 function showError(message) { errorMessage.textContent = message; errorBox.classList.remove("hidden"); }
 function hideError() { errorBox.classList.add("hidden"); }
 
-// ── 사이드바 (모바일) ──
+// ── 모바일 메뉴 ──
 
-function openSidebar() {
-  sidebar.classList.add("open");
-  sidebarOverlay.classList.remove("hidden");
+function closeMobileMenu() {
+  mobileNav?.classList.add("hidden");
+  mobileMenuToggle?.setAttribute("aria-expanded", "false");
 }
 
-function closeSidebar() {
-  sidebar.classList.remove("open");
-  sidebarOverlay.classList.add("hidden");
+function toggleMobileMenu() {
+  if (!mobileNav) return;
+  const willOpen = mobileNav.classList.contains("hidden");
+  mobileNav.classList.toggle("hidden", !willOpen);
+  mobileMenuToggle?.setAttribute("aria-expanded", willOpen ? "true" : "false");
 }
 
-sidebarToggle.addEventListener("click", openSidebar);
-sidebarOverlay.addEventListener("click", closeSidebar);
+mobileMenuToggle?.addEventListener("click", toggleMobileMenu);
 
 // ── 로그인 (Supabase Auth) ──
 
@@ -118,7 +118,7 @@ logoutButton.addEventListener("click", async () => {
 async function handleSearchSubmit(event) {
   event.preventDefault();
   hideError();
-  closeSidebar();
+  closeMobileMenu();
 
   const raw = searchInput.value.trim();
   if (!raw) {
@@ -210,9 +210,9 @@ function toggleChat() {
 // ── 네비게이션 ──
 
 function setActiveNav(section) {
-  document.querySelectorAll(".nav-link, .mobile-nav-link").forEach((el) => {
+  document.querySelectorAll(".top-nav-link, .mobile-nav-link").forEach((el) => {
     const match = el.dataset.section === section;
-    el.classList.toggle("nav-active", match && el.classList.contains("nav-link"));
+    el.classList.toggle("nav-active", match && el.classList.contains("top-nav-link"));
     el.classList.toggle("mobile-nav-active", match && el.classList.contains("mobile-nav-link"));
   });
 }
@@ -221,7 +221,7 @@ document.querySelectorAll("[data-section]").forEach((link) => {
   link.addEventListener("click", (event) => {
     if (link.getAttribute("href") === "#") event.preventDefault();
     setActiveNav(link.dataset.section);
-    closeSidebar();
+    closeMobileMenu();
     if (link.dataset.section === "consult") chatWindow.classList.remove("hidden");
   });
 });
