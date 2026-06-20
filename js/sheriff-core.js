@@ -147,6 +147,10 @@ async function analyzeLink(url) {
 }
 
 async function searchVideos(query, limit = 10, options = {}) {
+  if (youtubeQuotaBlocked) {
+    throw new Error("오늘 영상 검색 한도를 모두 사용했습니다. 내일 다시 시도해 주세요.");
+  }
+
   const body = { query, limit, analysisMode: options.analysisMode || "lenient" };
   if (options.skipAnalysis) body.skipAnalysis = true;
   if (options.safeOnly) body.safeOnly = true;
@@ -154,10 +158,18 @@ async function searchVideos(query, limit = 10, options = {}) {
 
   const { data, error } = await supabaseClient.functions.invoke("search-videos", { body });
   if (error) {
-    throw new Error(await getInvokeErrorMessage(error, data));
+    const msg = await getInvokeErrorMessage(error, data);
+    if (isYoutubeQuotaError({ message: msg }) || data?.code === "YOUTUBE_QUOTA_EXCEEDED") {
+      markYoutubeQuotaBlocked();
+    }
+    throw new Error(msg);
   }
   if (!Array.isArray(data?.videos)) {
-    throw new Error(data?.message || "영상 검색 결과를 받지 못했습니다.");
+    const msg = data?.message || "영상 검색 결과를 받지 못했습니다.";
+    if (data?.code === "YOUTUBE_QUOTA_EXCEEDED" || isYoutubeQuotaError({ message: msg })) {
+      markYoutubeQuotaBlocked();
+    }
+    throw new Error(msg);
   }
   return data.videos;
 }
@@ -298,7 +310,11 @@ async function searchYoutubeQueryBatch(searchQueries, neededCount, searchOptions
     } catch (err) {
       console.warn("YouTube search failed:", searchQuery, err);
       if (isYoutubeQuotaError(err)) {
-        youtubeQuotaBlocked = true;
+        markYoutubeQuotaBlocked();
+        break;
+      }
+      if (searchOptions?.skipAnalysis) {
+        markYoutubeQuotaBlocked();
         break;
       }
     }
@@ -337,9 +353,35 @@ const BROWSE_YOUTUBE_LIMIT = 20;
 const BROWSE_NEWS_LIMIT = 20;
 const BROWSE_WELFARE_LIMIT = 10;
 const YOUTUBE_CACHE_TTL_MS = 30 * 60 * 1000;
+const YOUTUBE_QUOTA_STORAGE_KEY = "sheriff-youtube-quota-date";
 
 const youtubeResultCache = new Map();
 let youtubeQuotaBlocked = false;
+
+function getTodayKstDate() {
+  return new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
+}
+
+function loadYoutubeQuotaState() {
+  try {
+    if (sessionStorage.getItem(YOUTUBE_QUOTA_STORAGE_KEY) === getTodayKstDate()) {
+      youtubeQuotaBlocked = true;
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+function markYoutubeQuotaBlocked() {
+  youtubeQuotaBlocked = true;
+  try {
+    sessionStorage.setItem(YOUTUBE_QUOTA_STORAGE_KEY, getTodayKstDate());
+  } catch {
+    /* ignore */
+  }
+}
+
+loadYoutubeQuotaState();
 
 function buildYoutubeCacheKey(categoryId, query, neededCount) {
   return `${categoryId || ""}|${query || ""}|${neededCount}`;
@@ -363,7 +405,16 @@ function setCachedYoutubeItems(cacheKey, items) {
 
 function isYoutubeQuotaError(err) {
   const msg = String(err?.message || err || "");
-  return /한도|quota|limit exceeded|dailyLimit/i.test(msg);
+  return /한도|quota|exceeded|dailyLimit|YOUTUBE_QUOTA/i.test(msg);
+}
+
+function renderYoutubeQuotaNotice() {
+  return `
+    <p class="youtube-quota-notice" role="status">
+      <span class="material-symbols-outlined" aria-hidden="true">info</span>
+      오늘 YouTube 검색 한도가 초과되어 검증된 추천 영상을 보여드립니다. 내일 오후 이후 다시 시도해 주세요.
+    </p>
+  `;
 }
 
 function buildBrowsePageUrl(page, categoryId) {
@@ -573,17 +624,24 @@ async function loadHomeYoutubeRecommendations(container, query, options = {}) {
   const categoryId = options.categoryId;
   const neededCount = preview ? HOME_YOUTUBE_PREVIEW : BROWSE_YOUTUBE_LIMIT;
 
+  if (youtubeQuotaBlocked) {
+    const items = padYoutubeItemsToCount([], categoryId, neededCount);
+    renderYoutubeItems(container, items, preview, { quotaNotice: true });
+    return;
+  }
+
   container.innerHTML = mascotLoadingHtml("카테고리에 맞는 영상을 찾고 있습니다...");
 
   try {
     const items = await fetchYoutubeItemsForCategory(categoryId, query, neededCount);
-    renderYoutubeItems(container, items, preview);
+    renderYoutubeItems(container, items, preview, { quotaNotice: youtubeQuotaBlocked });
   } catch (err) {
     console.warn("YouTube recommendations failed:", err);
+    if (isYoutubeQuotaError(err)) markYoutubeQuotaBlocked();
     const fallbackItems = padYoutubeItemsToCount([], categoryId, neededCount);
 
     if (fallbackItems.length > 0) {
-      renderYoutubeItems(container, fallbackItems, preview);
+      renderYoutubeItems(container, fallbackItems, preview, { quotaNotice: true });
       return;
     }
 
@@ -591,16 +649,17 @@ async function loadHomeYoutubeRecommendations(container, query, options = {}) {
   }
 }
 
-function renderYoutubeItems(container, items, preview) {
+function renderYoutubeItems(container, items, preview, renderOptions = {}) {
   if (!items.length) {
     container.innerHTML = mascotLoadingHtml("추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.");
     return;
   }
 
+  const notice = renderOptions.quotaNotice ? renderYoutubeQuotaNotice() : "";
   if (preview) {
-    container.innerHTML = items.map(renderYoutubeHomeCard).join("");
+    container.innerHTML = notice + items.map(renderYoutubeHomeCard).join("");
   } else {
-    container.innerHTML = `<div class="browse-grid browse-youtube-grid">${items.map(renderYoutubeThumbnailCard).join("")}</div>`;
+    container.innerHTML = notice + `<div class="browse-grid browse-youtube-grid">${items.map(renderYoutubeThumbnailCard).join("")}</div>`;
   }
 }
 

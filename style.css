@@ -1726,6 +1726,26 @@ button.back-link-prominent {
   font-size: var(--font-base);
 }
 
+.youtube-quota-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  grid-column: 1 / -1;
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid #d97706;
+  border-radius: var(--radius-md);
+  background: var(--color-warning-bg);
+  color: #92400e;
+  font-size: var(--font-sm);
+  line-height: 1.5;
+}
+
+.youtube-quota-notice .material-symbols-outlined {
+  flex-shrink: 0;
+  font-size: 1.35rem;
+}
+
 /* ── 챗봇 (모던 메신저 UI) ── */
 .chat-fab-wrap {
   position: fixed;

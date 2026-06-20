@@ -116,13 +116,13 @@ async function fetchYouTubeVideos(
       if (
         reason === "quotaExceeded"
         || reason === "dailyLimitExceeded"
-        || /quota|exceeded|limit/i.test(apiMessage)
+        || /quota|exceeded your quota|exceeded/i.test(apiMessage)
       ) {
         message = "오늘 영상 검색 한도를 모두 사용했습니다. 내일 다시 시도해 주세요.";
       } else if (reason === "keyInvalid" || reason === "accessNotConfigured") {
         message = "YouTube API 설정에 문제가 있습니다. 관리자에게 문의해 주세요.";
       } else if (response.status === 403) {
-        message = "YouTube API 접근이 거부되었습니다. API 키 제한(Referrer/IP)을 확인해 주세요.";
+        message = "오늘 영상 검색 한도를 모두 사용했습니다. 내일 다시 시도해 주세요.";
       }
     } catch {
       console.error("YouTube API HTTP", response.status);
@@ -305,9 +305,12 @@ Deno.serve(async (req: Request) => {
     return jsonResponse(req, { videos });
   } catch (error) {
     console.error("search-videos error:", error);
+    const message = toClientSafeMessage(error, "영상 검색 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+    const isQuota = /한도|quota|exceeded/i.test(message);
     return jsonResponse(req, {
       error: "검색 실패",
-      message: toClientSafeMessage(error, "영상 검색 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요."),
-    }, 400);
+      message,
+      ...(isQuota ? { code: "YOUTUBE_QUOTA_EXCEEDED" } : {}),
+    }, isQuota ? 429 : 400);
   }
 });
