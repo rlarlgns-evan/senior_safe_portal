@@ -2785,7 +2785,7 @@ button.search-button {
 .site-footer-bottom {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0.5rem;
   margin-top: 0.75rem;
 }
@@ -2832,7 +2832,7 @@ button.search-button {
   font-size: var(--font-base);
   color: var(--color-muted);
   font-weight: 600;
-  text-align: left;
+  text-align: center;
 }
 
 /* ── 정보 페이지 (약관 · 팀 소개) ── */
