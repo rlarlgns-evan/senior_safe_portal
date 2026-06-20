@@ -1407,7 +1407,7 @@ function injectSiteHeader() {
   header.innerHTML = getSiteHeaderHtml();
 }
 
-function getAuthSocialLoginHtml() {
+function getAuthSocialButtonsHtml() {
   const providers = [
     { id: "google", label: "Google", icon: "assets/social-google.svg" },
     { id: "naver", label: "네이버", icon: "assets/social-naver.svg" },
@@ -1415,17 +1415,13 @@ function getAuthSocialLoginHtml() {
   ];
 
   return `
-    <div class="auth-social-block" id="auth-social-login">
-      <p class="auth-social-title">간편 로그인</p>
-      <div class="auth-social-buttons" role="group" aria-label="간편 로그인">
-        ${providers.map(({ id, label, icon }) => `
-          <button type="button" class="auth-social-btn auth-social-btn--${id}" data-social-provider="${id}" aria-label="${label}로 로그인">
-            <img src="${icon}" alt="" class="auth-social-icon" width="40" height="40" />
-            <span class="auth-social-label">${label}</span>
-          </button>
-        `).join("")}
-      </div>
-      <p class="auth-divider" aria-hidden="true"><span>또는</span></p>
+    <div class="auth-social-buttons" role="group" aria-label="간편 로그인">
+      ${providers.map(({ id, label, icon }) => `
+        <button type="button" class="auth-social-btn auth-social-btn--${id}" data-social-provider="${id}" aria-label="${label}로 로그인">
+          <img src="${icon}" alt="" class="auth-social-icon" width="40" height="40" />
+          <span class="auth-social-label">${label}</span>
+        </button>
+      `).join("")}
     </div>
   `;
 }
@@ -1436,11 +1432,7 @@ function getLoginModalHtml() {
       <div class="modal-panel card">
         <button type="button" id="login-modal-close" class="modal-close btn btn--danger" aria-label="로그인 창 닫기">닫기</button>
         <h2 id="login-modal-title" class="modal-title">로그인</h2>
-        <p id="login-modal-desc" class="modal-desc">간편 로그인 또는 이메일로 이용하세요.</p>
-        <div class="auth-mode-tabs" role="tablist" aria-label="로그인 또는 회원가입">
-          <button type="button" id="auth-tab-login" class="auth-mode-tab auth-mode-tab--active" role="tab" aria-selected="true" aria-controls="login-form">로그인</button>
-          <button type="button" id="auth-tab-signup" class="auth-mode-tab" role="tab" aria-selected="false" aria-controls="signup-form">회원가입</button>
-        </div>
+        <p id="login-modal-desc" class="modal-desc">아이디와 비밀번호로 로그인하거나 간편 로그인을 이용하세요.</p>
         <div id="login-error" class="login-error alert-persistent hidden" role="alert">
           <p id="login-error-message"></p>
           <button type="button" id="login-error-close" class="btn btn--danger">닫기</button>
@@ -1449,22 +1441,31 @@ function getLoginModalHtml() {
           <p id="login-success-message"></p>
           <button type="button" id="login-success-close" class="btn btn--secondary">확인</button>
         </div>
-        <form id="login-form" class="login-form auth-form" role="tabpanel">
-          ${getAuthSocialLoginHtml()}
-          <label for="login-email" class="form-label">이메일</label>
-          <input id="login-email" type="email" class="modal-input" placeholder="example@email.com" autocomplete="email" required />
+        <form id="login-form" class="login-form auth-form">
+          <label for="login-email" class="form-label">아이디 (이메일)</label>
+          <input id="login-email" type="email" class="modal-input" placeholder="example@email.com" autocomplete="username email" required />
           <label for="login-password" class="form-label">비밀번호</label>
           <input id="login-password" type="password" class="modal-input" placeholder="비밀번호" autocomplete="current-password" required />
+          <div class="auth-form-footer">
+            <button type="button" id="auth-link-signup" class="auth-switch-link">회원가입</button>
+          </div>
           <button type="submit" class="modal-submit btn btn--primary">로그인하기</button>
         </form>
-        <form id="signup-form" class="login-form auth-form hidden" role="tabpanel" hidden>
-          <label for="signup-email" class="form-label">이메일</label>
-          <input id="signup-email" type="email" class="modal-input" placeholder="example@email.com" autocomplete="email" required />
+        <div id="auth-social-section" class="auth-social-section">
+          <p class="auth-divider" aria-hidden="true"><span>또는</span></p>
+          ${getAuthSocialButtonsHtml()}
+        </div>
+        <form id="signup-form" class="login-form auth-form hidden" hidden>
+          <label for="signup-email" class="form-label">아이디 (이메일)</label>
+          <input id="signup-email" type="email" class="modal-input" placeholder="example@email.com" autocomplete="username email" required />
           <label for="signup-password" class="form-label">비밀번호</label>
           <input id="signup-password" type="password" class="modal-input" placeholder="6자 이상" autocomplete="new-password" required minlength="6" />
           <label for="signup-password-confirm" class="form-label">비밀번호 확인</label>
           <input id="signup-password-confirm" type="password" class="modal-input" placeholder="비밀번호를 다시 입력" autocomplete="new-password" required minlength="6" />
           <p class="modal-note auth-form-note">가입 후 이메일 확인이 필요할 수 있습니다. 메일함을 확인해 주세요.</p>
+          <div class="auth-form-footer">
+            <button type="button" id="auth-link-login" class="auth-switch-link">로그인</button>
+          </div>
           <button type="submit" class="modal-submit btn btn--primary">회원가입하기</button>
         </form>
       </div>
@@ -1552,24 +1553,22 @@ const SiteAuth = {
     SiteAuth.mode = mode;
     const isLogin = mode === "login";
 
-    document.getElementById("auth-tab-login")?.classList.toggle("auth-mode-tab--active", isLogin);
-    document.getElementById("auth-tab-signup")?.classList.toggle("auth-mode-tab--active", !isLogin);
-    document.getElementById("auth-tab-login")?.setAttribute("aria-selected", isLogin ? "true" : "false");
-    document.getElementById("auth-tab-signup")?.setAttribute("aria-selected", isLogin ? "false" : "true");
-
     const loginForm = document.getElementById("login-form");
     const signupForm = document.getElementById("signup-form");
+    const socialSection = document.getElementById("auth-social-section");
+
     loginForm?.classList.toggle("hidden", !isLogin);
     signupForm?.classList.toggle("hidden", isLogin);
     if (signupForm) signupForm.hidden = isLogin;
+    socialSection?.classList.toggle("hidden", !isLogin);
 
     const title = document.getElementById("login-modal-title");
     const desc = document.getElementById("login-modal-desc");
     if (title) title.textContent = isLogin ? "로그인" : "회원가입";
     if (desc) {
       desc.textContent = isLogin
-        ? "간편 로그인 또는 이메일로 이용하세요."
-        : "이메일과 비밀번호로 새 계정을 만드세요.";
+        ? "아이디와 비밀번호로 로그인하거나 간편 로그인을 이용하세요."
+        : "아이디와 비밀번호로 새 계정을 만드세요.";
     }
 
     SiteAuth.hideLoginError();
@@ -1701,12 +1700,14 @@ const SiteAuth = {
         SiteAuth.handleLogout();
         return;
       }
-      if (target.closest("#auth-tab-login")) {
-        SiteAuth.setAuthMode("login");
+      if (target.closest("#auth-link-signup")) {
+        SiteAuth.setAuthMode("signup");
+        document.getElementById("signup-email")?.focus();
         return;
       }
-      if (target.closest("#auth-tab-signup")) {
-        SiteAuth.setAuthMode("signup");
+      if (target.closest("#auth-link-login")) {
+        SiteAuth.setAuthMode("login");
+        document.getElementById("login-email")?.focus();
         return;
       }
 

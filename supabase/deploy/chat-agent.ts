@@ -1,6 +1,6 @@
 // ── Supabase 대시보드 배포용 (자동 생성) ──
-// 원본: supabase/functions/analyze-link/index.ts + _shared/*
-// node scripts/bundle-edge-function.mjs analyze-link
+// 원본: supabase/functions/chat-agent/index.ts + _shared/*
+// node scripts/bundle-edge-function.mjs chat-agent
 
 /**
  * Edge Function 공통 보안 유틸리티
@@ -252,238 +252,195 @@ export async function sendGeminiChatMessage(
 /**
  * ⚠️ Supabase 대시보드 배포 시 이 파일(index.ts)을 붙여넣지 마세요!
  * 대시보드에는 아래 파일 전체를 복사해 붙여넣으세요:
- *   → supabase/deploy/analyze-link.ts
- *
- * Supabase Edge Function: analyze-link
- * 링크 메타데이터 수집 + Gemini 피싱/스캠 분석 (GEMINI_API_KEY 서버 전용)
- *
- * 배포 방법:
- *   A) 대시보드: supabase/deploy/analyze-link.ts 전체 붙여넣기
- *   B) CLI: supabase functions deploy analyze-link (이 폴더 전체 업로드)
+ *   → supabase/deploy/chat-agent.ts
  */
-
-type AnalysisResult = {
-  status: "안전" | "위험";
-  reason: string;
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const MAX_HTML_BYTES = 512_000;
-const FETCH_TIMEOUT_MS = 12_000;
+type ChatRole = "user" | "assistant";
+type HistoryItem = { role: ChatRole; content: string };
 
-function extractTitle(html: string): string {
-  const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  return match?.[1]?.replace(/\s+/g, " ").trim().slice(0, 300) || "";
-}
+const SYSTEM_INSTRUCTION = `You are "단디" (디지털 보안관), a warm and trustworthy conversational agent for Korean seniors (60+).
+Your name is 단디. Introduce yourself as 디지털 보안관 단디 when appropriate.
 
-function extractMetaContent(html: string, key: string): string {
-  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const patterns = [
-    new RegExp(`<meta[^>]*(?:name|property)=["']${escapedKey}["'][^>]*content=["']([\\s\\S]*?)["']`, "i"),
-    new RegExp(`<meta[^>]*content=["']([\\s\\S]*?)["'][^>]*(?:name|property)=["']${escapedKey}["']`, "i"),
-  ];
+Your job:
+- Help seniors stay safe online: phishing, smishing, voice phishing, fake news, scam ads, suspicious links.
+- Explain simply in Korean. Use short sentences. Be polite and reassuring.
+- If the user shares suspicious text or a link, explain risks clearly and give practical next steps (do not click, call 112/1332, ask family, etc.).
+- If link analysis data is provided, use it in your answer.
+- You may also answer general digital life questions (smartphone, YouTube, kakao) in a senior-friendly way.
+- Never ask for passwords, OTP codes, or bank account numbers.
+- Keep replies concise: about 3-6 sentences unless the user asks for more.`;
 
-  for (const pattern of patterns) {
-    const match = html.match(pattern);
-    if (match?.[1]) return match[1].replace(/\s+/g, " ").trim().slice(0, 500);
-  }
+function extractUrls(text: string): string[] {
+  const matches = text.match(/https?:\/\/[^\s<>"']+/gi) ?? [];
+  const bare = text.match(/(?:^|\s)([\w-]+\.(?:com|co\.kr|net|org|kr|go\.kr|or\.kr)(?:\/[^\s]*)?)/gi) ?? [];
 
-  return "";
-}
+  const normalized = new Set<string>();
 
-function extractDescription(html: string): string {
-  return extractMetaContent(html, "description")
-    || extractMetaContent(html, "og:description")
-    || extractMetaContent(html, "twitter:description");
-}
-
-function extractBestTitle(html: string): string {
-  return extractTitle(html)
-    || extractMetaContent(html, "og:title")
-    || extractMetaContent(html, "twitter:title");
-}
-
-function extractThumbnail(html: string, baseUrl: string): string {
-  const raw = extractMetaContent(html, "og:image")
-    || extractMetaContent(html, "twitter:image")
-    || extractMetaContent(html, "twitter:image:src");
-
-  if (!raw) return "";
-
-  try {
-    const resolved = new URL(raw, baseUrl);
-    if (!["http:", "https:"].includes(resolved.protocol)) return "";
-    return resolved.toString().slice(0, 2048);
-  } catch {
-    return "";
-  }
-}
-
-function youtubeThumbnailFromUrl(targetUrl: string): string {
-  const match = targetUrl.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/i);
-  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : "";
-}
-
-function faviconFromUrl(targetUrl: string): string {
-  try {
-    const host = new URL(targetUrl).hostname;
-    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=256`;
-  } catch {
-    return "";
-  }
-}
-
-function resolveLinkThumbnail(targetUrl: string, scrapedThumbnail?: string): string {
-  return scrapedThumbnail || youtubeThumbnailFromUrl(targetUrl) || faviconFromUrl(targetUrl);
-}
-
-/**
- * 공개 URL에서 HTML 메타데이터만 수집 (SSRF·대용량 응답 방지)
- */
-async function scrapeUrlMetadata(targetUrl: string): Promise<{ title: string; description: string; thumbnail: string }> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(targetUrl, {
-      method: "GET",
-      signal: controller.signal,
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; SeniorDigitalSheriffBot/1.0)",
-        Accept: "text/html,application/xhtml+xml",
-        "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
-      },
-      redirect: "follow",
-    });
-
-    if (!response.ok) {
-      throw new Error("링크 페이지를 불러오지 못했습니다.");
+  for (const raw of matches) {
+    try {
+      normalized.add(new URL(raw).toString());
+    } catch {
+      // ignore invalid URL
     }
-
-    const contentType = response.headers.get("content-type") || "";
-    if (!contentType.includes("text/html") && !contentType.includes("application/xhtml")) {
-      throw new Error("웹페이지(HTML) 형식이 아닌 링크입니다.");
-    }
-
-    const html = (await response.text()).slice(0, MAX_HTML_BYTES);
-    const title = extractBestTitle(html);
-    const description = extractDescription(html);
-    const thumbnail = extractThumbnail(html, targetUrl);
-
-    if (!title && !description) {
-      throw new Error("페이지에서 제목 또는 설명 정보를 찾지 못했습니다.");
-    }
-
-    return { title, description, thumbnail };
-  } finally {
-    clearTimeout(timeout);
   }
+
+  for (const raw of bare) {
+    const trimmed = raw.trim();
+    try {
+      normalized.add(new URL(/^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`).toString());
+    } catch {
+      // ignore invalid URL
+    }
+  }
+
+  return [...normalized];
 }
 
-/**
- * Gemini로 링크 위험도 분석
- */
-async function analyzeWithGemini(
-  title: string,
-  description: string,
-  targetUrl: string,
-  apiKey: string,
-  scrapeNote?: string,
-): Promise<AnalysisResult> {
-  const systemPrompt =
-    'Analyze URL/title/description for senior-targeting phishing/scams. Return JSON: {"status":"안전"|"위험","reason":"Korean explanation"}.';
+async function analyzeLinkViaFunction(
+  url: string,
+  authHeader: string | null,
+  apiKeyHeader: string | null,
+): Promise<{ status: string; reason: string; scraped?: Record<string, unknown> } | null> {
+  if (!authHeader) return null;
 
-  const userPrompt = [
-    `URL: ${targetUrl}`,
-    `Title: ${title || "(없음)"}`,
-    `Description: ${description || "(없음)"}`,
-    scrapeNote ? `Note: ${scrapeNote.slice(0, 200)}` : "",
-  ].filter(Boolean).join("\n");
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "https://oweduuhfkiutlszfwukt.supabase.co";
+  const response = await fetch(`${supabaseUrl}/functions/v1/analyze-link`, {
+    method: "POST",
+    headers: {
+      Authorization: authHeader,
+      apikey: apiKeyHeader ?? authHeader.replace(/^Bearer\s+/i, ""),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ url }),
+  });
 
-  const rawText = await generateGeminiText(
-    apiKey,
-    { generationConfig: { responseMimeType: "application/json" } },
-    [{ text: systemPrompt }, { text: userPrompt }],
-  );
+  if (!response.ok) return null;
+  return await response.json();
+}
 
-  let parsed: Partial<AnalysisResult>;
-  try {
-    parsed = JSON.parse(rawText) as Partial<AnalysisResult>;
-  } catch {
-    throw new Error("AI 분석 결과를 해석하지 못했습니다. 잠시 후 다시 시도해 주세요.");
-  }
+function buildLinkContext(analyses: Array<{ url: string; result: { status: string; reason: string; scraped?: Record<string, unknown> } }>): string {
+  if (analyses.length === 0) return "";
 
-  return {
-    status: parsed.status === "위험" ? "위험" : "안전",
-    reason: (parsed.reason || "분석 이유를 확인하지 못했습니다.").slice(0, 400),
-  };
+  return analyses.map(({ url, result }) => [
+    `[링크 분석] ${url}`,
+    `판정: ${result.status}`,
+    `근거: ${result.reason}`,
+    result.scraped?.title ? `페이지 제목: ${result.scraped.title}` : "",
+  ].filter(Boolean).join("\n")).join("\n\n");
+}
+
+function sanitizeHistory(history: unknown): HistoryItem[] {
+  if (!Array.isArray(history)) return [];
+
+  return history
+    .filter((item): item is HistoryItem =>
+      Boolean(item)
+      && typeof item === "object"
+      && (item.role === "user" || item.role === "assistant")
+      && typeof item.content === "string"
+      && item.content.trim().length > 0
+    )
+    .slice(-12)
+    .map((item) => ({
+      role: item.role,
+      content: item.content.trim().slice(0, 2000),
+    }));
 }
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: buildCorsHeaders(req) });
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
     if (req.method !== "POST") {
-      return jsonResponse(req, { error: "Method not allowed" }, 405);
+      return new Response(JSON.stringify({ error: "Method not allowed" }), {
+        status: 405,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
     if (!geminiApiKey) {
-      console.error("Missing GEMINI_API_KEY");
-      return jsonResponse(req, {
-        error: "분석 실패",
-        message: "서버 설정이 완료되지 않았습니다. 관리자에게 문의해 주세요.",
-      }, 503);
+      throw new Error("서버에 GEMINI_API_KEY가 설정되지 않았습니다.");
     }
 
-    let body: Record<string, unknown>;
-    try {
-      body = await req.json();
-    } catch {
-      return jsonResponse(req, {
-        error: "분석 실패",
-        message: "요청 형식이 올바르지 않습니다.",
-      }, 400);
+    const body = await req.json();
+    const message = typeof body?.message === "string" ? body.message.trim() : "";
+    if (!message) {
+      throw new Error("메시지가 비어 있습니다.");
     }
 
-    const targetUrl = sanitizePublicUrl(body?.url);
+    const history = sanitizeHistory(body?.history);
+    const authHeader = req.headers.get("Authorization");
+    const apiKeyHeader = req.headers.get("apikey");
 
-    let title = "";
-    let description = "";
-    let thumbnail = resolveLinkThumbnail(targetUrl);
-    let scrapeNote: string | undefined;
+    const urls = extractUrls(message);
+    const linkAnalyses: Array<{ url: string; result: { status: string; reason: string; scraped?: Record<string, unknown> } }> = [];
 
-    try {
-      const scraped = await scrapeUrlMetadata(targetUrl);
-      title = scraped.title;
-      description = scraped.description;
-      thumbnail = resolveLinkThumbnail(targetUrl, scraped.thumbnail);
-    } catch (scrapeError) {
-      scrapeNote = toClientSafeMessage(
-        scrapeError,
-        "페이지 정보를 가져오지 못했습니다.",
-      );
+    for (const url of urls.slice(0, 2)) {
+      const result = await analyzeLinkViaFunction(url, authHeader, apiKeyHeader);
+      if (result?.status) {
+        linkAnalyses.push({ url, result });
+      }
     }
 
-    const analysis = await analyzeWithGemini(title, description, targetUrl, geminiApiKey, scrapeNote);
+    const linkContext = buildLinkContext(linkAnalyses);
+    const userPrompt = linkContext
+      ? `${message}\n\n---\n아래는 시스템이 미리 수행한 링크 분석입니다. 답변에 반영하세요.\n${linkContext}`
+      : message;
 
-    return jsonResponse(req, {
-      ...analysis,
-      scraped: {
-        title,
-        description,
-        url: targetUrl,
-        thumbnail,
-        scrapeNote,
-      },
-    });
+    const reply = await sendGeminiChatMessage(
+      geminiApiKey,
+      { systemInstruction: SYSTEM_INSTRUCTION },
+      history.map((item) => ({
+        role: item.role === "assistant" ? "model" : "user",
+        parts: [{ text: item.content }],
+      })),
+      userPrompt,
+    );
+
+    if (!reply) {
+      throw new Error("챗봇 응답을 생성하지 못했습니다.");
+    }
+
+    return new Response(
+      JSON.stringify({
+        reply,
+        linkAnalysis: linkAnalyses.length === 1
+          ? {
+            url: linkAnalyses[0].url,
+            status: linkAnalyses[0].result.status,
+            reason: linkAnalyses[0].result.reason,
+            scraped: linkAnalyses[0].result.scraped ?? null,
+          }
+          : linkAnalyses.length > 1
+            ? linkAnalyses.map(({ url, result }) => ({
+              url,
+              status: result.status,
+              reason: result.reason,
+            }))
+            : null,
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (error) {
-    console.error("analyze-link error:", error);
     const status = error instanceof GeminiUnavailableError ? 503 : 400;
-    return jsonResponse(req, {
-      error: "분석 실패",
-      message: toClientSafeMessage(error, "링크 분석 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요."),
-    }, status);
+    const fallback = status === 503
+      ? "AI 서비스 이용량이 많아 잠시 응답이 지연되고 있습니다. 1~2분 후 다시 시도해 주세요."
+      : "알 수 없는 오류가 발생했습니다.";
+
+    return new Response(
+      JSON.stringify({
+        error: "챗봇 오류",
+        message: error instanceof Error ? error.message : fallback,
+      }),
+      { status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   }
 });

@@ -1,20 +1,23 @@
 /**
+ * ⚠️ Supabase 대시보드 배포 시 이 파일(index.ts)을 붙여넣지 마세요!
+ * 대시보드에는 아래 파일 전체를 복사해 붙여넣으세요:
+ *   → supabase/deploy/analyze-link.ts
+ *
  * Supabase Edge Function: analyze-link
  * 링크 메타데이터 수집 + Gemini 피싱/스캠 분석 (GEMINI_API_KEY 서버 전용)
  *
- * 배포 방법 (택 1):
- *   A) CLI: supabase functions deploy analyze-link
- *   B) 대시보드(한 파일): supabase/deploy/analyze-link.ts 전체 붙여넣기
- *      (node scripts/bundle-edge-function.mjs analyze-link 실행 후)
+ * 배포 방법:
+ *   A) 대시보드: supabase/deploy/analyze-link.ts 전체 붙여넣기
+ *   B) CLI: supabase functions deploy analyze-link (이 폴더 전체 업로드)
  */
 
-import { GoogleGenerativeAI } from "npm:@google/generative-ai@0.21.0";
 import {
   buildCorsHeaders,
   jsonResponse,
   sanitizePublicUrl,
   toClientSafeMessage,
 } from "./security.ts";
+import { generateGeminiText, GeminiUnavailableError } from "./gemini.ts";
 
 type AnalysisResult = {
   status: "안전" | "위험";
@@ -143,12 +146,6 @@ async function analyzeWithGemini(
   apiKey: string,
   scrapeNote?: string,
 ): Promise<AnalysisResult> {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    generationConfig: { responseMimeType: "application/json" },
-  });
-
   const systemPrompt =
     'Analyze URL/title/description for senior-targeting phishing/scams. Return JSON: {"status":"안전"|"위험","reason":"Korean explanation"}.';
 
@@ -159,14 +156,15 @@ async function analyzeWithGemini(
     scrapeNote ? `Note: ${scrapeNote.slice(0, 200)}` : "",
   ].filter(Boolean).join("\n");
 
-  const result = await model.generateContent([
-    { text: systemPrompt },
-    { text: userPrompt },
-  ]);
+  const rawText = await generateGeminiText(
+    apiKey,
+    { generationConfig: { responseMimeType: "application/json" } },
+    [{ text: systemPrompt }, { text: userPrompt }],
+  );
 
   let parsed: Partial<AnalysisResult>;
   try {
-    parsed = JSON.parse(result.response.text()) as Partial<AnalysisResult>;
+    parsed = JSON.parse(rawText) as Partial<AnalysisResult>;
   } catch {
     throw new Error("AI 분석 결과를 해석하지 못했습니다. 잠시 후 다시 시도해 주세요.");
   }
@@ -239,9 +237,10 @@ Deno.serve(async (req: Request) => {
     });
   } catch (error) {
     console.error("analyze-link error:", error);
+    const status = error instanceof GeminiUnavailableError ? 503 : 400;
     return jsonResponse(req, {
       error: "분석 실패",
       message: toClientSafeMessage(error, "링크 분석 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요."),
-    }, 400);
+    }, status);
   }
 });

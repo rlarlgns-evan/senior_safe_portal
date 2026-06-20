@@ -52,6 +52,15 @@ export function toClientSafeMessage(error: unknown, fallback: string): string {
 
   const message = error.message.trim().slice(0, 240);
   const sensitivePattern = /api[_-]?key|AIza|Bearer\s|stack| at \w+\.|deno\.|supabase\.co\/functions\/v1/i;
+  const geminiBusyPattern = /503|429|high demand|Service Unavailable|Resource exhausted/i;
+
+  if (geminiBusyPattern.test(message)) {
+    return "AI 서비스 이용량이 많아 잠시 응답이 지연되고 있습니다. 1~2분 후 다시 시도해 주세요.";
+  }
+
+  if (/GoogleGenerativeAI|generativelanguage\.googleapis\.com/i.test(message)) {
+    return fallback;
+  }
 
   if (!message || sensitivePattern.test(message)) {
     return fallback;

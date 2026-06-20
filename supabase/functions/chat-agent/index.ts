@@ -1,4 +1,9 @@
-import { GoogleGenerativeAI } from "npm:@google/generative-ai@0.21.0";
+/**
+ * ⚠️ Supabase 대시보드 배포 시 이 파일(index.ts)을 붙여넣지 마세요!
+ * 대시보드에는 아래 파일 전체를 복사해 붙여넣으세요:
+ *   → supabase/deploy/chat-agent.ts
+ */
+import { GeminiUnavailableError, sendGeminiChatMessage } from "./gemini.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -141,21 +146,15 @@ Deno.serve(async (req: Request) => {
       ? `${message}\n\n---\n아래는 시스템이 미리 수행한 링크 분석입니다. 답변에 반영하세요.\n${linkContext}`
       : message;
 
-    const genAI = new GoogleGenerativeAI(geminiApiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      systemInstruction: SYSTEM_INSTRUCTION,
-    });
-
-    const chat = model.startChat({
-      history: history.map((item) => ({
+    const reply = await sendGeminiChatMessage(
+      geminiApiKey,
+      { systemInstruction: SYSTEM_INSTRUCTION },
+      history.map((item) => ({
         role: item.role === "assistant" ? "model" : "user",
         parts: [{ text: item.content }],
       })),
-    });
-
-    const result = await chat.sendMessage(userPrompt);
-    const reply = result.response.text().trim();
+      userPrompt,
+    );
 
     if (!reply) {
       throw new Error("챗봇 응답을 생성하지 못했습니다.");
@@ -182,12 +181,17 @@ Deno.serve(async (req: Request) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {
+    const status = error instanceof GeminiUnavailableError ? 503 : 400;
+    const fallback = status === 503
+      ? "AI 서비스 이용량이 많아 잠시 응답이 지연되고 있습니다. 1~2분 후 다시 시도해 주세요."
+      : "알 수 없는 오류가 발생했습니다.";
+
     return new Response(
       JSON.stringify({
         error: "챗봇 오류",
-        message: error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.",
+        message: error instanceof Error ? error.message : fallback,
       }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      { status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });

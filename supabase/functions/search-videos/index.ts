@@ -1,14 +1,16 @@
 /**
+ * ⚠️ Supabase 대시보드 배포 시 이 파일(index.ts)을 붙여넣지 마세요!
+ * 대시보드에는 아래 파일 전체를 복사해 붙여넣으세요:
+ *   → supabase/deploy/search-videos.ts
+ *
  * Supabase Edge Function: search-videos
  * YouTube 검색 + Gemini AI 안전 분석 (시크릿은 서버 환경 변수만 사용)
  *
- * 배포 방법 (택 1):
- *   A) CLI: supabase functions deploy search-videos
- *   B) 대시보드(한 파일): supabase/deploy/search-videos.ts 전체 붙여넣기
- *      (node scripts/bundle-edge-function.mjs search-videos 실행 후)
+ * 배포 방법:
+ *   A) 대시보드: supabase/deploy/search-videos.ts 전체 붙여넣기
+ *   B) CLI: supabase functions deploy search-videos (이 폴더 전체 업로드)
  */
 
-import { GoogleGenerativeAI } from "npm:@google/generative-ai@0.21.0";
 import {
   buildCorsHeaders,
   clampLimit,
@@ -16,6 +18,7 @@ import {
   sanitizeSearchQuery,
   toClientSafeMessage,
 } from "./security.ts";
+import { generateGeminiText, GeminiUnavailableError } from "./gemini.ts";
 
 interface YouTubeSearchItem {
   id: { videoId: string };
@@ -176,12 +179,6 @@ async function analyzeWithGemini(
   geminiApiKey: string,
   analysisMode: unknown,
 ): Promise<GeminiAnalysisItem[]> {
-  const genAI = new GoogleGenerativeAI(geminiApiKey);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    generationConfig: { responseMimeType: "application/json" },
-  });
-
   const videoData = videos.map((item) => ({
     video_id: item.id.videoId,
     title: item.snippet.title.slice(0, 300),
@@ -190,14 +187,15 @@ async function analyzeWithGemini(
 
   const systemPrompt = resolveAnalysisPrompt(analysisMode);
 
-  const result = await model.generateContent([
-    { text: systemPrompt },
-    { text: `Analyze:\n${JSON.stringify(videoData)}` },
-  ]);
+  const rawText = await generateGeminiText(
+    geminiApiKey,
+    { generationConfig: { responseMimeType: "application/json" } },
+    [{ text: systemPrompt }, { text: `Analyze:\n${JSON.stringify(videoData)}` }],
+  );
 
   let parsed: GeminiAnalysisItem[];
   try {
-    parsed = JSON.parse(result.response.text());
+    parsed = JSON.parse(rawText);
     if (!Array.isArray(parsed)) throw new Error("invalid shape");
   } catch {
     console.error("Gemini JSON parse failed");
@@ -307,10 +305,11 @@ Deno.serve(async (req: Request) => {
     console.error("search-videos error:", error);
     const message = toClientSafeMessage(error, "영상 검색 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.");
     const isQuota = /한도|quota|exceeded/i.test(message);
+    const isGeminiBusy = error instanceof GeminiUnavailableError;
     return jsonResponse(req, {
       error: "검색 실패",
       message,
       ...(isQuota ? { code: "YOUTUBE_QUOTA_EXCEEDED" } : {}),
-    }, isQuota ? 429 : 400);
+    }, isQuota ? 429 : isGeminiBusy ? 503 : 400);
   }
 });
