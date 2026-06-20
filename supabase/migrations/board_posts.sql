@@ -1,5 +1,5 @@
--- Supabase SQL Editor에서 한 번 실행하세요.
--- 게시판: 로그인한 회원이 글 작성·공유, 전원 열람
+-- board_posts: 스키마 + RLS + view_count 보호 (통합)
+-- Supabase SQL Editor에서 한 번 실행
 
 create table if not exists public.board_posts (
   id uuid primary key default gen_random_uuid(),
@@ -35,7 +35,6 @@ create policy "board_posts_delete_own"
   on public.board_posts for delete
   using (auth.uid() = user_id);
 
--- view_count 열만 UPDATE 허용 (RPC 없이 PostgREST update 사용)
 revoke update on public.board_posts from anon, authenticated;
 grant update (view_count) on public.board_posts to anon, authenticated;
 
@@ -56,7 +55,6 @@ create policy "board_posts_update_view_count"
     and user_id is not null
   );
 
--- 모든 사용자: view_count +1 만 허용 (나머지 컬럼 변경 불가)
 create or replace function public.board_posts_update_guard()
 returns trigger
 language plpgsql
@@ -83,5 +81,4 @@ create trigger board_posts_update_guard
   for each row
   execute function public.board_posts_update_guard();
 
--- 예전 SECURITY DEFINER RPC 제거 (Security Advisor 경고 해소)
 drop function if exists public.increment_post_view(uuid);

@@ -2,8 +2,10 @@
  * Supabase Edge Function: analyze-link
  * 링크 메타데이터 수집 + Gemini 피싱/스캠 분석 (GEMINI_API_KEY 서버 전용)
  *
- * ⚠️ 대시보드 배포: 이 파일 말고 supabase/deploy/analyze-link.ts 를 붙여넣으세요!
- *    (node scripts/bundle-edge-function.mjs analyze-link 실행 후)
+ * 배포 방법 (택 1):
+ *   A) CLI: supabase functions deploy analyze-link
+ *   B) 대시보드(한 파일): supabase/deploy/analyze-link.ts 전체 붙여넣기
+ *      (node scripts/bundle-edge-function.mjs analyze-link 실행 후)
  */
 
 import { GoogleGenerativeAI } from "npm:@google/generative-ai@0.21.0";
@@ -12,7 +14,7 @@ import {
   jsonResponse,
   sanitizePublicUrl,
   toClientSafeMessage,
-} from "@shared/security.ts";
+} from "./security.ts";
 
 type AnalysisResult = {
   status: "안전" | "위험";

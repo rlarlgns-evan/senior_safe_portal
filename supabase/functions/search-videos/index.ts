@@ -2,8 +2,10 @@
  * Supabase Edge Function: search-videos
  * YouTube 검색 + Gemini AI 안전 분석 (시크릿은 서버 환경 변수만 사용)
  *
- * ⚠️ 대시보드 배포: 이 파일 말고 supabase/deploy/search-videos.ts 를 붙여넣으세요!
- *    (node scripts/bundle-edge-function.mjs search-videos 실행 후)
+ * 배포 방법 (택 1):
+ *   A) CLI: supabase functions deploy search-videos
+ *   B) 대시보드(한 파일): supabase/deploy/search-videos.ts 전체 붙여넣기
+ *      (node scripts/bundle-edge-function.mjs search-videos 실행 후)
  */
 
 import { GoogleGenerativeAI } from "npm:@google/generative-ai@0.21.0";
@@ -13,7 +15,7 @@ import {
   jsonResponse,
   sanitizeSearchQuery,
   toClientSafeMessage,
-} from "@shared/security.ts";
+} from "./security.ts";
 
 interface YouTubeSearchItem {
   id: { videoId: string };
@@ -45,7 +47,26 @@ interface VideoResult {
   reason: string;
 }
 
+const LENIENT_ANALYSIS_PROMPT =
+  "You are a Senior Digital Sheriff helping Korean seniors browse YouTube.\n"
+  + "Mark \"위험\" ONLY when title/description clearly promotes voice-phishing, fake police/bank calls, "
+  + "guaranteed investment returns, lottery/prize fee scams, or miracle cure product sales targeting seniors.\n"
+  + "Mark \"안전\" for mainstream news, TV clips, music, entertainment, documentaries, exercise, cooking, "
+  + "and general education even if unrelated words appear.\n"
+  + "When uncertain, choose \"안전\".\n"
+  + "Return JSON array only: [{\"video_id\":\"id\",\"status\":\"안전\"|\"위험\",\"reason\":\"simple Korean\"}].";
+
+const STRICT_ANALYSIS_PROMPT =
+  "You are a Senior Digital Sheriff. Analyze YouTube titles/descriptions for scams targeting Korean seniors. "
+  + "Return JSON array: [{\"video_id\":\"id\",\"status\":\"안전\"|\"위험\",\"reason\":\"simple Korean\"}].";
+
+function resolveAnalysisPrompt(mode: unknown): string {
+  return mode === "strict" ? STRICT_ANALYSIS_PROMPT : LENIENT_ANALYSIS_PROMPT;
+}
+
 const YOUTUBE_VIDEO_ID_PATTERN = /^[\w-]{11}$/;
+const DEFAULT_SEARCH_LIMIT = 10;
+const MAX_SEARCH_LIMIT = 25;
 
 const ALLOWED_YOUTUBE_VIDEO_CATEGORIES = new Set([
   "10", "17", "24", "25", "26", "27", "28",
@@ -108,12 +129,47 @@ async function fetchYouTubeVideos(
   return Array.isArray(data.items) ? data.items : [];
 }
 
+/** 넓은 검색 우선 → 부족하면 카테고리 힌트 검색으로 보충 */
+async function fetchYouTubeVideosExpanded(
+  query: string,
+  apiKey: string,
+  maxResults: number,
+  videoCategoryId?: string,
+): Promise<YouTubeSearchItem[]> {
+  const seen = new Set<string>();
+  const merged: YouTubeSearchItem[] = [];
+
+  const addItems = (items: YouTubeSearchItem[]) => {
+    for (const item of items) {
+      const id = item.id?.videoId;
+      if (!id || !YOUTUBE_VIDEO_ID_PATTERN.test(id) || seen.has(id)) continue;
+      seen.add(id);
+      merged.push(item);
+      if (merged.length >= maxResults) return;
+    }
+  };
+
+  addItems(await fetchYouTubeVideos(query, apiKey, maxResults));
+
+  if (merged.length < maxResults && videoCategoryId) {
+    addItems(await fetchYouTubeVideos(
+      query,
+      apiKey,
+      maxResults - merged.length,
+      videoCategoryId,
+    ));
+  }
+
+  return merged.slice(0, maxResults);
+}
+
 /**
  * Gemini로 영상 제목·설명 안전성 분석
  */
 async function analyzeWithGemini(
   videos: YouTubeSearchItem[],
   geminiApiKey: string,
+  analysisMode: unknown,
 ): Promise<GeminiAnalysisItem[]> {
   const genAI = new GoogleGenerativeAI(geminiApiKey);
   const model = genAI.getGenerativeModel({
@@ -127,8 +183,7 @@ async function analyzeWithGemini(
     description: item.snippet.description.slice(0, 500),
   }));
 
-  const systemPrompt =
-    "You are a Senior Digital Sheriff. Analyze YouTube titles/descriptions for scams targeting Korean seniors. Return JSON array: [{'video_id':'id','status':'안전'|'위험','reason':'simple Korean'}].";
+  const systemPrompt = resolveAnalysisPrompt(analysisMode);
 
   const result = await model.generateContent([
     { text: systemPrompt },
@@ -216,11 +271,13 @@ Deno.serve(async (req: Request) => {
     }
 
     const query = sanitizeSearchQuery(body?.query);
-    const maxResults = clampLimit(body?.limit, 5, 20);
+    const maxResults = clampLimit(body?.limit, DEFAULT_SEARCH_LIMIT, MAX_SEARCH_LIMIT);
     const skipAnalysis = body?.skipAnalysis === true;
+    const safeOnly = body?.safeOnly === true;
+    const analysisMode = body?.analysisMode;
     const videoCategoryId = sanitizeVideoCategoryId(body?.videoCategoryId);
 
-    const youtubeItems = await fetchYouTubeVideos(
+    const youtubeItems = await fetchYouTubeVideosExpanded(
       query,
       youtubeApiKey,
       maxResults,
@@ -233,8 +290,12 @@ Deno.serve(async (req: Request) => {
 
     const geminiResults = skipAnalysis
       ? []
-      : await analyzeWithGemini(youtubeItems, geminiApiKey);
-    const videos = mergeVideoResults(youtubeItems, geminiResults);
+      : await analyzeWithGemini(youtubeItems, geminiApiKey, analysisMode);
+    let videos = mergeVideoResults(youtubeItems, geminiResults);
+
+    if (safeOnly) {
+      videos = videos.filter((video) => video.status !== "위험");
+    }
 
     return jsonResponse(req, { videos });
   } catch (error) {

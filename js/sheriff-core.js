@@ -146,9 +146,10 @@ async function analyzeLink(url) {
   return data;
 }
 
-async function searchVideos(query, limit = 5, options = {}) {
-  const body = { query, limit };
+async function searchVideos(query, limit = 10, options = {}) {
+  const body = { query, limit, analysisMode: options.analysisMode || "lenient" };
   if (options.skipAnalysis) body.skipAnalysis = true;
+  if (options.safeOnly) body.safeOnly = true;
   if (options.videoCategoryId) body.videoCategoryId = options.videoCategoryId;
 
   const { data, error } = await supabaseClient.functions.invoke("search-videos", { body });
@@ -179,63 +180,60 @@ function videoResultToItem(video) {
   };
 }
 
-/** YouTube Data API videoCategoryId (검색 정확도 향상) */
-const YOUTUBE_API_CATEGORY_IDS = {
-  music: "10",
-  affairs: "25",
-  entertainment: "24",
-  documentary: "27",
-  health: "26",
-};
-
 const YOUTUBE_CATEGORIES = [
   {
     id: "music",
     label: "음악",
     query: "트로트 명곡",
-    queries: ["트로트 명곡 모음", "7080 추억의 가요", "국민가요 베스트"],
+    queries: ["트로트 명곡 모음", "7080 추억의 가요", "국민가요 베스트", "트로트 인기곡"],
   },
   {
     id: "affairs",
     label: "시사",
     query: "시사 뉴스",
-    queries: ["KBS 시사뉴스", "뉴스9 하이라이트", "오늘의 시사 브리핑"],
+    queries: ["KBS 시사뉴스", "뉴스9 하이라이트", "오늘의 시사", "MBC 뉴스"],
   },
   {
     id: "entertainment",
     label: "예능",
     query: "예능",
-    queries: ["유퀴즈 온더블럭", "놀면 뭐하니", "1박 2일"],
+    queries: ["유퀴즈 온더블럭", "놀면 뭐하니", "1박 2일", "한국 예능 하이라이트"],
   },
   {
     id: "documentary",
     label: "다큐",
     query: "다큐멘터리",
-    queries: ["EBS 다큐프라임", "KBS 다큐멘터리", "역사 다큐멘터리"],
+    queries: ["EBS 다큐프라임", "KBS 다큐멘터리", "역사 다큐", "자연 다큐"],
   },
   {
     id: "health",
     label: "건강",
     query: "시니어 건강",
-    queries: ["어르신 건강체조", "국민건강체조", "노인 스트레칭 운동"],
+    queries: ["어르신 건강체조", "국민건강체조", "노인 스트레칭", "시니어 운동"],
   },
 ];
 
-/** API 장애 시 공식·교육 채널 영상으로 대체 */
+/** API 장애·결과 부족 시 공식·교육 채널 영상으로 대체 (카테고리별 3개 이상) */
 const YOUTUBE_CATEGORY_FALLBACK = {
   music: [
     { video_id: "7DIh3WaGcEU", title: "전유진 - 사랑만은 않겠어요 [불후의 명곡2]", channel: "KBS 레전드 케이팝", status: "안전" },
     { video_id: "b3NNDg-gYpw", title: "트로트파의 기운을 얻어 가는 전유진 [불후의 명곡2]", channel: "KBS 레전드 케이팝", status: "안전" },
+    { video_id: "gMaDhkNja2I", title: "임영웅 - 무지개 [TV조선 트롯]", channel: "TV CHOSUN", status: "안전" },
   ],
   affairs: [
     { video_id: "B2lHwQBZx-A", title: "9시 뉴스", channel: "KBS News", status: "안전" },
+    { video_id: "21X5lGlqIxs", title: "KBS 뉴스 9", channel: "KBS News", status: "안전" },
+    { video_id: "Ap-EL2N2XgM", title: "MBC 뉴스데스크", channel: "MBCNEWS", status: "안전" },
   ],
   entertainment: [
     { video_id: "Nob6hMO60NE", title: "운동으로 꿈을 가르치는 지한구 선생님 [유퀴즈]", channel: "유 퀴즈 온 더 튜브", status: "안전" },
     { video_id: "lwycbWG8gJI", title: "유퀴즈 온더블럭 하이라이트", channel: "tvN D ENT", status: "안전" },
+    { video_id: "kOYS9l8X8Hs", title: "놀면 뭐하니?", channel: "MBC Entertainment", status: "안전" },
   ],
   documentary: [
     { video_id: "cLVugRBot1c", title: "EBS 다큐프라임 - 공부의 배신 1부", channel: "EBS 다큐", status: "안전" },
+    { video_id: "8jPQjjsBbIc", title: "EBS 다큐프라임", channel: "EBS Documentary", status: "안전" },
+    { video_id: "ZXsQAXuYbo0", title: "KBS 다큐멘터리", channel: "KBS Documentary", status: "안전" },
   ],
   health: [
     { video_id: "oq0eugtuMas", title: "국민건강체조 (새천년건강체조)", channel: "국민체육진흥공단", status: "안전" },
@@ -251,16 +249,51 @@ function getYoutubeSearchQueries(categoryId, fallbackQuery) {
   return [category?.query].filter(Boolean);
 }
 
-function getYoutubeFallbackItems(categoryId, count) {
-  const pool = YOUTUBE_CATEGORY_FALLBACK[categoryId] || [];
-  const seen = new Set();
+function getYoutubeFallbackItems(categoryId, count, excludeIds = new Set()) {
+  const categoryPool = YOUTUBE_CATEGORY_FALLBACK[categoryId] || [];
+  const sharedPool = Object.values(YOUTUBE_CATEGORY_FALLBACK).flat();
+  const seen = new Set(excludeIds);
   const items = [];
 
-  for (const video of pool) {
+  for (const video of [...categoryPool, ...sharedPool]) {
     if (!video?.video_id || seen.has(video.video_id)) continue;
     seen.add(video.video_id);
     items.push(videoResultToItem(video));
     if (items.length >= count) break;
+  }
+
+  return items;
+}
+
+function padYoutubeItemsToCount(items, categoryId, neededCount) {
+  if (items.length >= neededCount) return items.slice(0, neededCount);
+
+  const seenIds = new Set(items.map((item) => item.videoId));
+  const padded = [...items, ...getYoutubeFallbackItems(categoryId, neededCount - items.length, seenIds)];
+  return padded.slice(0, neededCount);
+}
+
+async function searchYoutubeQueryBatch(searchQueries, neededCount, searchOptions) {
+  const seenIds = new Set();
+  const items = [];
+
+  for (const searchQuery of searchQueries) {
+    if (items.length >= neededCount) break;
+
+    try {
+      const videos = await searchVideos(searchQuery, 25, searchOptions);
+
+      for (const video of videos) {
+        const item = videoResultToItem(video);
+        if (seenIds.has(item.videoId)) continue;
+
+        seenIds.add(item.videoId);
+        items.push(item);
+        if (items.length >= neededCount) break;
+      }
+    } catch (err) {
+      console.warn("YouTube search failed:", searchQuery, err);
+    }
   }
 
   return items;
@@ -339,17 +372,49 @@ function filterWelfareServices(services, categoryId) {
 }
 
 function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn, options = {}) {
-  let activeId = categories[0].id;
+  let activeId = options.initialCategoryId && categories.some((cat) => cat.id === options.initialCategoryId)
+    ? options.initialCategoryId
+    : categories[0].id;
   let loading = false;
-  let autoRotateEnabled = options.autoRotate === true && categories.length > 1;
+  let autoRotateBaseEnabled = options.autoRotate === true && categories.length > 1;
+  let autoRotateEnabled = autoRotateBaseEnabled;
   let autoRotateTimer = null;
+  let autoRotatePauseTimer = null;
   const autoRotateMs = Number(options.autoRotateMs) > 0 ? Number(options.autoRotateMs) : 5000;
+  const autoRotatePauseMs = Number(options.autoRotatePauseMs) > 0 ? Number(options.autoRotatePauseMs) : 60000;
 
-  function stopAutoRotate() {
-    autoRotateEnabled = false;
+  function clearAutoRotateTimer() {
     if (autoRotateTimer) {
       clearTimeout(autoRotateTimer);
       autoRotateTimer = null;
+    }
+  }
+
+  function pauseAutoRotate() {
+    autoRotateEnabled = false;
+    clearAutoRotateTimer();
+
+    if (autoRotatePauseTimer) {
+      clearTimeout(autoRotatePauseTimer);
+      autoRotatePauseTimer = null;
+    }
+
+    if (!autoRotateBaseEnabled) return;
+
+    autoRotatePauseTimer = setTimeout(() => {
+      autoRotatePauseTimer = null;
+      autoRotateEnabled = autoRotateBaseEnabled;
+      queueAutoRotate();
+    }, autoRotatePauseMs);
+  }
+
+  function stopAutoRotate() {
+    autoRotateBaseEnabled = false;
+    autoRotateEnabled = false;
+    clearAutoRotateTimer();
+    if (autoRotatePauseTimer) {
+      clearTimeout(autoRotatePauseTimer);
+      autoRotatePauseTimer = null;
     }
   }
 
@@ -391,7 +456,7 @@ function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn, 
         const nextId = button.dataset.category;
         if (loading || nextId === activeId) return;
 
-        stopAutoRotate();
+        pauseAutoRotate();
         activeId = nextId;
         renderTabs();
         await loadCategory();
@@ -410,10 +475,7 @@ function setupCategoryTabs(tabsContainer, categories, contentContainer, loadFn, 
     if (!category) return;
 
     loading = true;
-    if (autoRotateTimer) {
-      clearTimeout(autoRotateTimer);
-      autoRotateTimer = null;
-    }
+    clearAutoRotateTimer();
 
     tabsContainer.querySelectorAll(".category-tab").forEach((button) => {
       button.disabled = true;
@@ -495,31 +557,26 @@ function renderYoutubeHomeCard(item) {
 }
 
 async function fetchYoutubeItemsForCategory(categoryId, query, neededCount) {
-  const seenIds = new Set();
-  const items = [];
   const searchQueries = getYoutubeSearchQueries(categoryId, query);
-  const videoCategoryId = YOUTUBE_API_CATEGORY_IDS[categoryId];
+  const baseOptions = { skipAnalysis: true };
 
-  for (const searchQuery of searchQueries) {
-    if (items.length >= neededCount) break;
+  let items = await searchYoutubeQueryBatch(searchQueries, neededCount, baseOptions);
 
-    try {
-      const videos = await searchVideos(searchQuery, 15, {
-        skipAnalysis: true,
-        videoCategoryId,
-      });
+  if (items.length < neededCount) {
+    const broadQuery = getCategoryQuery(YOUTUBE_CATEGORIES, categoryId);
+    const extra = await searchYoutubeQueryBatch([broadQuery], neededCount, baseOptions);
+    const seenIds = new Set(items.map((item) => item.videoId));
 
-      for (const video of videos) {
-        const item = videoResultToItem(video);
-        if (seenIds.has(item.videoId)) continue;
-
-        seenIds.add(item.videoId);
-        items.push(item);
-        if (items.length >= neededCount) break;
-      }
-    } catch (err) {
-      console.warn("YouTube category search failed:", categoryId, searchQuery, err);
+    for (const item of extra) {
+      if (seenIds.has(item.videoId)) continue;
+      seenIds.add(item.videoId);
+      items.push(item);
+      if (items.length >= neededCount) break;
     }
+  }
+
+  if (items.length < neededCount) {
+    return padYoutubeItemsToCount(items, categoryId, neededCount);
   }
 
   return items.slice(0, neededCount);
@@ -534,41 +591,30 @@ async function loadHomeYoutubeRecommendations(container, query, options = {}) {
 
   try {
     const items = await fetchYoutubeItemsForCategory(categoryId, query, neededCount);
-
-    if (items.length > 0) {
-      if (preview) {
-        container.innerHTML = items.map(renderYoutubeHomeCard).join("");
-      } else {
-        container.innerHTML = `<div class="browse-grid browse-youtube-grid">${items.map(renderYoutubeThumbnailCard).join("")}</div>`;
-      }
-      return;
-    }
-
-    const fallbackItems = getYoutubeFallbackItems(categoryId, neededCount);
-    if (fallbackItems.length > 0) {
-      if (preview) {
-        container.innerHTML = fallbackItems.map(renderYoutubeHomeCard).join("");
-      } else {
-        container.innerHTML = `<div class="browse-grid browse-youtube-grid">${fallbackItems.map(renderYoutubeThumbnailCard).join("")}</div>`;
-      }
-      return;
-    }
-
-    container.innerHTML = mascotLoadingHtml("추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.");
+    renderYoutubeItems(container, items, preview);
   } catch (err) {
     console.warn("YouTube recommendations failed:", err);
-    const fallbackItems = getYoutubeFallbackItems(categoryId, neededCount);
+    const fallbackItems = padYoutubeItemsToCount([], categoryId, neededCount);
 
     if (fallbackItems.length > 0) {
-      if (preview) {
-        container.innerHTML = fallbackItems.map(renderYoutubeHomeCard).join("");
-      } else {
-        container.innerHTML = `<div class="browse-grid browse-youtube-grid">${fallbackItems.map(renderYoutubeThumbnailCard).join("")}</div>`;
-      }
+      renderYoutubeItems(container, fallbackItems, preview);
       return;
     }
 
     container.innerHTML = mascotLoadingHtml("영상을 불러오지 못했습니다. 검색창에서 직접 검색해 보세요.");
+  }
+}
+
+function renderYoutubeItems(container, items, preview) {
+  if (!items.length) {
+    container.innerHTML = mascotLoadingHtml("추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.");
+    return;
+  }
+
+  if (preview) {
+    container.innerHTML = items.map(renderYoutubeHomeCard).join("");
+  } else {
+    container.innerHTML = `<div class="browse-grid browse-youtube-grid">${items.map(renderYoutubeThumbnailCard).join("")}</div>`;
   }
 }
 
@@ -1196,7 +1242,7 @@ async function runSearch(raw) {
     };
   }
 
-  const videos = await searchVideos(query);
+  const videos = await searchVideos(query, 10, { analysisMode: "lenient" });
   if (videos.length === 0) {
     throw new Error("검색 결과가 없습니다. 다른 검색어를 입력해 주세요.");
   }
@@ -1228,7 +1274,15 @@ function loadSearchResults() {
 }
 
 function goToResultsPage() {
-  window.location.href = "results.html";
+  if (document.getElementById("view-results")) {
+    window.location.hash = "results";
+    if (typeof ResultsModule !== "undefined" && typeof ViewRouter !== "undefined") {
+      ResultsModule.renderFromStorage();
+      ViewRouter.showResults();
+      return;
+    }
+  }
+  window.location.href = "index.html#results";
 }
 
 async function chatWithAgent(message, history) {
@@ -1275,6 +1329,7 @@ function getSiteHeaderHtml() {
           </div>
         </aside>
         <div class="auth-area" id="auth-area">
+          <a href="community.html" id="mypage-link" class="auth-button auth-mypage btn btn--secondary hidden">마이페이지</a>
           <span id="user-greeting" class="user-greeting hidden"></span>
           <button type="button" id="login-button" class="auth-button auth-login btn btn--primary">로그인</button>
           <button type="button" id="logout-button" class="auth-button auth-logout btn btn--secondary hidden">로그아웃</button>
@@ -1290,7 +1345,7 @@ function getSiteHeaderHtml() {
 
 function injectSiteHeader() {
   const header = document.querySelector("header.site-header");
-  if (!header) return;
+  if (!header || header.dataset.headerStatic === "true") return;
   header.innerHTML = getSiteHeaderHtml();
 }
 
@@ -1332,6 +1387,7 @@ function getUserDisplayName(user) {
 const SiteAuth = {
   updateAuthUI(user) {
     const greeting = document.getElementById("user-greeting");
+    const mypageLink = document.getElementById("mypage-link");
     const loginBtn = document.getElementById("login-button");
     const logoutBtn = document.getElementById("logout-button");
 
@@ -1339,10 +1395,12 @@ const SiteAuth = {
       const safeName = getUserDisplayName(user);
       if (greeting) greeting.textContent = `${safeName}님`;
       greeting?.classList.remove("hidden");
+      mypageLink?.classList.remove("hidden");
       loginBtn?.classList.add("hidden");
       logoutBtn?.classList.remove("hidden");
     } else {
       greeting?.classList.add("hidden");
+      mypageLink?.classList.add("hidden");
       loginBtn?.classList.remove("hidden");
       logoutBtn?.classList.add("hidden");
     }
@@ -1376,12 +1434,9 @@ const SiteAuth = {
     SiteAuth.hideLoginError();
 
     try {
-      const email = (document.getElementById("login-email")?.value ?? "").trim();
+      const email = validateEmailInput(document.getElementById("login-email")?.value ?? "");
       const password = document.getElementById("login-password")?.value ?? "";
 
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        throw new Error("올바른 이메일 주소를 입력해 주세요.");
-      }
       if (!password) throw new Error("비밀번호를 입력해 주세요.");
 
       const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -1392,8 +1447,7 @@ const SiteAuth = {
 
       SiteAuth.closeLoginModal();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "로그인 중 문제가 발생했습니다.";
-      SiteAuth.showLoginError(message);
+      SiteAuth.showLoginError(sanitizeUserFacingMessage(err, "로그인 중 문제가 발생했습니다."));
     }
   },
 
@@ -1440,7 +1494,7 @@ function getSiteFooterHtml() {
 }
 
 function injectSiteFooter() {
-  const layout = document.querySelector(".app-layout");
+  const layout = document.querySelector(".app-shell") || document.querySelector(".app-layout");
   if (!layout || layout.querySelector(".site-footer")) return;
   layout.insertAdjacentHTML("beforeend", getSiteFooterHtml());
 }
@@ -1504,12 +1558,3 @@ function initSiteWeather() {
 
   initHomeLocationServices();
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  injectSiteHeader();
-  injectLoginModal();
-  initSiteNavigation();
-  SiteAuth.init();
-  injectSiteFooter();
-  initSiteWeather();
-});

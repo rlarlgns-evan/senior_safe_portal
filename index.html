@@ -10,77 +10,167 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 </head>
-<body data-nav="home">
+<body data-nav="home" data-page="home" class="spa-app">
 
-  <div class="app-layout">
+  <!-- Global persistent header — always visible across SPA views -->
+  <header class="site-header global-header" role="banner" data-header-static="true">
+    <div class="site-header-row">
+      <a class="site-brand" href="index.html" id="spa-home-link" aria-label="홈으로 이동">
+        <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="88" height="88" />
+        <span class="site-brand-text">시니어 디지털 보안관</span>
+      </a>
+      <nav class="top-nav" aria-label="주요 메뉴" data-auto-nav></nav>
+      <div class="header-end">
+        <aside class="header-weather" aria-label="오늘의 날씨">
+          <div id="weather-widget" class="weather-card weather-card--header" aria-live="polite">
+            <div class="weather-icon-wrap" aria-hidden="true">
+              <span id="weather-icon" class="material-symbols-outlined">partly_cloudy_day</span>
+            </div>
+            <div class="weather-details">
+              <div class="weather-primary">
+                <span id="weather-temp" class="weather-temp">--°</span>
+                <span id="weather-main" class="weather-location">날씨 확인 중...</span>
+              </div>
+              <p id="weather-sub" class="weather-meta">위치를 불러오고 있습니다</p>
+            </div>
+            <button type="button" id="location-button" class="weather-locate-btn btn btn--secondary hidden" aria-label="내 위치로 날씨 보기">
+              <span class="material-symbols-outlined" aria-hidden="true">my_location</span>
+              <span class="weather-locate-label">내 위치</span>
+            </button>
+          </div>
+        </aside>
+        <div class="auth-area" id="auth-area">
+          <a href="community.html" id="mypage-link" class="auth-button auth-mypage btn btn--secondary hidden">마이페이지</a>
+          <span id="user-greeting" class="user-greeting hidden" aria-live="polite"></span>
+          <button type="button" id="login-button" class="auth-button auth-login btn btn--primary">로그인</button>
+          <button type="button" id="logout-button" class="auth-button auth-logout btn btn--secondary hidden">로그아웃</button>
+        </div>
+        <button type="button" id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobile-nav">
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+        </button>
+      </div>
+    </div>
+    <nav id="mobile-nav" class="mobile-nav hidden" aria-label="모바일 메뉴" data-auto-nav="true"></nav>
+  </header>
 
-    <header class="site-header"></header>
+  <div class="app-shell">
+    <main class="app-main" id="app-main">
 
-    <main class="main-content" id="home-section">
+      <!-- View 1: Home -->
+      <div id="view-home" class="app-view app-view--active" data-view="home" role="region" aria-label="홈">
 
-      <section class="home-search-band" id="hero-section" aria-label="검색">
-        <div class="home-search-inner">
-          <form id="search-form" class="search-form search-form--home" novalidate>
-            <label for="search-input" class="sr-only">검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요</label>
+        <section class="home-search-band" id="hero-section" aria-label="검색">
+          <div class="home-search-inner">
+            <form id="search-form" class="search-form search-form--home" novalidate>
+              <label for="search-input" class="sr-only">검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요</label>
+              <div class="search-row">
+                <span class="search-mark" aria-hidden="true">
+                  <img src="assets/mascot-sheriff.png" alt="" class="search-mark-img" width="32" height="32" />
+                </span>
+                <input id="search-input" type="text" class="search-input" placeholder="검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요" autocomplete="off" />
+                <button type="submit" class="search-submit-chip" aria-label="검색하기">
+                  <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                  <span class="search-submit-label">검색</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section class="home-cards-band" aria-label="추천 콘텐츠">
+          <div class="content-grid">
+            <section id="youtube-section" class="content-section content-column" aria-labelledby="youtube-heading">
+              <div class="section-header">
+                <h3 id="youtube-heading" class="section-title">
+                  <span class="material-symbols-outlined section-icon" aria-hidden="true">smart_display</span>
+                  유튜브
+                </h3>
+              </div>
+              <div id="youtube-categories" class="category-tabs" role="tablist" aria-label="유튜브 카테고리"></div>
+              <div id="youtube-content" class="youtube-grid"></div>
+              <a id="youtube-more" class="section-more-link btn btn--secondary" href="youtube.html">더보기</a>
+            </section>
+
+            <section id="news-section" class="content-section content-column" aria-labelledby="news-heading">
+              <div class="section-header">
+                <h3 id="news-heading" class="section-title">
+                  <span class="material-symbols-outlined section-icon" aria-hidden="true">newspaper</span>
+                  뉴스
+                </h3>
+              </div>
+              <div id="news-categories" class="category-tabs" role="tablist" aria-label="뉴스 카테고리"></div>
+              <div id="news-content" class="news-list"></div>
+              <a id="news-more" class="section-more-link btn btn--secondary" href="news.html">더보기</a>
+            </section>
+
+            <section id="welfare-section" class="content-section content-column welfare-section" aria-labelledby="welfare-heading">
+              <div class="section-header section-header--welfare">
+                <h3 id="welfare-heading" class="section-title">
+                  <span class="material-symbols-outlined section-icon" aria-hidden="true">volunteer_activism</span>
+                  복지정보
+                </h3>
+                <p id="welfare-location-label" class="welfare-location-label">📍 위치 확인 중...</p>
+              </div>
+              <div id="welfare-categories" class="category-tabs" role="tablist" aria-label="복지 카테고리"></div>
+              <div id="welfare-content" class="welfare-content">
+                <div class="loading-with-mascot youtube-loading">
+                  <img src="assets/mascot-sheriff.png" alt="" class="mascot-loading" width="72" height="72" />
+                  <p>근처 복지 시설과 혜택 정보를 찾고 있습니다...</p>
+                </div>
+              </div>
+              <a id="welfare-more" class="section-more-link btn btn--secondary" href="welfare.html">더보기</a>
+            </section>
+          </div>
+        </section>
+      </div>
+
+      <!-- View 2: Search results -->
+      <div id="view-results" class="app-view hidden" data-view="results" role="region" aria-label="검사 결과" aria-hidden="true">
+        <div class="results-main">
+          <button type="button" id="results-back-home" class="back-link-prominent">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            ⬅ 처음으로 돌아가기
+          </button>
+
+          <header class="results-summary-card results-intro-card">
+            <h1 class="results-intro-title">시니어 디지털 보안관</h1>
+            <p>무엇이든 안전하게 검색하세요</p>
+          </header>
+
+          <form id="results-search-form" class="search-form results-search-form" novalidate>
+            <label for="results-search-input" class="sr-only">검색어 또는 의심되는 링크를 입력하세요</label>
             <div class="search-row">
               <span class="search-mark" aria-hidden="true">
                 <img src="assets/mascot-sheriff.png" alt="" class="search-mark-img" width="32" height="32" />
               </span>
-              <input id="search-input" type="text" class="search-input" placeholder="검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요" autocomplete="off" />
+              <input id="results-search-input" type="text" class="search-input" placeholder="예: 건강, https://example.com" autocomplete="off" />
               <button type="submit" class="search-submit-chip" aria-label="검색하기">
                 <span class="material-symbols-outlined" aria-hidden="true">search</span>
                 <span class="search-submit-label">검색</span>
               </button>
             </div>
           </form>
+
+          <section id="results-summary" class="results-summary-card">
+            <h2 id="results-summary-title">검사 결과를 불러오는 중...</h2>
+            <p id="results-summary-desc">어르신의 안전을 위해 최신 AI 기술로 분석한 결과입니다.</p>
+          </section>
+
+          <div id="results-error" class="results-alert alert-persistent hidden" role="alertdialog" aria-modal="true" aria-labelledby="results-error-message">
+            <p id="results-error-message"></p>
+            <button type="button" id="results-error-close" class="btn btn--danger">닫기</button>
+          </div>
+
+          <div id="results-loading" class="results-loading-panel alert-persistent hidden" role="alertdialog" aria-modal="true" aria-labelledby="results-loading-text">
+            <div class="loading-spinner" aria-hidden="true"></div>
+            <p id="results-loading-text">안전 검사를 진행하고 있습니다...</p>
+            <button type="button" id="results-loading-cancel" class="btn btn--secondary results-loading-cancel">검사 취소하기</button>
+          </div>
+
+          <section id="results-list" class="results-list"></section>
         </div>
-      </section>
+      </div>
 
-      <section class="home-cards-band" aria-label="추천 콘텐츠">
-        <div class="content-grid">
-        <section id="youtube-section" class="content-section content-column" aria-labelledby="youtube-heading">
-          <div class="section-header">
-            <h3 id="youtube-heading" class="section-title">
-              <span class="material-symbols-outlined section-icon" aria-hidden="true">smart_display</span>
-              유튜브
-            </h3>
-          </div>
-          <div id="youtube-categories" class="category-tabs" role="tablist" aria-label="유튜브 카테고리"></div>
-          <div id="youtube-content" class="youtube-grid"></div>
-          <a id="youtube-more" class="section-more-link btn btn--secondary" href="youtube.html">더보기</a>
-        </section>
-
-        <section id="news-section" class="content-section content-column" aria-labelledby="news-heading">
-          <div class="section-header">
-            <h3 id="news-heading" class="section-title">
-              <span class="material-symbols-outlined section-icon" aria-hidden="true">newspaper</span>
-              뉴스
-            </h3>
-          </div>
-          <div id="news-categories" class="category-tabs" role="tablist" aria-label="뉴스 카테고리"></div>
-          <div id="news-content" class="news-list"></div>
-          <a id="news-more" class="section-more-link btn btn--secondary" href="news.html">더보기</a>
-        </section>
-
-        <section id="welfare-section" class="content-section content-column welfare-section" aria-labelledby="welfare-heading">
-          <div class="section-header section-header--welfare">
-            <h3 id="welfare-heading" class="section-title">
-              <span class="material-symbols-outlined section-icon" aria-hidden="true">volunteer_activism</span>
-              복지정보
-            </h3>
-            <p id="welfare-location-label" class="welfare-location-label">📍 위치 확인 중...</p>
-          </div>
-          <div id="welfare-categories" class="category-tabs" role="tablist" aria-label="복지 카테고리"></div>
-          <div id="welfare-content" class="welfare-content">
-            <div class="loading-with-mascot youtube-loading">
-              <img src="assets/mascot-sheriff.png" alt="" class="mascot-loading" width="72" height="72" />
-              <p>근처 복지 시설과 혜택 정보를 찾고 있습니다...</p>
-            </div>
-          </div>
-          <a id="welfare-more" class="section-more-link btn btn--secondary" href="welfare.html">더보기</a>
-        </section>
-        </div>
-      </section>
     </main>
   </div>
 
@@ -89,7 +179,7 @@
       <div class="chat-header">
         <div class="chat-header-info">
           <div class="chat-header-avatar">
-            <img src="assets/mascot-sheriff.png" alt="" class="chat-header-mascot" width="40" height="40" />
+            <img src="assets/mascot-sheriff.png" alt="" class="chat-header-mascot" width="44" height="44" />
           </div>
           <div class="chat-header-text">
             <h3 id="chat-title">보안관 단디</h3>
@@ -122,7 +212,7 @@
       </div>
     </div>
     <button type="button" id="chat-fab" class="chat-fab chat-fab--mascot btn btn--accent">
-      <img src="assets/mascot-sheriff.png" alt="" class="chat-fab-img" width="48" height="48" />
+      <img src="assets/mascot-sheriff.png" alt="" class="chat-fab-img" width="58" height="58" />
       <span>보안관 단디에게 물어보기</span>
     </button>
   </div>
@@ -163,7 +253,10 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="common.js"></script>
-  <script src="script.js"></script>
+  <script src="js/core/utils.js"></script>
+  <script src="js/sheriff-core.js"></script>
+  <script src="js/pages/results.js"></script>
+  <script src="js/pages/home.js"></script>
+  <script src="js/bootstrap.js"></script>
 </body>
 </html>

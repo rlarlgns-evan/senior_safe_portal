@@ -2,65 +2,13 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="refresh" content="0; url=index.html#results" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>보안 검증 결과 - 시니어 디지털 보안관</title>
+  <title>검사 결과로 이동 중…</title>
   <link rel="icon" type="image/png" href="favicon.png" />
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script>location.replace("index.html#results");</script>
 </head>
-<body class="results-page">
-
-  <div class="app-layout">
-    <header class="site-header"></header>
-
-    <main class="results-main">
-    <a href="index.html" class="back-link-prominent">
-      <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-      ⬅ 처음으로 돌아가기
-    </a>
-
-    <header class="results-summary-card" style="margin-bottom: 1.5rem;">
-      <h1 style="font-size: var(--font-2xl); margin: 0 0 0.5rem;">시니어 디지털 보안관</h1>
-      <p>무엇이든 안전하게 검색하세요</p>
-    </header>
-
-    <form id="results-search-form" class="search-form results-search-form" novalidate style="margin-bottom: 1.5rem;">
-      <label for="results-search-input" class="sr-only">검색어 또는 의심되는 링크를 입력하세요</label>
-      <div class="search-row">
-        <span class="search-mark" aria-hidden="true">
-          <img src="assets/mascot-sheriff.png" alt="" class="search-mark-img" width="32" height="32" />
-        </span>
-        <input id="results-search-input" type="text" class="search-input" placeholder="예: 건강, https://example.com" autocomplete="off" />
-        <button type="submit" class="search-submit-chip" aria-label="검색하기">
-          <span class="material-symbols-outlined" aria-hidden="true">search</span>
-          <span class="search-submit-label">검색</span>
-        </button>
-      </div>
-    </form>
-
-    <section id="results-summary" class="results-summary-card" style="margin-bottom: 1.5rem;">
-      <h2 id="results-summary-title">검사 결과를 불러오는 중...</h2>
-      <p id="results-summary-desc">어르신의 안전을 위해 최신 AI 기술로 분석한 결과입니다.</p>
-    </section>
-
-    <div id="results-error" class="results-alert alert-persistent hidden" role="alertdialog" aria-modal="true" aria-labelledby="results-error-message">
-      <p id="results-error-message"></p>
-      <button type="button" id="results-error-close" class="btn btn--danger">닫기</button>
-    </div>
-
-    <div id="results-loading" class="results-loading-panel alert-persistent hidden" role="alertdialog" aria-modal="true" aria-labelledby="results-loading-text">
-      <div class="loading-spinner" aria-hidden="true"></div>
-      <p id="results-loading-text">안전 검사를 진행하고 있습니다...</p>
-      <button type="button" id="results-loading-cancel" class="btn btn--secondary" style="margin-top: 1rem;">검사 취소하기</button>
-    </div>
-
-    <section id="results-list" class="flex flex-col gap-6" style="display: flex; flex-direction: column; gap: 1.5rem;"></section>
-  </main>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="common.js"></script>
-  <script src="results.js"></script>
+<body>
+  <p>검사 결과 페이지로 이동합니다. 자동으로 넘어가지 않으면 <a href="index.html#results">여기</a>를 눌러 주세요.</p>
 </body>
 </html>

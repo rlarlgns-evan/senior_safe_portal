@@ -300,7 +300,7 @@ async function handleBoardSubmit(event) {
 }
 
 async function deleteCurrentPost() {
-  if (!viewingPostId || !confirm("이 글을 삭제할까요?")) return;
+  if (!viewingPostId || !confirmCriticalAction("이 글을 삭제할까요?")) return;
 
   const { error } = await supabaseClient.from(BOARD_TABLE).delete().eq("id", viewingPostId);
   if (error) {
@@ -359,5 +359,3 @@ async function initBoardPage() {
 
   await loadBoardPosts(1);
 }
-
-document.addEventListener("DOMContentLoaded", initBoardPage);

@@ -25,12 +25,25 @@ const SHARED_IMPORT_RE =
 
 const FUNCTIONS_WITH_SHARED = ["analyze-link", "search-videos"];
 
+function syncSharedSecurity(name) {
+  const sharedPath = path.join(FUNCTIONS_DIR, "_shared", "security.ts");
+  const localPath = path.join(FUNCTIONS_DIR, name, "security.ts");
+  if (!fs.existsSync(sharedPath)) {
+    throw new Error(`공유 파일 없음: ${sharedPath}`);
+  }
+  fs.copyFileSync(sharedPath, localPath);
+}
+
 function bundleFunction(name) {
   const indexPath = path.join(FUNCTIONS_DIR, name, "index.ts");
   const sharedPath = path.join(FUNCTIONS_DIR, "_shared", "security.ts");
 
   if (!fs.existsSync(indexPath)) {
     throw new Error(`함수를 찾을 수 없습니다: ${name}`);
+  }
+
+  if (FUNCTIONS_WITH_SHARED.includes(name)) {
+    syncSharedSecurity(name);
   }
 
   let indexSource = fs.readFileSync(indexPath, "utf8");
@@ -52,7 +65,7 @@ function bundleFunction(name) {
 
   const bundled = [
     "// ── Supabase 대시보드 배포용 (자동 생성) ──",
-    `// 원본: supabase/functions/${name}/index.ts + _shared/security.ts`,
+    `// 원본: supabase/functions/${name}/index.ts + security.ts`,
     "// node scripts/bundle-edge-function.mjs " + name,
     "",
     sharedSource.trim(),
