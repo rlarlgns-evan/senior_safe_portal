@@ -29,12 +29,12 @@
   --font-search: 24px;
   --font-family: "Inter", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
 
-  /* Layout tokens */
-  --space-page-x: 8px;
-  --space-header-x: 4px;
-  --space-card: 18px;
-  --layout-max-wide: 100%;
-  --layout-max-content: 100%;
+  /* Layout tokens (본문·헤더 중간 여백) */
+  --space-page-x: 12px;
+  --space-header-x: 10px;
+  --space-card: 20px;
+  --layout-max-wide: min(1440px, 100%);
+  --layout-max-content: min(1320px, 100%);
   --radius-card: 16px;
   --radius-btn: 12px;
   --shadow-card: 0 4px 16px rgba(11, 61, 145, 0.12);
@@ -47,13 +47,15 @@
 
 @media (min-width: 768px) {
   :root {
-    --space-page-x: 12px;
+    --space-page-x: 18px;
+    --space-header-x: 14px;
   }
 }
 
 @media (min-width: 1024px) {
   :root {
-    --space-page-x: 16px;
+    --space-page-x: 24px;
+    --space-header-x: 16px;
   }
 }
 
@@ -255,11 +257,11 @@ body {
   grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas: "brand nav login";
   align-items: center;
-  gap: 0.35rem 0.5rem;
+  gap: 0.5rem 0.65rem;
   width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0.45rem var(--space-header-x);
+  max-width: var(--layout-max-wide);
+  margin: 0 auto;
+  padding: 0.55rem var(--space-header-x);
   min-height: 64px;
 }
 
@@ -276,7 +278,7 @@ body {
 }
 
 .site-brand-text {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -285,7 +287,7 @@ body {
   grid-area: login;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.45rem;
   justify-self: end;
   flex-shrink: 0;
   min-width: 0;
@@ -298,9 +300,9 @@ body {
 
 .weather-card--header {
   width: auto;
-  max-width: min(220px, 36vw);
-  padding: 0.3rem 0.45rem;
-  gap: 0.35rem;
+  max-width: min(250px, 38vw);
+  padding: 0.32rem 0.5rem;
+  gap: 0.38rem;
   border-radius: 12px;
   border-width: 2px;
 }
@@ -320,8 +322,8 @@ body {
 }
 
 .weather-card--header .weather-location {
-  font-size: 0.78rem;
-  max-width: 5.5rem;
+  font-size: 0.8rem;
+  max-width: 6.5rem;
 }
 
 .weather-card--header .weather-meta {
@@ -345,7 +347,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.2rem;
+  gap: 0.28rem;
   min-width: 0;
   width: 100%;
   flex-wrap: nowrap;
@@ -355,9 +357,9 @@ body {
 }
 
 .site-header .top-nav-link {
-  padding: 0.35rem 0.5rem;
-  min-height: 44px;
-  font-size: 0.95rem;
+  padding: 0.4rem 0.6rem;
+  min-height: 48px;
+  font-size: 1rem;
 }
 
 .top-nav::-webkit-scrollbar {
@@ -433,9 +435,9 @@ body {
   }
 
   .site-header .top-nav-link {
-    font-size: 1rem;
-    padding: 0.4rem 0.6rem;
-    min-height: 46px;
+    font-size: 1.05rem;
+    padding: 0.45rem 0.75rem;
+    min-height: 52px;
   }
 }
 
@@ -488,10 +490,10 @@ body {
 }
 
 .auth-button {
-  min-height: 44px;
-  padding: 0.45rem 0.85rem;
+  min-height: 48px;
+  padding: 0.5rem 1rem;
   border-radius: var(--radius-btn);
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 800;
   cursor: pointer;
   border: var(--btn-border-width) solid var(--color-text);
@@ -539,7 +541,7 @@ body {
 }
 
 .hero-content {
-  max-width: 100%;
+  max-width: var(--layout-max-content);
   margin: 0 auto;
 }
 
@@ -726,7 +728,7 @@ body {
 }
 
 .search-form {
-  max-width: 100%;
+  max-width: var(--layout-max-content);
   margin: 0 auto 1rem;
 }
 
@@ -2127,7 +2129,7 @@ body {
 }
 
 .results-main {
-  max-width: 100%;
+  max-width: var(--layout-max-content);
   margin: 0 auto;
   padding: var(--space-card) var(--space-page-x);
 }
@@ -2709,7 +2711,7 @@ body {
 /* ── 정보 페이지 (약관 · 팀 소개) ── */
 .info-main {
   flex: 1;
-  max-width: 100%;
+  max-width: min(880px, 100%);
   margin: 0 auto;
   padding: 1.5rem var(--space-page-x) 2rem;
   width: 100%;
@@ -2791,7 +2793,7 @@ body {
 
 .community-main {
   flex: 1;
-  max-width: 100%;
+  max-width: min(1020px, 100%);
   margin: 0 auto;
   padding: 1.25rem var(--space-page-x) 2.5rem;
 }
@@ -2967,7 +2969,7 @@ body {
 
 .board-main {
   flex: 1;
-  max-width: 100%;
+  max-width: var(--layout-max-content);
   margin: 0 auto;
   padding: 1.5rem var(--space-page-x) 2.5rem;
 }
