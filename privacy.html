@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>개인정보처리방침 - 시니어 디지털 보안관</title>
+  <title>개인정보 처리방침 - 시니어 디지털 보안관</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -18,28 +18,177 @@
         <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
         홈으로 돌아가기
       </a>
-      <article class="info-panel">
-        <h1>개인정보처리방침</h1>
-        <p class="info-lead">시니어 디지털 보안관은 이용자의 개인정보를 소중히 보호합니다.</p>
+      <article class="info-panel privacy-policy">
+        <h1>개인정보 처리방침</h1>
+        <p class="info-lead">
+          「시니어 디지털 보안관」(이하 “서비스”)은 「개인정보 보호법」 등 관련 법령을 준수하며,
+          이용자의 개인정보를 보호하고 이와 관련한 고충을 신속·원활하게 처리하기 위해
+          다음과 같이 개인정보 처리방침을 수립·공개합니다.
+        </p>
+        <p class="privacy-meta"><strong>시행일자:</strong> 2026년 6월 21일</p>
 
-        <h2>1. 수집하는 정보</h2>
+        <h2>제1조 (개인정보의 처리 목적)</h2>
+        <p>서비스는 다음의 목적을 위해 개인정보를 처리합니다. 처리한 개인정보는 아래 목적 이외의 용도로 이용되지 않으며, 이용 목적이 변경되는 경우 「개인정보 보호법」 제18조에 따라 별도의 동의를 받습니다.</p>
+        <ol class="privacy-list">
+          <li><strong>회원 가입 및 관리:</strong> 회원 식별, 로그인·로그아웃, 부정 이용 방지, 고지·통지</li>
+          <li><strong>서비스 제공:</strong> 링크·문자 안전 검사, 유튜브·뉴스 추천, 복지 정보 안내, AI 챗봇 상담, 날씨·위치 기반 정보 제공</li>
+          <li><strong>게시판 운영:</strong> 게시글 작성·열람·삭제, 작성자 표시, 조회수 관리</li>
+          <li><strong>서비스 개선 및 안정성:</strong> 오류 대응, 보안 강화, 이용 통계(비식별·집계 형태)</li>
+        </ol>
+
+        <h2>제2조 (처리하는 개인정보의 항목 및 수집 방법)</h2>
+        <p>서비스는 서비스 이용에 필요한 최소한의 개인정보만을 수집합니다.</p>
+
+        <h3>1. 이용자가 직접 입력하는 정보</h3>
+        <div class="privacy-table-wrap">
+          <table class="privacy-table">
+            <caption class="sr-only">수집 항목 표</caption>
+            <thead>
+              <tr>
+                <th scope="col">구분</th>
+                <th scope="col">수집 항목</th>
+                <th scope="col">수집 방법</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>회원(로그인)</td>
+                <td>이메일 주소, 비밀번호(암호화 저장), 서비스 내 표시명(이메일 일부 기반)</td>
+                <td>로그인·회원가입 화면 입력</td>
+              </tr>
+              <tr>
+                <td>자유게시판</td>
+                <td>작성자 이름(닉네임), 게시글 제목·내용, 작성 일시, 조회수, 회원 고유 식별값(user_id)</td>
+                <td>게시글 작성 시 입력</td>
+              </tr>
+              <tr>
+                <td>링크·검색·상담</td>
+                <td>검색어, URL(링크), 챗봇 대화 내용</td>
+                <td>검색창·챗봇 입력</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>2. 서비스 이용 과정에서 자동 생성·수집되는 정보</h3>
         <ul>
-          <li>로그인 시: Supabase를 통해 입력하신 이메일 등 계정 정보</li>
-          <li>위치 기반 복지 안내: 브라우저에서 허용하신 위치 정보 (저장하지 않고 세션 중에만 활용)</li>
-          <li>검색·상담: 입력하신 검색어, 링크, 챗봇 대화 내용 (서비스 제공 및 안전 검사 목적)</li>
+          <li>접속 IP 주소, 브라우저 종류, OS, 접속 일시, 서비스 이용 기록(오류 로그 등)</li>
+          <li>인증 세션 정보(로그인 유지를 위한 토큰 등)</li>
+          <li>링크 검사 결과 등 일부 데이터: 브라우저 <strong>sessionStorage</strong>에 임시 저장(브라우저 종료 시 삭제)</li>
         </ul>
 
-        <h2>2. 이용 목적</h2>
-        <p>링크 안전 분석, 맞춤 복지 정보 제공, 콘텐츠 추천, AI 상담 응답, 서비스 개선 및 오류 대응에 사용합니다.</p>
+        <h3>3. 선택적 수집(동의 후 이용)</h3>
+        <ul>
+          <li><strong>위치정보:</strong> 복지 정보·날씨 제공 시 브라우저 위치 접근 권한을 허용한 경우, 위·경도 좌표 및 이를 변환한 행정구역명. 서비스 서버에 영구 저장하지 않으며, 해당 기능 이용 중에만 처리합니다. 거부 시 기본 지역(서울) 정보로 대체 제공될 수 있습니다.</li>
+        </ul>
 
-        <h2>3. 보관 및 파기</h2>
-        <p>법령에서 정한 경우를 제외하고, 수집 목적 달성 후 지체 없이 파기합니다. 검색 결과 등 일부 데이터는 브라우저 sessionStorage에 임시 저장될 수 있습니다.</p>
+        <h2>제3조 (개인정보의 처리 및 보유 기간)</h2>
+        <ol class="privacy-list">
+          <li>서비스는 법령에 따른 보유·이용 기간 또는 이용자로부터 개인정보를 수집 시 동의받은 기간 내에서 개인정보를 처리·보유합니다.</li>
+          <li>각 항목별 보유 기간은 다음과 같습니다.
+            <ul>
+              <li><strong>회원 정보:</strong> 회원 탈퇴 시까지. 다만, 관련 법령에 따라 보존할 필요가 있는 경우 해당 기간 동안 보관</li>
+              <li><strong>게시판 게시글:</strong> 작성자 삭제 또는 운영 정책에 따른 삭제 시까지</li>
+              <li><strong>검색·상담·링크 분석 입력값:</strong> 서비스 제공 목적 달성 후 지체 없이 파기(서버 로그는 최대 90일 이내 보관 후 파기 원칙)</li>
+              <li><strong>sessionStorage 데이터:</strong> 브라우저 탭·창 종료 시 삭제</li>
+            </ul>
+          </li>
+          <li>관계 법령에 따른 보관 예: 「전자상거래 등에서의 소비자보호에 관한 법률」에 따른 표시·광고, 계약·청약철회 기록 등(해당 시)</li>
+        </ol>
 
-        <h2>4. 제3자 제공</h2>
-        <p>서비스 제공을 위해 Supabase, 외부 검색·뉴스·복지 API 등 필요한 범위에서만 처리하며, 이용자 동의 없이 영리 목적으로 제3자에게 제공하지 않습니다.</p>
+        <h2>제4조 (개인정보의 제3자 제공)</h2>
+        <p>서비스는 원칙적으로 이용자의 개인정보를 제3자에게 제공하지 않습니다. 다만, 아래의 경우는 예외로 합니다.</p>
+        <ul>
+          <li>이용자가 사전에 동의한 경우</li>
+          <li>법령의 규정에 의거하거나, 수사·조사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관 등의 요구가 있는 경우</li>
+        </ul>
 
-        <h2>5. 이용자 권리</h2>
-        <p>개인정보 열람·수정·삭제를 요청하실 수 있습니다. 문의는 <a href="team.html">팀 소개</a> 페이지를 참고해 주세요.</p>
+        <h2>제5조 (개인정보 처리의 위탁)</h2>
+        <p>서비스는 원활한 서비스 제공을 위해 다음과 같이 개인정보 처리 업무를 위탁할 수 있습니다.</p>
+        <div class="privacy-table-wrap">
+          <table class="privacy-table">
+            <caption class="sr-only">위탁 업체 표</caption>
+            <thead>
+              <tr>
+                <th scope="col">수탁자</th>
+                <th scope="col">위탁 업무</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Supabase Inc.</td>
+                <td>회원 인증, 데이터베이스·서버(Edge Functions) 호스팅, 게시판 데이터 저장</td>
+              </tr>
+              <tr>
+                <td>Google LLC</td>
+                <td>YouTube·Gemini API를 통한 영상 검색·AI 분석·챗봇 응답(입력 데이터 처리)</td>
+              </tr>
+              <tr>
+                <td>네이버 주식회사</td>
+                <td>뉴스 검색 API 연동(검색어 처리)</td>
+              </tr>
+              <tr>
+                <td>공공데이터포털(행정안전부 등)</td>
+                <td>지역 복지 정보 조회(지역 코드·검색 조건 처리)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>서비스는 위탁계약 체결 시 「개인정보 보호법」 제26조에 따라 위탁업무 수행 목적 외 처리 금지, 기술적·관리적 보호조치, 재위탁 제한, 손해배상 등을 문서로 명시하고, 수탁자가 개인정보를 안전하게 처리하는지 관리·감독합니다.</p>
+
+        <h2>제6조 (개인정보의 파기)</h2>
+        <ol class="privacy-list">
+          <li>서비스는 개인정보 보유 기간의 경과, 처리 목적 달성 등 개인정보가 불필요하게 되었을 때에는 지체 없이 해당 개인정보를 파기합니다.</li>
+          <li>전자적 파일 형태의 정보는 복구·재생되지 않도록 기술적 방법으로 삭제하며, 종이 문서는 분쇄 또는 소각합니다.</li>
+          <li>이용자는 게시판에서 본인이 작성한 글을 직접 삭제할 수 있습니다.</li>
+        </ol>
+
+        <h2>제7조 (정보주체와 법정대리인의 권리·의무 및 행사 방법)</h2>
+        <p>이용자(정보주체)는 서비스에 대해 언제든지 다음 각 호의 권리를 행사할 수 있습니다.</p>
+        <ul>
+          <li>개인정보 열람 요구</li>
+          <li>오류 등이 있을 경우 정정 요구</li>
+          <li>삭제 요구</li>
+          <li>처리 정지 요구</li>
+        </ul>
+        <p>권리 행사는 서비스 내 게시판·로그인 기능을 통해 직접 처리하거나, 제10조의 개인정보 보호책임자에게 서면·전자우편 등으로 요청하실 수 있습니다. 서비스는 지체 없이 조치하겠습니다.</p>
+        <p>만 14세 미만 아동의 개인정보는 법정대리인의 동의 없이 수집하지 않으며, 아동의 권리 행사는 법정대리인이 할 수 있습니다.</p>
+
+        <h2>제8조 (개인정보의 안전성 확보 조치)</h2>
+        <p>서비스는 개인정보의 안전성 확보를 위해 다음과 같은 조치를 취하고 있습니다.</p>
+        <ul>
+          <li><strong>관리적 조치:</strong> 내부 관리계획 수립, 접근 권한 최소화, 정기적 점검</li>
+          <li><strong>기술적 조치:</strong> 비밀번호 등 중요정보 암호화, HTTPS 통신, 접근 통제, API 키 서버 측 보관</li>
+          <li><strong>물리적 조치:</strong> 클라우드 데이터센터(수탁사)의 물리적 접근 통제</li>
+          <li><strong>입력값 검증·XSS 방지:</strong> 이용자 입력의 검증 및 화면 출력 시 이스케이프 처리</li>
+        </ul>
+
+        <h2>제9조 (개인정보 자동 수집 장치의 설치·운영 및 거부)</h2>
+        <ol class="privacy-list">
+          <li>서비스는 로그인 유지 등을 위해 브라우저에 인증 토큰(쿠키·localStorage 등)을 저장할 수 있습니다.</li>
+          <li>이용자는 브라우저 설정을 통해 쿠키 저장을 거부할 수 있으나, 이 경우 로그인 등 일부 서비스 이용에 제한이 있을 수 있습니다.</li>
+          <li>위치정보는 브라우저·OS 설정에서 권한을 허용·거부·철회할 수 있습니다.</li>
+        </ol>
+
+        <h2>제10조 (개인정보 보호책임자)</h2>
+        <p>서비스는 개인정보 처리에 관한 업무를 총괄하여 책임지고, 개인정보 처리와 관련한 이용자의 불만 처리 및 피해 구제를 위해 아래와 같이 개인정보 보호책임자를 지정합니다.</p>
+        <dl class="privacy-contact">
+          <div><dt>운영 주체</dt><dd>시니어 디지털 보안관 운영팀(샤이한 열정 감자)</dd></div>
+          <div><dt>개인정보 보호책임자</dt><dd>시니어 디지털 보안관 운영팀</dd></div>
+          <div><dt>문의</dt><dd><a href="https://github.com/rlarlgns-evan/senior_safe_portal/issues" target="_blank" rel="noopener noreferrer">GitHub 이슈</a> 또는 <a href="team.html">팀 소개</a> 페이지 참고</dd></div>
+        </dl>
+
+        <h2>제11조 (권익침해 구제 방법)</h2>
+        <p>개인정보 침해로 인한 구제를 받기 위해 아래 기관에 상담·신고할 수 있습니다.</p>
+        <ul>
+          <li>개인정보침해신고센터: (국번 없이) 118 · <a href="https://privacy.kisa.or.kr" target="_blank" rel="noopener noreferrer">privacy.kisa.or.kr</a></li>
+          <li>개인정보분쟁조정위원회: (국번 없이) 1833-6972 · <a href="https://www.kopico.go.kr" target="_blank" rel="noopener noreferrer">www.kopico.go.kr</a></li>
+          <li>대검찰청 사이버수사과: (국번 없이) 1301 · <a href="https://www.spo.go.kr" target="_blank" rel="noopener noreferrer">www.spo.go.kr</a></li>
+          <li>경찰청 사이버수사국: (국번 없이) 182 · <a href="https://ecrm.police.go.kr" target="_blank" rel="noopener noreferrer">ecrm.police.go.kr</a></li>
+        </ul>
+
+        <h2>제12조 (개인정보 처리방침의 변경)</h2>
+        <p>이 개인정보 처리방침은 2026년 6월 21일부터 적용됩니다. 내용 추가·삭제·수정이 있을 경우 시행 7일 전부터 서비스 초기화면 또는 본 페이지를 통해 공지합니다. 다만, 이용자 권리에 중대한 변경이 있는 경우 최소 30일 전에 공지합니다.</p>
       </article>
     </main>
   </div>

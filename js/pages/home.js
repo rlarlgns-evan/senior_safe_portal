@@ -319,15 +319,12 @@ const HomeModule = {
     const newsMore = document.getElementById("news-more");
     const welfareMore = document.getElementById("welfare-more");
 
-    const tabAutoRotate = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const homeTabOptions = { autoRotate: tabAutoRotate, autoRotateMs: 15000 };
-
     setupCategoryTabs(
       document.getElementById("youtube-categories"),
       YOUTUBE_CATEGORIES,
       homeDom.youtubeContent,
       loadHomeYoutubeRecommendations,
-      { ...homeTabOptions, onCategoryChange: (id) => NavigationUI.updateSectionMoreLink(youtubeMore, "youtube", id) },
+      { onCategoryChange: (id) => NavigationUI.updateSectionMoreLink(youtubeMore, "youtube", id) },
     );
 
     setupCategoryTabs(
@@ -335,7 +332,7 @@ const HomeModule = {
       NEWS_CATEGORIES,
       homeDom.newsContent,
       loadHomeNewsRecommendations,
-      { ...homeTabOptions, onCategoryChange: (id) => NavigationUI.updateSectionMoreLink(newsMore, "news", id) },
+      { onCategoryChange: (id) => NavigationUI.updateSectionMoreLink(newsMore, "news", id) },
     );
 
     bindWelfareCategoryReload(
@@ -344,7 +341,7 @@ const HomeModule = {
         WELFARE_CATEGORIES,
         document.getElementById("welfare-content"),
         (container, query, options) => loadHomeWelfareInfo(container, query, options),
-        { ...homeTabOptions, onCategoryChange: (id) => NavigationUI.updateSectionMoreLink(welfareMore, "welfare", id) },
+        { onCategoryChange: (id) => NavigationUI.updateSectionMoreLink(welfareMore, "welfare", id) },
       ).reload,
     );
   },
