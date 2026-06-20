@@ -320,7 +320,7 @@ const HomeModule = {
     const welfareMore = document.getElementById("welfare-more");
 
     const tabAutoRotate = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const homeTabOptions = { autoRotate: tabAutoRotate, autoRotateMs: 5000 };
+    const homeTabOptions = { autoRotate: tabAutoRotate, autoRotateMs: 15000 };
 
     setupCategoryTabs(
       document.getElementById("youtube-categories"),

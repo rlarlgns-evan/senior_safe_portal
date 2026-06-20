@@ -274,14 +274,18 @@ function padYoutubeItemsToCount(items, categoryId, neededCount) {
 }
 
 async function searchYoutubeQueryBatch(searchQueries, neededCount, searchOptions) {
+  if (youtubeQuotaBlocked) return [];
+
   const seenIds = new Set();
   const items = [];
+  const maxQueries = neededCount <= HOME_YOUTUBE_PREVIEW ? 1 : 2;
+  const apiLimit = Math.min(Math.max(neededCount, 3), 10);
 
-  for (const searchQuery of searchQueries) {
+  for (const searchQuery of searchQueries.slice(0, maxQueries)) {
     if (items.length >= neededCount) break;
 
     try {
-      const videos = await searchVideos(searchQuery, 25, searchOptions);
+      const videos = await searchVideos(searchQuery, apiLimit, searchOptions);
 
       for (const video of videos) {
         const item = videoResultToItem(video);
@@ -293,6 +297,10 @@ async function searchYoutubeQueryBatch(searchQueries, neededCount, searchOptions
       }
     } catch (err) {
       console.warn("YouTube search failed:", searchQuery, err);
+      if (isYoutubeQuotaError(err)) {
+        youtubeQuotaBlocked = true;
+        break;
+      }
     }
   }
 
@@ -328,6 +336,35 @@ const HOME_WELFARE_PREVIEW = 3;
 const BROWSE_YOUTUBE_LIMIT = 20;
 const BROWSE_NEWS_LIMIT = 20;
 const BROWSE_WELFARE_LIMIT = 10;
+const YOUTUBE_CACHE_TTL_MS = 30 * 60 * 1000;
+
+const youtubeResultCache = new Map();
+let youtubeQuotaBlocked = false;
+
+function buildYoutubeCacheKey(categoryId, query, neededCount) {
+  return `${categoryId || ""}|${query || ""}|${neededCount}`;
+}
+
+function getCachedYoutubeItems(cacheKey) {
+  const entry = youtubeResultCache.get(cacheKey);
+  if (!entry || Date.now() > entry.expiresAt) {
+    youtubeResultCache.delete(cacheKey);
+    return null;
+  }
+  return entry.items;
+}
+
+function setCachedYoutubeItems(cacheKey, items) {
+  youtubeResultCache.set(cacheKey, {
+    items,
+    expiresAt: Date.now() + YOUTUBE_CACHE_TTL_MS,
+  });
+}
+
+function isYoutubeQuotaError(err) {
+  const msg = String(err?.message || err || "");
+  return /한도|quota|limit exceeded|dailyLimit/i.test(msg);
+}
 
 function buildBrowsePageUrl(page, categoryId) {
   const params = new URLSearchParams();
@@ -557,12 +594,20 @@ function renderYoutubeHomeCard(item) {
 }
 
 async function fetchYoutubeItemsForCategory(categoryId, query, neededCount) {
+  const cacheKey = buildYoutubeCacheKey(categoryId, query, neededCount);
+  const cached = getCachedYoutubeItems(cacheKey);
+  if (cached) return cached;
+
+  if (youtubeQuotaBlocked) {
+    return padYoutubeItemsToCount([], categoryId, neededCount);
+  }
+
   const searchQueries = getYoutubeSearchQueries(categoryId, query);
   const baseOptions = { skipAnalysis: true };
 
   let items = await searchYoutubeQueryBatch(searchQueries, neededCount, baseOptions);
 
-  if (items.length < neededCount) {
+  if (items.length < neededCount && neededCount > HOME_YOUTUBE_PREVIEW && !youtubeQuotaBlocked) {
     const broadQuery = getCategoryQuery(YOUTUBE_CATEGORIES, categoryId);
     const extra = await searchYoutubeQueryBatch([broadQuery], neededCount, baseOptions);
     const seenIds = new Set(items.map((item) => item.videoId));
@@ -579,7 +624,9 @@ async function fetchYoutubeItemsForCategory(categoryId, query, neededCount) {
     return padYoutubeItemsToCount(items, categoryId, neededCount);
   }
 
-  return items.slice(0, neededCount);
+  const result = items.slice(0, neededCount);
+  setCachedYoutubeItems(cacheKey, result);
+  return result;
 }
 
 async function loadHomeYoutubeRecommendations(container, query, options = {}) {

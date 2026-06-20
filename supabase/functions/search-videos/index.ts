@@ -110,9 +110,14 @@ async function fetchYouTubeVideos(
     try {
       const errBody = await response.json();
       const reason = errBody?.error?.errors?.[0]?.reason ?? "";
-      console.error("YouTube API HTTP", response.status, reason, errBody?.error?.message);
+      const apiMessage = String(errBody?.error?.message ?? "");
+      console.error("YouTube API HTTP", response.status, reason, apiMessage);
 
-      if (reason === "quotaExceeded" || reason === "dailyLimitExceeded") {
+      if (
+        reason === "quotaExceeded"
+        || reason === "dailyLimitExceeded"
+        || /quota|exceeded|limit/i.test(apiMessage)
+      ) {
         message = "오늘 영상 검색 한도를 모두 사용했습니다. 내일 다시 시도해 주세요.";
       } else if (reason === "keyInvalid" || reason === "accessNotConfigured") {
         message = "YouTube API 설정에 문제가 있습니다. 관리자에게 문의해 주세요.";
