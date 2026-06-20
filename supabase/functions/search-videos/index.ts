@@ -47,6 +47,16 @@ interface VideoResult {
 
 const YOUTUBE_VIDEO_ID_PATTERN = /^[\w-]{11}$/;
 
+const ALLOWED_YOUTUBE_VIDEO_CATEGORIES = new Set([
+  "10", "17", "24", "25", "26", "27", "28",
+]);
+
+function sanitizeVideoCategoryId(raw: unknown): string | undefined {
+  const id = String(raw ?? "").trim();
+  if (!id || !ALLOWED_YOUTUBE_VIDEO_CATEGORIES.has(id)) return undefined;
+  return id;
+}
+
 /**
  * YouTube Data API v3로 영상 검색
  * @param query - 검증된 검색어
@@ -56,6 +66,7 @@ async function fetchYouTubeVideos(
   query: string,
   apiKey: string,
   maxResults: number,
+  videoCategoryId?: string,
 ): Promise<YouTubeSearchItem[]> {
   const params = new URLSearchParams({
     part: "snippet",
@@ -66,6 +77,10 @@ async function fetchYouTubeVideos(
     relevanceLanguage: "ko",
     key: apiKey,
   });
+
+  if (videoCategoryId) {
+    params.set("videoCategoryId", videoCategoryId);
+  }
 
   const response = await fetch(`https://www.googleapis.com/youtube/v3/search?${params.toString()}`);
 
@@ -203,8 +218,14 @@ Deno.serve(async (req: Request) => {
     const query = sanitizeSearchQuery(body?.query);
     const maxResults = clampLimit(body?.limit, 5, 20);
     const skipAnalysis = body?.skipAnalysis === true;
+    const videoCategoryId = sanitizeVideoCategoryId(body?.videoCategoryId);
 
-    const youtubeItems = await fetchYouTubeVideos(query, youtubeApiKey, maxResults);
+    const youtubeItems = await fetchYouTubeVideos(
+      query,
+      youtubeApiKey,
+      maxResults,
+      videoCategoryId,
+    );
 
     if (youtubeItems.length === 0) {
       return jsonResponse(req, { videos: [] });

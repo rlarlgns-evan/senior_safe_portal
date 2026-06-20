@@ -149,6 +149,7 @@ async function analyzeLink(url) {
 async function searchVideos(query, limit = 5, options = {}) {
   const body = { query, limit };
   if (options.skipAnalysis) body.skipAnalysis = true;
+  if (options.videoCategoryId) body.videoCategoryId = options.videoCategoryId;
 
   const { data, error } = await supabaseClient.functions.invoke("search-videos", { body });
   if (error) {
@@ -178,12 +179,46 @@ function videoResultToItem(video) {
   };
 }
 
+/** YouTube Data API videoCategoryId (검색 정확도 향상) */
+const YOUTUBE_API_CATEGORY_IDS = {
+  music: "10",
+  affairs: "25",
+  entertainment: "24",
+  documentary: "27",
+  health: "26",
+};
+
 const YOUTUBE_CATEGORIES = [
-  { id: "music", label: "음악", query: "트로트 명곡 어르신" },
-  { id: "affairs", label: "시사", query: "시사 뉴스 브리핑" },
-  { id: "entertainment", label: "예능", query: "예능 프로 그리고" },
-  { id: "documentary", label: "다큐", query: "다큐멘터리 역사" },
-  { id: "health", label: "건강", query: "시니어 건강 운동" },
+  {
+    id: "music",
+    label: "음악",
+    query: "트로트 명곡",
+    queries: ["트로트 명곡 모음", "7080 추억의 가요", "국민가요 베스트"],
+  },
+  {
+    id: "affairs",
+    label: "시사",
+    query: "시사 뉴스",
+    queries: ["KBS 시사뉴스", "뉴스9 하이라이트", "오늘의 시사 브리핑"],
+  },
+  {
+    id: "entertainment",
+    label: "예능",
+    query: "예능",
+    queries: ["유퀴즈 온더블럭", "놀면 뭐하니", "1박 2일"],
+  },
+  {
+    id: "documentary",
+    label: "다큐",
+    query: "다큐멘터리",
+    queries: ["EBS 다큐프라임", "KBS 다큐멘터리", "역사 다큐멘터리"],
+  },
+  {
+    id: "health",
+    label: "건강",
+    query: "시니어 건강",
+    queries: ["어르신 건강체조", "국민건강체조", "노인 스트레칭 운동"],
+  },
 ];
 
 /** API 장애 시 공식·교육 채널 영상으로 대체 */
@@ -207,20 +242,21 @@ const YOUTUBE_CATEGORY_FALLBACK = {
     { video_id: "vKGj6kF8b8o", title: "하체 근력 운동 | 백세수업", channel: "서울아산병원", status: "안전" },
     { video_id: "WhanMCBWDH8", title: "6070 시니어 저강도 운동 1분", channel: "엄마의 생존운동", status: "안전" },
   ],
-  _shared: [
-    { video_id: "7DIh3WaGcEU", title: "전유진 - 사랑만은 않겠어요 [불후의 명곡2]", channel: "KBS 레전드 케이팝", status: "안전" },
-    { video_id: "B2lHwQBZx-A", title: "9시 뉴스", channel: "KBS News", status: "안전" },
-    { video_id: "oq0eugtuMas", title: "국민건강체조 (새천년건강체조)", channel: "국민체육진흥공단", status: "안전" },
-  ],
 };
 
+function getYoutubeSearchQueries(categoryId, fallbackQuery) {
+  const category = findCategoryById(YOUTUBE_CATEGORIES, categoryId);
+  if (category?.queries?.length) return category.queries;
+  if (fallbackQuery) return [fallbackQuery];
+  return [category?.query].filter(Boolean);
+}
+
 function getYoutubeFallbackItems(categoryId, count) {
-  const primary = YOUTUBE_CATEGORY_FALLBACK[categoryId] || [];
-  const shared = YOUTUBE_CATEGORY_FALLBACK._shared || [];
+  const pool = YOUTUBE_CATEGORY_FALLBACK[categoryId] || [];
   const seen = new Set();
   const items = [];
 
-  for (const video of [...primary, ...shared]) {
+  for (const video of pool) {
     if (!video?.video_id || seen.has(video.video_id)) continue;
     seen.add(video.video_id);
     items.push(videoResultToItem(video));
@@ -420,71 +456,70 @@ function renderYoutubeHomeCard(item) {
   `;
 }
 
-async function fetchSafeYoutubeItems(query, neededCount) {
+async function fetchYoutubeItemsForCategory(categoryId, query, neededCount) {
   const seenIds = new Set();
-  const safeItems = [];
-  const queryVariants = [
-    query,
-    `${query} 공식`,
-    `${query} 추천`,
-  ];
+  const items = [];
+  const searchQueries = getYoutubeSearchQueries(categoryId, query);
+  const videoCategoryId = YOUTUBE_API_CATEGORY_IDS[categoryId];
 
-  for (const searchQuery of queryVariants) {
-    if (safeItems.length >= neededCount) break;
+  for (const searchQuery of searchQueries) {
+    if (items.length >= neededCount) break;
 
-    const videos = await searchVideos(searchQuery, 15, { skipAnalysis: true });
-    for (const video of videos) {
-      if (!isVideoSafe(video)) continue;
+    try {
+      const videos = await searchVideos(searchQuery, 15, {
+        skipAnalysis: true,
+        videoCategoryId,
+      });
 
-      const item = videoResultToItem(video);
-      if (seenIds.has(item.videoId)) continue;
+      for (const video of videos) {
+        const item = videoResultToItem(video);
+        if (seenIds.has(item.videoId)) continue;
 
-      seenIds.add(item.videoId);
-      safeItems.push(item);
-      if (safeItems.length >= neededCount) break;
+        seenIds.add(item.videoId);
+        items.push(item);
+        if (items.length >= neededCount) break;
+      }
+    } catch (err) {
+      console.warn("YouTube category search failed:", categoryId, searchQuery, err);
     }
   }
 
-  return safeItems.slice(0, neededCount);
+  return items.slice(0, neededCount);
 }
 
 async function loadHomeYoutubeRecommendations(container, query, options = {}) {
   const preview = options.preview !== false;
-  container.innerHTML = mascotLoadingHtml("어르신을 위한 안전한 영상을 찾고 있습니다...");
+  const categoryId = options.categoryId;
+  const neededCount = preview ? HOME_YOUTUBE_PREVIEW : BROWSE_YOUTUBE_LIMIT;
+
+  container.innerHTML = mascotLoadingHtml("카테고리에 맞는 영상을 찾고 있습니다...");
 
   try {
-    if (preview) {
-      const safeItems = await fetchSafeYoutubeItems(query, HOME_YOUTUBE_PREVIEW);
+    const items = await fetchYoutubeItemsForCategory(categoryId, query, neededCount);
 
-      if (safeItems.length === 0) {
-        const fallbackItems = getYoutubeFallbackItems(options.categoryId, HOME_YOUTUBE_PREVIEW);
-        if (fallbackItems.length > 0) {
-          container.innerHTML = fallbackItems.map(renderYoutubeHomeCard).join("");
-          return;
-        }
-        container.innerHTML = mascotLoadingHtml("안전한 추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.");
-        return;
+    if (items.length > 0) {
+      if (preview) {
+        container.innerHTML = items.map(renderYoutubeHomeCard).join("");
+      } else {
+        container.innerHTML = `<div class="browse-grid browse-youtube-grid">${items.map(renderYoutubeThumbnailCard).join("")}</div>`;
       }
-
-      container.innerHTML = safeItems.map(renderYoutubeHomeCard).join("");
       return;
     }
 
-    const videos = await searchVideos(query, BROWSE_YOUTUBE_LIMIT);
-    const items = videos.map(videoResultToItem);
-
-    if (items.length === 0) {
-      container.innerHTML = mascotLoadingHtml("추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.");
+    const fallbackItems = getYoutubeFallbackItems(categoryId, neededCount);
+    if (fallbackItems.length > 0) {
+      if (preview) {
+        container.innerHTML = fallbackItems.map(renderYoutubeHomeCard).join("");
+      } else {
+        container.innerHTML = `<div class="browse-grid browse-youtube-grid">${fallbackItems.map(renderYoutubeThumbnailCard).join("")}</div>`;
+      }
       return;
     }
 
-    container.innerHTML = `<div class="browse-grid browse-youtube-grid">${items.map(renderYoutubeThumbnailCard).join("")}</div>`;
+    container.innerHTML = mascotLoadingHtml("추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.");
   } catch (err) {
     console.warn("YouTube recommendations failed:", err);
-    const fallbackItems = getYoutubeFallbackItems(
-      options.categoryId,
-      preview ? HOME_YOUTUBE_PREVIEW : BROWSE_YOUTUBE_LIMIT,
-    );
+    const fallbackItems = getYoutubeFallbackItems(categoryId, neededCount);
 
     if (fallbackItems.length > 0) {
       if (preview) {
@@ -1178,7 +1213,7 @@ function getSiteHeaderHtml() {
   return `
     <div class="site-header-row">
       <a class="site-brand" href="index.html">
-        <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="60" height="60" />
+        <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="68" height="68" />
         <span class="site-brand-text">시니어 디지털 보안관</span>
       </a>
       <nav class="top-nav" aria-label="주요 메뉴" data-auto-nav></nav>
