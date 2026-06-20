@@ -266,7 +266,7 @@ body {
   max-width: none;
   margin: 0;
   padding: 0.75rem var(--space-header-x);
-  min-height: 76px;
+  min-height: 88px;
   box-sizing: border-box;
 }
 
@@ -382,7 +382,7 @@ body {
 .top-nav-link {
   flex: 0 0 auto;
   padding: 0.65rem 0.85rem;
-  border-radius: 999px;
+  border-radius: var(--radius-btn);
   text-decoration: none;
   color: var(--color-text);
   font-weight: 800;
@@ -442,12 +442,12 @@ body {
 
 @media (min-width: 1100px) {
   .brand-mascot {
-    width: 68px;
-    height: 68px;
+    width: 88px;
+    height: 88px;
   }
 
   .site-brand-text {
-    font-size: 1.35rem;
+    font-size: 1.4rem;
   }
 
   .top-nav-link {
@@ -477,8 +477,8 @@ body {
   }
 
   .brand-mascot {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
   }
 
   .top-nav-link {
@@ -542,8 +542,8 @@ body {
 }
 
 .brand-mascot {
-  width: 58px;
-  height: 58px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
   flex-shrink: 0;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
@@ -1379,7 +1379,7 @@ body {
   min-height: 44px;
   padding: 0.45rem 1.1rem;
   border: 2px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-btn);
   background: #fff;
   color: var(--color-text);
   font-size: 1rem;
