@@ -197,3 +197,19 @@ function loadSearchResults() {
 function goToResultsPage() {
   window.location.href = "results.html";
 }
+
+async function chatWithAgent(message, history) {
+  const { data, error } = await supabaseClient.functions.invoke("chat-agent", {
+    body: { message, history },
+  });
+
+  if (error) {
+    throw new Error(await getInvokeErrorMessage(error, data));
+  }
+
+  if (!data?.reply) {
+    throw new Error(data?.message || "챗봇 응답을 받지 못했습니다.");
+  }
+
+  return data;
+}

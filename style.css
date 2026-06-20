@@ -702,6 +702,35 @@ body {
   margin-left: auto;
 }
 
+.chat-bubble.chat-action {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  padding: 0.15rem 0;
+}
+
+.chat-result-link {
+  width: 100%;
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  background: #fff;
+  border: 2px solid var(--color-primary);
+  border-radius: 10px;
+  color: var(--color-primary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chat-result-link:hover {
+  background: #ffead5;
+}
+
+.chat-input:disabled,
+.chat-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .chat-form {
   padding: 0.85rem;
   border-top: 1px solid var(--color-border);

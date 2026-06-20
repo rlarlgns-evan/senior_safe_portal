@@ -181,7 +181,9 @@ async function handleSearchSubmit(event) {
   }
 }
 
-// ── 챗봇 ──
+// ── 챗봇 (대화형 Agent) ──
+
+const chatHistory = [];
 
 function addChatBubble(text, sender) {
   const bubble = document.createElement("div");
@@ -189,14 +191,16 @@ function addChatBubble(text, sender) {
   bubble.textContent = text;
   chatMessages.appendChild(bubble);
   chatMessages.scrollTop = chatMessages.scrollHeight;
+  return bubble;
 }
 
-function getDummyChatResponse(text) {
-  const danger = ["당첨", "무료", "긴급", "송금", "계좌", "링크", "클릭", "택배", "미납", "경찰", "검찰", "대출"];
-  if (danger.some((k) => text.includes(k))) {
-    return "🚨 위험! 사기(스미싱)일 가능성이 높습니다. 링크를 누르지 마세요. 112에 문의하세요.";
+function setChatSubmitting(isSubmitting) {
+  const submitButton = chatForm.querySelector(".chat-submit");
+  if (submitButton) {
+    submitButton.disabled = isSubmitting;
+    submitButton.textContent = isSubmitting ? "답변 생성 중..." : "메시지 보내기";
   }
-  return "✅ 특별히 위험한 표현은 없습니다. 모르는 링크는 누르지 않는 것이 안전합니다.";
+  chatInput.disabled = isSubmitting;
 }
 
 async function handleChatSubmit(event) {
@@ -206,30 +210,40 @@ async function handleChatSubmit(event) {
 
   addChatBubble(text, "user");
   chatInput.value = "";
+  chatHistory.push({ role: "user", content: text });
 
-  if (isLikelyUrl(text)) {
-    addChatBubble("링크를 확인하고 있습니다...", "bot");
-    try {
-      const url = normalizeUrl(text);
-      const data = await analyzeLink(url);
+  const thinkingBubble = addChatBubble("보안관이 생각하고 있습니다...", "bot");
+  setChatSubmitting(true);
+
+  try {
+    const data = await chatWithAgent(text, chatHistory.slice(0, -1));
+    thinkingBubble.textContent = data.reply;
+    chatHistory.push({ role: "assistant", content: data.reply });
+
+    if (data.linkAnalysis && !Array.isArray(data.linkAnalysis)) {
       const payload = {
-        query: text,
+        query: data.linkAnalysis.url,
         type: "link",
-        summary: "링크 1건을 정밀 검사했습니다.",
-        items: [linkAnalysisToItem(data, url)],
+        summary: data.linkAnalysis.status === "위험"
+          ? "⚠️ 챗봇 링크 검사 · 위험 신호 감지"
+          : "✅ 챗봇 링크 검사 · 비교적 안전",
+        items: [linkAnalysisToItem(data.linkAnalysis, data.linkAnalysis.url)],
       };
       saveSearchResults(payload);
-      chatMessages.lastElementChild.textContent = data.status === "위험"
-        ? `🚨 위험 링크입니다. 결과 페이지로 이동합니다.`
-        : `✅ 비교적 안전해 보입니다. 결과 페이지로 이동합니다.`;
-      setTimeout(() => goToResultsPage(), 800);
-    } catch {
-      chatMessages.lastElementChild.textContent = "분석 중 오류가 발생했습니다.";
-    }
-    return;
-  }
 
-  setTimeout(() => addChatBubble(getDummyChatResponse(text), "bot"), 600);
+      const detailBubble = document.createElement("div");
+      detailBubble.className = "chat-bubble bot chat-action";
+      detailBubble.innerHTML = `<button type="button" class="chat-result-link">📋 상세 검사 결과 보기</button>`;
+      detailBubble.querySelector("button").addEventListener("click", goToResultsPage);
+      chatMessages.appendChild(detailBubble);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  } catch (err) {
+    thinkingBubble.textContent = `죄송합니다. 오류가 발생했습니다: ${err.message}`;
+    chatHistory.pop();
+  } finally {
+    setChatSubmitting(false);
+  }
 }
 
 function toggleChat() {
@@ -261,7 +275,7 @@ document.querySelectorAll("[data-section]").forEach((link) => {
 document.addEventListener("DOMContentLoaded", () => {
   renderDefaultYoutube();
   renderNews();
-  addChatBubble("안녕하세요! 디지털 보안관입니다. 의심스러운 문자나 링크를 붙여넣어 주세요.", "bot");
+  addChatBubble("안녕하세요! 저는 시니어 디지털 보안관입니다. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.", "bot");
   initAuth();
 });
 
