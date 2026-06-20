@@ -1473,7 +1473,7 @@ function getLoginModalHtml() {
 }
 
 function injectLoginModal() {
-  if (document.getElementById("login-modal")) return;
+  document.getElementById("login-modal")?.remove();
   document.body.insertAdjacentHTML("beforeend", getLoginModalHtml());
 }
 
@@ -1674,21 +1674,54 @@ const SiteAuth = {
   },
 
   bindEvents() {
-    document.getElementById("login-button")?.addEventListener("click", () => SiteAuth.openLoginModal());
-    document.getElementById("login-modal-close")?.addEventListener("click", () => SiteAuth.closeLoginModal());
-    document.getElementById("login-form")?.addEventListener("submit", (e) => SiteAuth.handleLoginSubmit(e));
-    document.getElementById("signup-form")?.addEventListener("submit", (e) => SiteAuth.handleSignupSubmit(e));
-    document.getElementById("auth-tab-login")?.addEventListener("click", () => SiteAuth.setAuthMode("login"));
-    document.getElementById("auth-tab-signup")?.addEventListener("click", () => SiteAuth.setAuthMode("signup"));
-    document.getElementById("login-error-close")?.addEventListener("click", () => SiteAuth.hideLoginError());
-    document.getElementById("login-success-close")?.addEventListener("click", () => SiteAuth.hideLoginSuccess());
-    document.getElementById("logout-button")?.addEventListener("click", () => SiteAuth.handleLogout());
+    if (SiteAuth._eventsBound) return;
+    SiteAuth._eventsBound = true;
 
-    document.querySelectorAll("[data-social-provider]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const provider = button.getAttribute("data-social-provider");
+    document.body.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      if (target.closest("#login-button")) {
+        SiteAuth.openLoginModal();
+        return;
+      }
+      if (target.closest("#login-modal-close")) {
+        SiteAuth.closeLoginModal();
+        return;
+      }
+      if (target.closest("#login-error-close")) {
+        SiteAuth.hideLoginError();
+        return;
+      }
+      if (target.closest("#login-success-close")) {
+        SiteAuth.hideLoginSuccess();
+        return;
+      }
+      if (target.closest("#logout-button")) {
+        SiteAuth.handleLogout();
+        return;
+      }
+      if (target.closest("#auth-tab-login")) {
+        SiteAuth.setAuthMode("login");
+        return;
+      }
+      if (target.closest("#auth-tab-signup")) {
+        SiteAuth.setAuthMode("signup");
+        return;
+      }
+
+      const socialBtn = target.closest("[data-social-provider]");
+      if (socialBtn) {
+        const provider = socialBtn.getAttribute("data-social-provider");
         if (provider) SiteAuth.handleSocialLogin(provider);
-      });
+      }
+    });
+
+    document.body.addEventListener("submit", (event) => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement)) return;
+      if (form.id === "login-form") SiteAuth.handleLoginSubmit(event);
+      if (form.id === "signup-form") SiteAuth.handleSignupSubmit(event);
     });
   },
 

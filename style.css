@@ -2350,7 +2350,9 @@ button.back-link-prominent {
 
 .modal-panel {
   position: relative;
-  width: min(100%, 480px);
+  width: min(100%, 520px);
+  max-height: min(92vh, 900px);
+  overflow-y: auto;
   background: var(--color-surface);
   border: var(--btn-border-width) solid var(--color-border);
   border-radius: var(--radius-card);
