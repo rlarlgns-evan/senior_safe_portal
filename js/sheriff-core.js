@@ -1407,25 +1407,66 @@ function injectSiteHeader() {
   header.innerHTML = getSiteHeaderHtml();
 }
 
+function getAuthSocialLoginHtml() {
+  const providers = [
+    { id: "google", label: "Google", icon: "assets/social-google.svg" },
+    { id: "naver", label: "네이버", icon: "assets/social-naver.svg" },
+    { id: "kakao", label: "카카오", icon: "assets/social-kakao.svg" },
+  ];
+
+  return `
+    <div class="auth-social-block" id="auth-social-login">
+      <p class="auth-social-title">간편 로그인</p>
+      <div class="auth-social-buttons" role="group" aria-label="간편 로그인">
+        ${providers.map(({ id, label, icon }) => `
+          <button type="button" class="auth-social-btn auth-social-btn--${id}" data-social-provider="${id}" aria-label="${label}로 로그인">
+            <img src="${icon}" alt="" class="auth-social-icon" width="40" height="40" />
+            <span class="auth-social-label">${label}</span>
+          </button>
+        `).join("")}
+      </div>
+      <p class="auth-divider" aria-hidden="true"><span>또는</span></p>
+    </div>
+  `;
+}
+
 function getLoginModalHtml() {
   return `
     <div id="login-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
       <div class="modal-panel card">
         <button type="button" id="login-modal-close" class="modal-close btn btn--danger" aria-label="로그인 창 닫기">닫기</button>
         <h2 id="login-modal-title" class="modal-title">로그인</h2>
-        <p class="modal-desc">이메일과 비밀번호로 로그인하세요. (Supabase 계정)</p>
-        <form id="login-form" class="login-form">
+        <p id="login-modal-desc" class="modal-desc">간편 로그인 또는 이메일로 이용하세요.</p>
+        <div class="auth-mode-tabs" role="tablist" aria-label="로그인 또는 회원가입">
+          <button type="button" id="auth-tab-login" class="auth-mode-tab auth-mode-tab--active" role="tab" aria-selected="true" aria-controls="login-form">로그인</button>
+          <button type="button" id="auth-tab-signup" class="auth-mode-tab" role="tab" aria-selected="false" aria-controls="signup-form">회원가입</button>
+        </div>
+        <div id="login-error" class="login-error alert-persistent hidden" role="alert">
+          <p id="login-error-message"></p>
+          <button type="button" id="login-error-close" class="btn btn--danger">닫기</button>
+        </div>
+        <div id="login-success" class="login-success alert-persistent hidden" role="status">
+          <p id="login-success-message"></p>
+          <button type="button" id="login-success-close" class="btn btn--secondary">확인</button>
+        </div>
+        <form id="login-form" class="login-form auth-form" role="tabpanel">
+          ${getAuthSocialLoginHtml()}
           <label for="login-email" class="form-label">이메일</label>
           <input id="login-email" type="email" class="modal-input" placeholder="example@email.com" autocomplete="email" required />
           <label for="login-password" class="form-label">비밀번호</label>
           <input id="login-password" type="password" class="modal-input" placeholder="비밀번호" autocomplete="current-password" required />
-          <div id="login-error" class="login-error alert-persistent hidden" role="alert">
-            <p id="login-error-message"></p>
-            <button type="button" id="login-error-close" class="btn btn--danger">닫기</button>
-          </div>
           <button type="submit" class="modal-submit btn btn--primary">로그인하기</button>
         </form>
-        <p class="modal-note">계정이 없으시면 Supabase에서 회원가입 후 이용해 주세요.</p>
+        <form id="signup-form" class="login-form auth-form hidden" role="tabpanel" hidden>
+          <label for="signup-email" class="form-label">이메일</label>
+          <input id="signup-email" type="email" class="modal-input" placeholder="example@email.com" autocomplete="email" required />
+          <label for="signup-password" class="form-label">비밀번호</label>
+          <input id="signup-password" type="password" class="modal-input" placeholder="6자 이상" autocomplete="new-password" required minlength="6" />
+          <label for="signup-password-confirm" class="form-label">비밀번호 확인</label>
+          <input id="signup-password-confirm" type="password" class="modal-input" placeholder="비밀번호를 다시 입력" autocomplete="new-password" required minlength="6" />
+          <p class="modal-note auth-form-note">가입 후 이메일 확인이 필요할 수 있습니다. 메일함을 확인해 주세요.</p>
+          <button type="submit" class="modal-submit btn btn--primary">회원가입하기</button>
+        </form>
       </div>
     </div>
   `;
@@ -1443,6 +1484,25 @@ function getUserDisplayName(user) {
 }
 
 const SiteAuth = {
+  mode: "login",
+
+  /** @type {Record<"google"|"naver"|"kakao", (() => void|Promise<void>)|null>} */
+  socialHandlers: {
+    google: null,
+    naver: null,
+    kakao: null,
+  },
+
+  /**
+   * 간편 로그인 API 연동 (추후 설정)
+   * @example SiteAuth.registerSocialHandler("google", () => supabaseClient.auth.signInWithOAuth({ provider: "google" }))
+   */
+  registerSocialHandler(provider, handler) {
+    if (provider in SiteAuth.socialHandlers) {
+      SiteAuth.socialHandlers[provider] = handler;
+    }
+  },
+
   updateAuthUI(user) {
     const greeting = document.getElementById("user-greeting");
     const mypageLink = document.getElementById("mypage-link");
@@ -1468,23 +1528,92 @@ const SiteAuth = {
     document.getElementById("login-error")?.classList.add("hidden");
   },
 
+  hideLoginSuccess() {
+    document.getElementById("login-success")?.classList.add("hidden");
+  },
+
   showLoginError(message) {
+    SiteAuth.hideLoginSuccess();
     const box = document.getElementById("login-error");
     const text = document.getElementById("login-error-message");
     if (text) text.textContent = message;
     box?.classList.remove("hidden");
   },
 
-  openLoginModal() {
+  showLoginSuccess(message) {
     SiteAuth.hideLoginError();
+    const box = document.getElementById("login-success");
+    const text = document.getElementById("login-success-message");
+    if (text) text.textContent = message;
+    box?.classList.remove("hidden");
+  },
+
+  setAuthMode(mode) {
+    SiteAuth.mode = mode;
+    const isLogin = mode === "login";
+
+    document.getElementById("auth-tab-login")?.classList.toggle("auth-mode-tab--active", isLogin);
+    document.getElementById("auth-tab-signup")?.classList.toggle("auth-mode-tab--active", !isLogin);
+    document.getElementById("auth-tab-login")?.setAttribute("aria-selected", isLogin ? "true" : "false");
+    document.getElementById("auth-tab-signup")?.setAttribute("aria-selected", isLogin ? "false" : "true");
+
+    const loginForm = document.getElementById("login-form");
+    const signupForm = document.getElementById("signup-form");
+    loginForm?.classList.toggle("hidden", !isLogin);
+    signupForm?.classList.toggle("hidden", isLogin);
+    if (signupForm) signupForm.hidden = isLogin;
+
+    const title = document.getElementById("login-modal-title");
+    const desc = document.getElementById("login-modal-desc");
+    if (title) title.textContent = isLogin ? "로그인" : "회원가입";
+    if (desc) {
+      desc.textContent = isLogin
+        ? "간편 로그인 또는 이메일로 이용하세요."
+        : "이메일과 비밀번호로 새 계정을 만드세요.";
+    }
+
+    SiteAuth.hideLoginError();
+    SiteAuth.hideLoginSuccess();
+  },
+
+  openLoginModal(options = {}) {
+    SiteAuth.setAuthMode(options.mode ?? "login");
     document.getElementById("login-modal")?.classList.remove("hidden");
-    document.getElementById("login-email")?.focus();
+    if (SiteAuth.mode === "signup") {
+      document.getElementById("signup-email")?.focus();
+    } else {
+      document.getElementById("login-email")?.focus();
+    }
   },
 
   closeLoginModal() {
     document.getElementById("login-modal")?.classList.add("hidden");
     document.getElementById("login-form")?.reset();
+    document.getElementById("signup-form")?.reset();
     SiteAuth.hideLoginError();
+    SiteAuth.hideLoginSuccess();
+    SiteAuth.setAuthMode("login");
+  },
+
+  async handleSocialLogin(provider) {
+    SiteAuth.hideLoginError();
+    SiteAuth.hideLoginSuccess();
+
+    const labels = { google: "Google", naver: "네이버", kakao: "카카오" };
+    const handler = SiteAuth.socialHandlers[provider];
+
+    if (typeof handler === "function") {
+      try {
+        await handler();
+      } catch (err) {
+        SiteAuth.showLoginError(sanitizeUserFacingMessage(err, "간편 로그인 중 문제가 발생했습니다."));
+      }
+      return;
+    }
+
+    SiteAuth.showLoginError(
+      `${labels[provider] ?? provider} 간편 로그인은 준비 중입니다. 이메일로 로그인해 주세요.`,
+    );
   },
 
   async handleLoginSubmit(event) {
@@ -1509,6 +1638,37 @@ const SiteAuth = {
     }
   },
 
+  async handleSignupSubmit(event) {
+    event.preventDefault();
+    SiteAuth.hideLoginError();
+    SiteAuth.hideLoginSuccess();
+
+    try {
+      const email = validateEmailInput(document.getElementById("signup-email")?.value ?? "");
+      const password = document.getElementById("signup-password")?.value ?? "";
+      const confirm = document.getElementById("signup-password-confirm")?.value ?? "";
+
+      if (password.length < 6) throw new Error("비밀번호는 6자 이상으로 입력해 주세요.");
+      if (password !== confirm) throw new Error("비밀번호 확인이 일치하지 않습니다.");
+
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) {
+        SiteAuth.showLoginError("회원가입에 실패했습니다. 이메일을 확인하거나 잠시 후 다시 시도해 주세요.");
+        return;
+      }
+
+      if (data.session) {
+        SiteAuth.closeLoginModal();
+        return;
+      }
+
+      SiteAuth.setAuthMode("login");
+      SiteAuth.showLoginSuccess("가입 확인 메일을 보냈습니다. 메일함을 확인한 뒤 로그인해 주세요.");
+    } catch (err) {
+      SiteAuth.showLoginError(sanitizeUserFacingMessage(err, "회원가입 중 문제가 발생했습니다."));
+    }
+  },
+
   async handleLogout() {
     await supabaseClient.auth.signOut();
   },
@@ -1517,8 +1677,19 @@ const SiteAuth = {
     document.getElementById("login-button")?.addEventListener("click", () => SiteAuth.openLoginModal());
     document.getElementById("login-modal-close")?.addEventListener("click", () => SiteAuth.closeLoginModal());
     document.getElementById("login-form")?.addEventListener("submit", (e) => SiteAuth.handleLoginSubmit(e));
+    document.getElementById("signup-form")?.addEventListener("submit", (e) => SiteAuth.handleSignupSubmit(e));
+    document.getElementById("auth-tab-login")?.addEventListener("click", () => SiteAuth.setAuthMode("login"));
+    document.getElementById("auth-tab-signup")?.addEventListener("click", () => SiteAuth.setAuthMode("signup"));
     document.getElementById("login-error-close")?.addEventListener("click", () => SiteAuth.hideLoginError());
+    document.getElementById("login-success-close")?.addEventListener("click", () => SiteAuth.hideLoginSuccess());
     document.getElementById("logout-button")?.addEventListener("click", () => SiteAuth.handleLogout());
+
+    document.querySelectorAll("[data-social-provider]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const provider = button.getAttribute("data-social-provider");
+        if (provider) SiteAuth.handleSocialLogin(provider);
+      });
+    });
   },
 
   async init() {

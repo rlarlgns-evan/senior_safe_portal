@@ -37,6 +37,17 @@ function validateEmailInput(email) {
   return trimmed;
 }
 
+function validatePasswordInput(password, minLength = 6) {
+  if (!password) throw new Error("비밀번호를 입력해 주세요.");
+  if (password.length < minLength) {
+    throw new Error(`비밀번호는 ${minLength}자 이상 입력해 주세요.`);
+  }
+  if (password.length > 72) {
+    throw new Error("비밀번호가 너무 깁니다. 72자 이내로 입력해 주세요.");
+  }
+  return password;
+}
+
 function validateLinkAnalysisUrl(url) {
   if (typeof url !== "string" || !url.trim()) return null;
   try {

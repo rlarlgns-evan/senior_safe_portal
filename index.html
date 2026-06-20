@@ -174,26 +174,6 @@
     </main>
   </div>
 
-  <div id="login-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
-    <div class="modal-panel card">
-      <button type="button" id="login-modal-close" class="modal-close btn btn--danger" aria-label="로그인 창 닫기">닫기</button>
-      <h2 id="login-modal-title" class="modal-title">로그인</h2>
-      <p class="modal-desc">이메일과 비밀번호로 로그인하세요. (Supabase 계정)</p>
-      <form id="login-form" class="login-form">
-        <label for="login-email" class="form-label">이메일</label>
-        <input id="login-email" type="email" class="modal-input" placeholder="example@email.com" autocomplete="email" required />
-        <label for="login-password" class="form-label">비밀번호</label>
-        <input id="login-password" type="password" class="modal-input" placeholder="비밀번호" autocomplete="current-password" required />
-        <div id="login-error" class="login-error alert-persistent hidden" role="alert">
-          <p id="login-error-message"></p>
-          <button type="button" id="login-error-close" class="btn btn--danger">닫기</button>
-        </div>
-        <button type="submit" class="modal-submit btn btn--primary">로그인하기</button>
-      </form>
-      <p class="modal-note">계정이 없으시면 Supabase에서 회원가입 후 이용해 주세요.</p>
-    </div>
-  </div>
-
   <div id="loading-overlay" class="loading-overlay hidden" role="alertdialog" aria-modal="true" aria-labelledby="loading-message" aria-hidden="true">
     <div class="loading-box card alert-persistent">
       <img src="assets/mascot-sheriff.png" alt="" class="loading-mascot" width="96" height="96" />

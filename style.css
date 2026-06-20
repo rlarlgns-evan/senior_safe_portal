@@ -2439,6 +2439,175 @@ button.back-link-prominent {
   margin: 0;
 }
 
+/* ── 로그인 · 회원가입 탭 & 간편 로그인 ── */
+.auth-mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin: 0 0 1.15rem;
+}
+
+.auth-mode-tab {
+  min-height: 52px;
+  padding: 0.65rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-btn);
+  background: var(--color-surface);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: var(--font-base);
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.auth-mode-tab--active {
+  background: var(--color-nav-active-bg);
+  border-color: var(--color-nav-active-border);
+  color: var(--color-primary);
+}
+
+.auth-mode-tab:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.auth-form.hidden {
+  display: none;
+}
+
+.auth-form-note {
+  margin: 0 0 1rem;
+}
+
+.auth-social-block {
+  margin-bottom: 1.15rem;
+}
+
+.auth-social-title {
+  margin: 0 0 0.75rem;
+  font-size: var(--font-base);
+  font-weight: 800;
+  color: var(--color-text-main);
+  text-align: center;
+}
+
+.auth-social-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.auth-social-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 88px;
+  padding: 0.65rem 0.35rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.auth-social-btn:hover,
+.auth-social-btn:focus-visible {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  transform: translateY(-1px);
+  outline: none;
+  box-shadow: var(--shadow-focus-primary);
+}
+
+.auth-social-btn--google:hover,
+.auth-social-btn--google:focus-visible {
+  border-color: #4285f4;
+  background: #f8fbff;
+}
+
+.auth-social-btn--naver:hover,
+.auth-social-btn--naver:focus-visible {
+  border-color: #03c75a;
+  background: #f0fdf4;
+}
+
+.auth-social-btn--kakao:hover,
+.auth-social-btn--kakao:focus-visible {
+  border-color: #fee500;
+  background: #fffbeb;
+}
+
+.auth-social-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.auth-social-label {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--color-text-main);
+  line-height: 1.2;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.15rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-border-subtle);
+}
+
+.auth-divider span {
+  flex-shrink: 0;
+}
+
+.login-success {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  color: var(--color-success);
+  font-size: var(--font-base);
+  font-weight: 700;
+  margin-bottom: 1rem;
+  padding: var(--space-card);
+  background: var(--color-success-bg);
+  border: var(--btn-border-width) solid var(--color-success-border);
+  border-radius: var(--radius-card);
+}
+
+.login-success p {
+  margin: 0;
+}
+
+@media (max-width: 420px) {
+  .auth-social-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-social-btn {
+    flex-direction: row;
+    justify-content: flex-start;
+    min-height: 60px;
+    padding: 0.65rem 1rem;
+  }
+}
+
 /* ── 결과 / 로딩 / 오류 ── */
 .result-overlay {
   position: fixed;
