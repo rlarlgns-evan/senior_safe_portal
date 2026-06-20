@@ -44,6 +44,40 @@ function extractBestTitle(html: string): string {
     || extractMetaContent(html, "twitter:title");
 }
 
+function extractThumbnail(html: string, baseUrl: string): string {
+  const raw = extractMetaContent(html, "og:image")
+    || extractMetaContent(html, "twitter:image")
+    || extractMetaContent(html, "twitter:image:src");
+
+  if (!raw) return "";
+
+  try {
+    return new URL(raw, baseUrl).toString();
+  } catch {
+    return "";
+  }
+}
+
+function youtubeThumbnailFromUrl(targetUrl: string): string {
+  const match = targetUrl.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/i);
+  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : "";
+}
+
+function faviconFromUrl(targetUrl: string): string {
+  try {
+    const host = new URL(targetUrl).hostname;
+    return `https://www.google.com/s2/favicons?domain=${host}&sz=256`;
+  } catch {
+    return "";
+  }
+}
+
+function resolveLinkThumbnail(targetUrl: string, scrapedThumbnail?: string): string {
+  return scrapedThumbnail
+    || youtubeThumbnailFromUrl(targetUrl)
+    || faviconFromUrl(targetUrl);
+}
+
 function normalizeUrl(rawUrl: unknown): string {
   if (typeof rawUrl !== "string" || !rawUrl.trim()) {
     throw new Error("링크 주소가 비어 있습니다.");
@@ -59,7 +93,7 @@ function normalizeUrl(rawUrl: unknown): string {
   return parsed.toString();
 }
 
-async function scrapeUrlMetadata(targetUrl: string): Promise<{ title: string; description: string }> {
+async function scrapeUrlMetadata(targetUrl: string): Promise<{ title: string; description: string; thumbnail: string }> {
   const response = await fetch(targetUrl, {
     method: "GET",
     headers: {
@@ -82,12 +116,13 @@ async function scrapeUrlMetadata(targetUrl: string): Promise<{ title: string; de
   const html = await response.text();
   const title = extractBestTitle(html);
   const description = extractDescription(html);
+  const thumbnail = extractThumbnail(html, targetUrl);
 
   if (!title && !description) {
     throw new Error("페이지에서 제목 또는 설명 정보를 찾지 못했습니다.");
   }
 
-  return { title, description };
+  return { title, description, thumbnail };
 }
 
 async function analyzeWithGemini(
@@ -159,12 +194,14 @@ Deno.serve(async (req: Request) => {
 
     let title = "";
     let description = "";
+    let thumbnail = resolveLinkThumbnail(targetUrl);
     let scrapeNote: string | undefined;
 
     try {
       const scraped = await scrapeUrlMetadata(targetUrl);
       title = scraped.title;
       description = scraped.description;
+      thumbnail = resolveLinkThumbnail(targetUrl, scraped.thumbnail);
     } catch (scrapeError) {
       scrapeNote = scrapeError instanceof Error
         ? scrapeError.message
@@ -176,7 +213,7 @@ Deno.serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         ...analysis,
-        scraped: { title, description, url: targetUrl, scrapeNote },
+        scraped: { title, description, url: targetUrl, thumbnail, scrapeNote },
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );

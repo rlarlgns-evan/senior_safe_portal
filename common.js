@@ -69,15 +69,43 @@ function buildDemoVideoItems(query) {
   ];
 }
 
+function getYoutubeThumbnail(url) {
+  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/i);
+  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : "";
+}
+
+function getFaviconThumbnail(url) {
+  try {
+    const host = new URL(url).hostname;
+    return `https://www.google.com/s2/favicons?domain=${host}&sz=256`;
+  } catch {
+    return "";
+  }
+}
+
+function resolveLinkThumbnail(url, scrapedThumbnail) {
+  return scrapedThumbnail || getYoutubeThumbnail(url) || getFaviconThumbnail(url) || "";
+}
+
 function linkAnalysisToItem(data, url) {
   const isDanger = data.status === "위험";
+  const thumbnail = resolveLinkThumbnail(url, data.scraped?.thumbnail);
+  let hostname = url;
+  try {
+    hostname = new URL(url).hostname;
+  } catch {
+    // keep full url
+  }
+
   return {
     status: isDanger ? "danger" : "safe",
-    title: data.scraped?.title || "링크 안전 검사 결과",
+    title: data.scraped?.title || hostname,
     reason: data.reason || "분석 근거를 확인하지 못했습니다.",
-    thumbnail: "",
+    thumbnail,
     url,
     subtitle: url,
+    isLink: true,
+    domain: hostname,
   };
 }
 
@@ -104,7 +132,9 @@ async function runSearch(raw) {
     return {
       query,
       type: "link",
-      summary: "링크 1건을 정밀 검사했습니다.",
+      summary: data.status === "위험"
+        ? "⚠️ 입력하신 링크에서 위험 신호가 감지되었습니다."
+        : "✅ 입력하신 링크는 비교적 안전해 보입니다.",
       items: [linkAnalysisToItem(data, url)],
     };
   }
