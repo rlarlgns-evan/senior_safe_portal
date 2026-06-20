@@ -3037,3 +3037,218 @@ button.search-button {
 .community-cta-btn:focus {
   background: #1d4ed8;
 }
+
+/* ── 게시판 페이지 ── */
+
+.board-main {
+  flex: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 2.5rem;
+}
+
+.board-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%);
+  border: 2px solid var(--color-border);
+}
+
+.board-hero-mascot {
+  width: 80px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.board-title {
+  margin: 0 0 0.35rem;
+  font-size: var(--font-2xl);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.board-lead {
+  margin: 0;
+  font-size: var(--font-base);
+  color: var(--color-muted);
+  line-height: 1.55;
+}
+
+.board-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.board-auth-hint {
+  margin: 0;
+  flex: 1 1 12rem;
+  font-size: var(--font-base);
+  color: var(--color-muted);
+}
+
+.board-write-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: var(--btn-min-height);
+  padding: 0.75rem 1.25rem;
+  font-size: var(--font-base);
+  font-weight: 800;
+}
+
+.board-write-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.board-compose {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  border-radius: 14px;
+  background: #fff;
+  border: 2px solid var(--color-border);
+}
+
+.board-compose-title {
+  margin: 0 0 1rem;
+  font-size: var(--font-xl);
+  font-weight: 800;
+}
+
+.board-form .form-label {
+  display: block;
+  margin: 0.75rem 0 0.35rem;
+  font-weight: 800;
+}
+
+.board-textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 0.85rem 1rem;
+  font-size: var(--font-base);
+  font-family: inherit;
+  border: var(--btn-border-width) solid var(--color-border);
+  border-radius: var(--radius-btn);
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.board-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.board-status {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-btn);
+  background: var(--primary-blue-light);
+  font-size: var(--font-base);
+  font-weight: 600;
+}
+
+.board-status.hidden {
+  display: none;
+}
+
+.board-status-error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.board-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.board-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  border: 2px dashed var(--color-border);
+  border-radius: 14px;
+  color: var(--color-muted);
+  font-size: var(--font-base);
+}
+
+.board-empty .mascot-loading {
+  width: 72px;
+  margin: 0 auto 0.75rem;
+  display: block;
+}
+
+.board-card {
+  border: 2px solid var(--color-border);
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.board-card-toggle {
+  width: 100%;
+  padding: 1.1rem 1.15rem;
+  border: none;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.board-card-toggle:hover,
+.board-card-toggle:focus {
+  background: #f9fafb;
+}
+
+.board-card-title {
+  margin: 0 0 0.45rem;
+  font-size: var(--font-lg);
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.board-card-meta {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.board-card-body {
+  padding: 0 1.15rem 1.15rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.board-card-content {
+  margin: 1rem 0;
+  font-size: var(--font-base);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.board-delete-btn {
+  min-height: var(--btn-min-height);
+  padding: 0.65rem 1.15rem;
+  font-size: var(--font-base);
+  font-weight: 800;
+}

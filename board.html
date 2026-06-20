@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>게시판 - 시니어 디지털 보안관</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+</head>
+<body class="board-page" data-nav="board">
+
+  <div class="app-layout">
+    <header class="site-header"></header>
+
+    <main class="board-main">
+      <div class="board-hero">
+        <img src="assets/mascot-sheriff.png" alt="" class="board-hero-mascot" width="80" height="80" />
+        <div>
+          <h1 class="board-title">
+            <span class="material-symbols-outlined section-icon" aria-hidden="true">forum</span>
+            안전 정보 게시판
+          </h1>
+          <p class="board-lead">디지털 안전 경험과 꿀팁을 서로 올리고 공유해요.</p>
+        </div>
+      </div>
+
+      <div class="board-toolbar">
+        <p id="board-auth-hint" class="board-auth-hint">글을 쓰려면 우측 상단에서 로그인해 주세요.</p>
+        <button type="button" id="board-write-btn" class="board-write-btn btn btn--primary">
+          <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+          글쓰기
+        </button>
+      </div>
+
+      <section id="board-compose" class="board-compose hidden" aria-labelledby="board-compose-title">
+        <h2 id="board-compose-title" class="board-compose-title">새 글 작성</h2>
+        <form id="board-form" class="board-form">
+          <label for="board-title-input" class="form-label">제목</label>
+          <input id="board-title-input" type="text" class="modal-input" maxlength="100" placeholder="예: 스미싱 문자 이렇게 확인했어요" required />
+          <label for="board-content-input" class="form-label">내용</label>
+          <textarea id="board-content-input" class="board-textarea" maxlength="2000" rows="6" placeholder="다른 분들과 나누고 싶은 내용을 적어 주세요." required></textarea>
+          <div id="board-form-error" class="login-error alert-persistent hidden" role="alert">
+            <p id="board-form-error-message"></p>
+          </div>
+          <div class="board-form-actions">
+            <button type="button" id="board-compose-cancel" class="btn btn--secondary">취소</button>
+            <button type="submit" class="btn btn--primary">올리기</button>
+          </div>
+        </form>
+      </section>
+
+      <div id="board-status" class="board-status" aria-live="polite"></div>
+      <ul id="board-list" class="board-list" aria-label="게시글 목록"></ul>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="common.js"></script>
+  <script src="board.js"></script>
+</body>
+</html>

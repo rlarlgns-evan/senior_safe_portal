@@ -14,7 +14,8 @@ const SITE_NAV_ITEMS = [
   { id: "youtube", href: "youtube.html", label: "유튜브" },
   { id: "news", href: "news.html", label: "뉴스" },
   { id: "welfare", href: "welfare.html", label: "복지정보" },
-  { id: "community", href: "community.html", label: "커뮤니티" },
+  { id: "info", href: "community.html", label: "정보" },
+  { id: "board", href: "board.html", label: "게시판" },
 ];
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1223,6 +1224,12 @@ function injectLoginModal() {
   document.body.insertAdjacentHTML("beforeend", getLoginModalHtml());
 }
 
+function getUserDisplayName(user) {
+  if (!user) return "회원";
+  const emailLocal = user.email?.split("@")[0] ?? "회원";
+  return emailLocal.replace(/[^\w.\-가-힣]/g, "").slice(0, 32) || "회원";
+}
+
 const SiteAuth = {
   updateAuthUI(user) {
     const greeting = document.getElementById("user-greeting");
@@ -1230,8 +1237,7 @@ const SiteAuth = {
     const logoutBtn = document.getElementById("logout-button");
 
     if (user) {
-      const emailLocal = user.email?.split("@")[0] ?? "회원";
-      const safeName = emailLocal.replace(/[^\w.\-가-힣]/g, "").slice(0, 32) || "회원";
+      const safeName = getUserDisplayName(user);
       if (greeting) greeting.textContent = `${safeName}님`;
       greeting?.classList.remove("hidden");
       loginBtn?.classList.add("hidden");
