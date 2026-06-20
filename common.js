@@ -1170,11 +1170,6 @@ function getSiteFooterHtml() {
   return `
     <footer class="site-footer" aria-label="사이트 하단">
       <div class="site-footer-inner">
-        <div class="site-footer-brand">
-          <img src="${MASCOT_POTATO_SRC}" alt="샤이한 열정 감자 마스코트" class="footer-potato" width="88" height="88" loading="lazy" />
-          <p class="site-footer-provider">샤이한 열정 감자</p>
-          <p class="site-footer-tagline">샤이한 열정 감자가 제공하는 페이지입니다</p>
-        </div>
         <nav class="site-footer-nav" aria-label="정보 링크">
           <a href="terms.html">이용약관</a>
           <span class="footer-divider" aria-hidden="true">·</span>
@@ -1182,7 +1177,10 @@ function getSiteFooterHtml() {
           <span class="footer-divider" aria-hidden="true">·</span>
           <a href="team.html">팀 소개</a>
         </nav>
-        <p class="site-footer-copy">© 2026 시니어 디지털 보안관</p>
+        <div class="site-footer-bottom">
+          <img src="${MASCOT_POTATO_SRC}" alt="" class="footer-potato" width="40" height="40" loading="lazy" />
+          <p class="site-footer-copy">© 2026 시니어 디지털 보안관</p>
+        </div>
       </div>
     </footer>
   `;

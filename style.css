@@ -2779,37 +2779,22 @@ button.search-button {
 .site-footer-inner {
   max-width: 1320px;
   margin: 0 auto;
-  padding: 1.5rem 1rem 1.75rem;
-  text-align: center;
+  padding: 1.25rem 1rem 1.5rem;
 }
 
-.site-footer-brand {
+.site-footer-bottom {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
+  margin-top: 0.75rem;
 }
 
 .footer-potato {
-  width: 88px;
-  height: 88px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
-}
-
-.site-footer-provider {
-  margin: 0;
-  font-size: var(--font-xl);
-  font-weight: 800;
-  color: var(--color-text);
-}
-
-.site-footer-tagline {
-  margin: 0;
-  font-size: var(--font-base);
-  font-weight: 700;
-  color: var(--color-muted);
+  flex-shrink: 0;
 }
 
 .site-footer-nav {
@@ -2818,7 +2803,6 @@ button.search-button {
   align-items: center;
   justify-content: center;
   gap: 0.35rem 0.75rem;
-  margin: 0.5rem 0 0.75rem;
 }
 
 .site-footer-nav a {
@@ -2848,6 +2832,7 @@ button.search-button {
   font-size: var(--font-base);
   color: var(--color-muted);
   font-weight: 600;
+  text-align: left;
 }
 
 /* ── 정보 페이지 (약관 · 팀 소개) ── */
