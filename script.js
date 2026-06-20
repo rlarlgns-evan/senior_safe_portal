@@ -306,7 +306,10 @@ function setActiveNav(section) {
 }
 
 document.querySelectorAll("[data-section]").forEach((link) => {
-  link.addEventListener("click", () => {
+  link.addEventListener("click", (event) => {
+    if (link.getAttribute("href") === "#") {
+      event.preventDefault();
+    }
     setActiveNav(link.dataset.section);
     if (link.dataset.section === "consult") {
       chatWindow.classList.remove("hidden");
