@@ -13,8 +13,8 @@ const SITE_NAV_ITEMS = [
   { id: "home", href: "index.html", label: "홈" },
   { id: "youtube", href: "youtube.html", label: "유튜브" },
   { id: "news", href: "news.html", label: "뉴스" },
-  { id: "welfare", href: "welfare.html", label: "복지정보" },
-  { id: "board", href: "board.html", label: "게시판" },
+  { id: "welfare", href: "welfare.html", label: "복지" },
+  { id: "board", href: "board.html", label: "자유게시판" },
   { id: "info", href: "community.html", label: "정보" },
 ];
 
@@ -1178,16 +1178,11 @@ function getSiteHeaderHtml() {
   return `
     <div class="site-header-row">
       <a class="site-brand" href="index.html">
-        <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="48" height="48" />
+        <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="60" height="60" />
         <span class="site-brand-text">시니어 디지털 보안관</span>
       </a>
       <nav class="top-nav" aria-label="주요 메뉴" data-auto-nav></nav>
       <div class="header-end">
-        <div class="auth-area" id="auth-area">
-          <span id="user-greeting" class="user-greeting hidden"></span>
-          <button type="button" id="login-button" class="auth-button auth-login btn btn--primary">로그인</button>
-          <button type="button" id="logout-button" class="auth-button auth-logout btn btn--secondary hidden">로그아웃</button>
-        </div>
         <aside class="header-weather" aria-label="오늘의 날씨">
           <div id="weather-widget" class="weather-card weather-card--header" aria-live="polite">
             <div class="weather-icon-wrap" aria-hidden="true">
@@ -1206,6 +1201,11 @@ function getSiteHeaderHtml() {
             </button>
           </div>
         </aside>
+        <div class="auth-area" id="auth-area">
+          <span id="user-greeting" class="user-greeting hidden"></span>
+          <button type="button" id="login-button" class="auth-button auth-login btn btn--primary">로그인</button>
+          <button type="button" id="logout-button" class="auth-button auth-logout btn btn--secondary hidden">로그아웃</button>
+        </div>
         <button type="button" id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobile-nav">
           <span class="material-symbols-outlined" aria-hidden="true">menu</span>
         </button>

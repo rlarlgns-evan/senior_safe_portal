@@ -1,9 +1,7 @@
--- Security Advisor: increment_post_view SECURITY DEFINER + RLS USING(true) 경고 해소
+-- Security Advisor: board_posts_update_view_count USING(true)/WITH CHECK(true) 경고 해소
 -- Supabase SQL Editor에서 이 파일 전체를 한 번 실행하세요.
--- (동일 내용: board_posts_fix_rls.sql)
 
-drop function if exists public.increment_post_view(uuid);
-
+-- view_count 열만 UPDATE 허용 (PostgREST)
 revoke update on public.board_posts from anon, authenticated;
 grant update (view_count) on public.board_posts to anon, authenticated;
 
@@ -24,6 +22,7 @@ create policy "board_posts_update_view_count"
     and user_id is not null
   );
 
+-- 모든 사용자(작성자 포함): view_count +1 만 허용, 나머지 컬럼 변경 불가
 create or replace function public.board_posts_update_guard()
 returns trigger
 language plpgsql
@@ -49,3 +48,5 @@ create trigger board_posts_update_guard
   before update on public.board_posts
   for each row
   execute function public.board_posts_update_guard();
+
+drop function if exists public.increment_post_view(uuid);

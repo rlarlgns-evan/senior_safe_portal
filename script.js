@@ -301,18 +301,36 @@ const SearchModule = {
 
 // ── Chat (XSS-safe: textContent + createElement only) ──
 
+function formatChatTime(date = new Date()) {
+  return date.toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit", hour12: true });
+}
+
 const ChatModule = {
   /**
    * 채팅 말풍선 추가 — 외부/LLM 텍스트는 textContent만 사용
    * @param {string} text
    * @param {ChatSender} sender
+   * @param {{ featured?: boolean }} [options]
    * @returns {HTMLDivElement}
    */
-  renderChatBubble(text, sender) {
+  renderChatBubble(text, sender, options = {}) {
     const row = document.createElement("div");
     row.className = sender === "bot"
       ? "chat-message-row chat-message-row--bot"
       : "chat-message-row chat-message-row--user";
+
+    const content = document.createElement("div");
+    content.className = "chat-message-content";
+
+    const time = document.createElement("span");
+    time.className = "chat-time";
+    time.textContent = formatChatTime();
+
+    const bubble = document.createElement("div");
+    bubble.className = sender === "bot"
+      ? `chat-bubble bot${options.featured ? " chat-bubble--featured" : ""}`
+      : "chat-bubble user";
+    bubble.textContent = String(text ?? "").slice(0, AppConfig.MAX_CHAT_LENGTH);
 
     if (sender === "bot") {
       const avatar = document.createElement("img");
@@ -320,13 +338,23 @@ const ChatModule = {
       avatar.alt = "";
       avatar.className = "chat-mascot-avatar";
       avatar.setAttribute("loading", "lazy");
+      content.appendChild(time);
+      content.appendChild(bubble);
       row.appendChild(avatar);
+      row.appendChild(content);
+    } else {
+      const userAvatar = document.createElement("div");
+      userAvatar.className = "chat-user-avatar";
+      userAvatar.setAttribute("aria-hidden", "true");
+      const icon = document.createElement("span");
+      icon.className = "material-symbols-outlined";
+      icon.textContent = "person";
+      userAvatar.appendChild(icon);
+      content.appendChild(bubble);
+      content.appendChild(time);
+      row.appendChild(content);
+      row.appendChild(userAvatar);
     }
-
-    const bubble = document.createElement("div");
-    bubble.className = sender === "bot" ? "chat-bubble bot" : "chat-bubble user";
-    bubble.textContent = String(text ?? "").slice(0, AppConfig.MAX_CHAT_LENGTH);
-    row.appendChild(bubble);
 
     dom.chatMessages?.appendChild(row);
     if (dom.chatMessages) dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
@@ -338,11 +366,8 @@ const ChatModule = {
    * @param {boolean} isSubmitting
    */
   setSubmitting(isSubmitting) {
-    const submitButton = dom.chatForm?.querySelector(".chat-submit");
-    if (submitButton) {
-      submitButton.disabled = isSubmitting;
-      submitButton.textContent = isSubmitting ? "답변 생성 중..." : "메시지 보내기";
-    }
+    const submitButton = dom.chatForm?.querySelector(".chat-send-btn");
+    if (submitButton) submitButton.disabled = isSubmitting;
     if (dom.chatInput) dom.chatInput.disabled = isSubmitting;
   },
 
@@ -351,20 +376,41 @@ const ChatModule = {
     const detailRow = document.createElement("div");
     detailRow.className = "chat-message-row chat-message-row--bot";
 
+    const avatar = document.createElement("img");
+    avatar.src = MASCOT_SRC;
+    avatar.alt = "";
+    avatar.className = "chat-mascot-avatar";
+    avatar.setAttribute("loading", "lazy");
+
+    const content = document.createElement("div");
+    content.className = "chat-message-content";
+
     const detailBubble = document.createElement("div");
     detailBubble.className = "chat-bubble bot chat-action";
 
     const resultButton = document.createElement("button");
     resultButton.type = "button";
-    resultButton.className = "btn btn--primary";
+    resultButton.className = "chat-action-btn";
     resultButton.textContent = "📋 상세 검사 결과 보기";
     resultButton.addEventListener("click", goToResultsPage);
 
     detailBubble.appendChild(resultButton);
-    detailRow.appendChild(detailBubble);
+    content.appendChild(detailBubble);
+    detailRow.appendChild(avatar);
+    detailRow.appendChild(content);
     dom.chatMessages?.appendChild(detailRow);
 
     if (dom.chatMessages) dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+  },
+
+  sendSuggestion(text) {
+    if (!dom.chatInput || ChatModule.isBusy()) return;
+    dom.chatInput.value = text;
+    dom.chatForm?.requestSubmit();
+  },
+
+  isBusy() {
+    return Boolean(dom.chatForm?.querySelector(".chat-send-btn:disabled"));
   },
 
   /**
@@ -479,6 +525,11 @@ function bindEvents() {
   dom.chatFab?.addEventListener("click", () => ChatModule.toggleChatWindow());
   dom.chatClose?.addEventListener("click", () => ChatModule.closeChatWindow());
   dom.chatForm?.addEventListener("submit", (e) => ChatModule.handleChatSubmit(e));
+  document.querySelectorAll("[data-chat-prompt]").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      ChatModule.sendSuggestion(chip.dataset.chatPrompt || "");
+    });
+  });
 }
 
 /**
@@ -489,6 +540,7 @@ function initApp() {
   ChatModule.renderChatBubble(
     "안녕하세요! 저는 디지털 보안관 단디예요. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.",
     "bot",
+    { featured: true },
   );
   bindEvents();
 
