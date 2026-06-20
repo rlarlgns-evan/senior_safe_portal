@@ -8,6 +8,16 @@ const SEARCH_RESULTS_KEY = "sheriff-search-results";
 const MASCOT_SRC = "assets/mascot-sheriff.png";
 const MASCOT_POTATO_SRC = "assets/mascot-potato.png";
 
+/** 상단 네비게이션 (전용 페이지로 이동) */
+const SITE_NAV_ITEMS = [
+  { id: "home", href: "index.html", label: "홈" },
+  { id: "youtube", href: "youtube.html", label: "유튜브" },
+  { id: "news", href: "news.html", label: "뉴스" },
+  { id: "welfare", href: "welfare.html", label: "복지정보" },
+  { id: "community", href: "community.html", label: "커뮤니티" },
+  { id: "consult", href: "index.html?consult=1", label: "상담" },
+];
+
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function mascotImg(className, alt = "디지털 보안관 마스코트") {
@@ -529,6 +539,59 @@ function weatherCodeToLabel(code) {
   return "알 수 없음";
 }
 
+function parseKoreanLocationFromGeo(geo) {
+  const admin = geo?.localityInfo?.administrative;
+  let region = geo?.principalSubdivision || geo?.countryName || "대한민국";
+  let city = geo?.city || geo?.locality || region;
+
+  if (Array.isArray(admin)) {
+    const findAdmin = (level) => admin.find((item) => item.adminLevel === level)?.name;
+    const province = findAdmin(4) || findAdmin(3);
+    const district = findAdmin(6) || findAdmin(8) || findAdmin(5);
+    if (province) region = province;
+    if (district) city = district;
+  }
+
+  const label = city && city !== region
+    ? (geo?.locality && geo.locality !== city ? `${city} ${geo.locality}` : city)
+    : region;
+
+  return { region, city, label };
+}
+
+function normalizeWelfareAreaName(value) {
+  return String(value ?? "")
+    .replace(/\s+/g, "")
+    .replace(/(특별자치시|특별자치도|광역시|특별시|자치시|자치도|시|도|구|군)$/u, "")
+    .toLowerCase();
+}
+
+function filterLocalWelfareByRegion(services, apiData) {
+  if (!Array.isArray(services) || !apiData?.region) return services;
+
+  const targetRegion = normalizeWelfareAreaName(apiData.region);
+  const filtered = services.filter((service) => {
+    if (service.source === "national") return false;
+    if (!service.region?.trim()) return true;
+    const serviceRegion = normalizeWelfareAreaName(service.region);
+    return (
+      serviceRegion.includes(targetRegion.slice(0, 2)) ||
+      targetRegion.includes(serviceRegion.slice(0, 2))
+    );
+  });
+
+  return filtered.length > 0 ? filtered : services.filter((service) => service.source !== "national");
+}
+
+function formatWelfareLocationLabel(apiData, fallbackLabel, locationSource) {
+  const resolved = [apiData?.region, apiData?.city].filter(Boolean).join(" ");
+  const suffix = locationSource === "default" ? " (기본 위치 · 서울)" : "";
+  if (resolved) {
+    return `📍 ${resolved}${suffix} · 지역 맞춤 복지`;
+  }
+  return `📍 ${fallbackLabel}${suffix} · 지역 맞춤 복지`;
+}
+
 async function fetchLocationLabelDirect(latitude, longitude) {
   const params = new URLSearchParams({
     latitude: String(latitude),
@@ -545,13 +608,7 @@ async function fetchLocationLabelDirect(latitude, longitude) {
   }
 
   const geo = await response.json();
-  const region = geo.principalSubdivision || geo.countryName || "대한민국";
-  const city = geo.city || geo.locality || region;
-  const label = geo.locality && geo.locality !== city
-    ? `${city} ${geo.locality}`
-    : city;
-
-  return { region, city, label };
+  return parseKoreanLocationFromGeo(geo);
 }
 
 async function fetchWeatherDirect(latitude, longitude) {
@@ -830,40 +887,48 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
   }
 
   const { weather, locationSource } = cachedWelfareContext;
-  const suffix = locationSource === "default" ? " (기본 위치 · 서울)" : "";
 
   if (locationLabel) {
-    locationLabel.textContent = `📍 ${weather.label}${suffix} 맞춤 복지 정보`;
+    locationLabel.textContent = formatWelfareLocationLabel(null, weather.label, locationSource);
   }
 
   container.innerHTML = mascotLoadingHtml("우리 지역 복지 혜택을 찾고 있습니다...");
 
   try {
-    const fetchLimit = preview ? 4 : BROWSE_WELFARE_LIMIT;
+    const fetchLimit = preview ? 6 : BROWSE_WELFARE_LIMIT;
     const data = await fetchWelfareInfo(weather.region, weather.city, categoryId, fetchLimit);
-    let localServices = filterWelfareServices(data.services, categoryId);
+
+    if (locationLabel) {
+      locationLabel.textContent = formatWelfareLocationLabel(data, weather.label, locationSource);
+    }
+
+    let localServices = filterLocalWelfareByRegion(
+      filterWelfareServices(data.services, categoryId),
+      data,
+    );
     let nationalServices = filterWelfareServices(data.nationalServices, categoryId);
 
     if (preview) {
       localServices = localServices.slice(0, HOME_WELFARE_PREVIEW);
-      nationalServices = nationalServices.slice(0, HOME_WELFARE_PREVIEW);
     }
 
     const categoryLabel = WELFARE_CATEGORIES.find((cat) => cat.id === categoryId)?.label ?? "전체";
 
-    const emptyLocal = mascotLoadingHtml(`${categoryLabel} 분야 지자체 복지서비스를 찾지 못했습니다.`);
+    const emptyLocal = mascotLoadingHtml(`${categoryLabel} · ${data.region || "해당"} 지역 복지를 찾지 못했습니다.`);
     const emptyNational = mascotLoadingHtml(`${categoryLabel} 분야 중앙부처 복지서비스를 찾지 못했습니다.`);
 
     if (preview) {
-      const combined = [...localServices, ...nationalServices].slice(0, HOME_WELFARE_PREVIEW);
-
-      if (combined.length === 0) {
-        container.innerHTML = mascotLoadingHtml(`${categoryLabel} 분야 복지 혜택을 찾지 못했습니다.`);
+      if (localServices.length === 0) {
+        container.innerHTML = emptyLocal;
         return;
       }
 
-      container.innerHTML = `<div class="home-preview-list">${combined.map((s) => renderWelfareServiceCard(s, true)).join("")}</div>`;
+      container.innerHTML = `<div class="home-preview-list">${localServices.map((s) => renderWelfareServiceCard(s, true)).join("")}</div>`;
       return;
+    }
+
+    if (!preview) {
+      nationalServices = nationalServices.slice(0, BROWSE_WELFARE_LIMIT);
     }
 
     const localHtml = localServices.length > 0
@@ -877,7 +942,7 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
       <div class="welfare-services welfare-services-browse">
         <section class="welfare-block">
           <h4 class="welfare-subheading">우리 지역 · 지자체 복지</h4>
-          <p class="welfare-source-note">${escapeHtml(categoryLabel)} · 지자체복지서비스 API</p>
+          <p class="welfare-source-note">${escapeHtml([data.region, data.city].filter(Boolean).join(" ") || categoryLabel)} · 지자체복지서비스 API</p>
           ${localHtml}
         </section>
         <section class="welfare-block">
@@ -1031,17 +1096,9 @@ function getSiteFooterHtml() {
   return `
     <footer class="site-footer">
       <div class="site-footer-inner">
-        <nav class="site-footer-nav" aria-label="하단 정보">
-          <a href="terms.html">이용약관</a>
-          <span class="footer-divider" aria-hidden="true">·</span>
-          <a href="privacy.html">개인정보처리방침</a>
-          <span class="footer-divider" aria-hidden="true">·</span>
-          <a href="team.html">팀 소개</a>
-        </nav>
-        <p class="site-footer-copy">© ${new Date().getFullYear()} 시니어 디지털 보안관</p>
         <div class="site-footer-brand">
           <img src="${MASCOT_POTATO_SRC}" alt="" class="footer-potato" width="72" height="72" loading="lazy" />
-          <p class="site-footer-provider">샤이한 열정 감자가 제공하는 페이지입니다</p>
+          <p class="site-footer-provider">샤이한 열정 감자</p>
         </div>
       </div>
     </footer>
@@ -1054,4 +1111,65 @@ function injectSiteFooter() {
   layout.insertAdjacentHTML("beforeend", getSiteFooterHtml());
 }
 
-document.addEventListener("DOMContentLoaded", injectSiteFooter);
+/**
+ * 상단·모바일 네비 링크 HTML 생성
+ * @param {string} activeId
+ * @param {"top-nav-link"|"mobile-nav-link"} linkClass
+ */
+function buildNavLinksHtml(activeId, linkClass) {
+  const isMobile = linkClass === "mobile-nav-link";
+  const activeClass = isMobile ? " mobile-nav-active" : " nav-active";
+
+  return SITE_NAV_ITEMS.map(({ id, href, label }) => {
+    const active = id === activeId ? activeClass : "";
+    return `<a class="${linkClass}${active}" href="${href}" data-nav="${id}">${label}</a>`;
+  }).join("");
+}
+
+/** body[data-nav] 기준으로 네비 주입 및 상담 링크 처리 */
+function initSiteNavigation() {
+  const activeId = document.body.dataset.nav || "";
+
+  const topNav = document.querySelector(".top-nav[data-auto-nav]");
+  if (topNav) {
+    topNav.innerHTML = buildNavLinksHtml(activeId, "top-nav-link");
+  }
+
+  const mobileNav = document.getElementById("mobile-nav");
+  if (mobileNav?.dataset.autoNav === "true") {
+    mobileNav.innerHTML = buildNavLinksHtml(activeId, "mobile-nav-link");
+  }
+
+  document.querySelectorAll('[data-nav="consult"]').forEach((link) => {
+    link.addEventListener("click", (event) => {
+      const onHome = /index\.html$/i.test(location.pathname)
+        || location.pathname.endsWith("/")
+        || location.pathname.endsWith("\\");
+
+      if (!onHome) return;
+
+      event.preventDefault();
+      const chatWindow = document.getElementById("chat-window");
+      const chatInput = document.getElementById("chat-input");
+      chatWindow?.classList.remove("hidden");
+      chatInput?.focus();
+      closeMobileNavMenu();
+    });
+  });
+
+  document.querySelectorAll(".top-nav-link, .mobile-nav-link").forEach((link) => {
+    link.addEventListener("click", () => closeMobileNavMenu());
+  });
+}
+
+function closeMobileNavMenu() {
+  const mobileNav = document.getElementById("mobile-nav");
+  const toggle = document.getElementById("mobile-menu-toggle");
+  mobileNav?.classList.add("hidden");
+  toggle?.setAttribute("aria-expanded", "false");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initSiteNavigation();
+  injectSiteFooter();
+});

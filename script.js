@@ -1,301 +1,518 @@
 /**
- * 시니어 디지털 보안관 - 홈(대시보드)
+ * 시니어 디지털 보안관 — 홈 대시보드
+ * @fileoverview XSS-safe DOM 조작, 지속형 알림, 단일 책임 모듈 구조
  */
 
-// DOM
-const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
-const mobileNav = document.getElementById("mobile-nav");
-const searchForm = document.getElementById("search-form");
-const searchInput = document.getElementById("search-input");
-const youtubeContent = document.getElementById("youtube-content");
-const newsContent = document.getElementById("news-content");
-const loadingOverlay = document.getElementById("loading-overlay");
-const errorBox = document.getElementById("error-box");
-const errorMessage = document.getElementById("error-message");
-const errorClose = document.getElementById("error-close");
-const chatWindow = document.getElementById("chat-window");
-const chatFab = document.getElementById("chat-fab");
-const chatClose = document.getElementById("chat-close");
-const chatForm = document.getElementById("chat-form");
-const chatInput = document.getElementById("chat-input");
-const chatMessages = document.getElementById("chat-messages");
-const loginButton = document.getElementById("login-button");
-const logoutButton = document.getElementById("logout-button");
-const userGreeting = document.getElementById("user-greeting");
-const loginModal = document.getElementById("login-modal");
-const loginModalClose = document.getElementById("login-modal-close");
-const loginForm = document.getElementById("login-form");
-const loginEmail = document.getElementById("login-email");
-const loginPassword = document.getElementById("login-password");
-const loginError = document.getElementById("login-error");
+/** @typedef {'user' | 'bot'} ChatSender */
 
-function showLoading() { loadingOverlay.classList.remove("hidden"); }
-function hideLoading() { loadingOverlay.classList.add("hidden"); }
-function showError(message) { errorMessage.textContent = message; errorBox.classList.remove("hidden"); }
-function hideError() { errorBox.classList.add("hidden"); }
-
-// ── 모바일 메뉴 ──
-
-function closeMobileMenu() {
-  mobileNav?.classList.add("hidden");
-  mobileMenuToggle?.setAttribute("aria-expanded", "false");
-}
-
-function toggleMobileMenu() {
-  if (!mobileNav) return;
-  const willOpen = mobileNav.classList.contains("hidden");
-  mobileNav.classList.toggle("hidden", !willOpen);
-  mobileMenuToggle?.setAttribute("aria-expanded", willOpen ? "true" : "false");
-}
-
-mobileMenuToggle?.addEventListener("click", toggleMobileMenu);
-
-// ── 로그인 (Supabase Auth) ──
-
-function updateAuthUI(user) {
-  if (user) {
-    const name = user.email?.split("@")[0] || "회원";
-    userGreeting.textContent = `${name}님`;
-    userGreeting.classList.remove("hidden");
-    loginButton.classList.add("hidden");
-    logoutButton.classList.remove("hidden");
-  } else {
-    userGreeting.classList.add("hidden");
-    loginButton.classList.remove("hidden");
-    logoutButton.classList.add("hidden");
-  }
-}
-
-async function initAuth() {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  updateAuthUI(session?.user ?? null);
-
-  supabaseClient.auth.onAuthStateChange((_event, session) => {
-    updateAuthUI(session?.user ?? null);
-  });
-}
-
-function openLoginModal() {
-  loginError.classList.add("hidden");
-  loginModal.classList.remove("hidden");
-  loginEmail.focus();
-}
-
-function closeLoginModal() {
-  loginModal.classList.add("hidden");
-  loginForm.reset();
-}
-
-loginButton.addEventListener("click", openLoginModal);
-loginModalClose.addEventListener("click", closeLoginModal);
-
-loginForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  loginError.classList.add("hidden");
-
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email: loginEmail.value.trim(),
-    password: loginPassword.value,
-  });
-
-  if (error) {
-    loginError.textContent = `로그인 실패: ${error.message}`;
-    loginError.classList.remove("hidden");
-    return;
-  }
-
-  closeLoginModal();
+const AppConfig = Object.freeze({
+  MAX_SEARCH_LENGTH: 500,
+  MAX_CHAT_LENGTH: 2000,
+  MAX_EMAIL_LENGTH: 254,
 });
 
-logoutButton.addEventListener("click", async () => {
-  await supabaseClient.auth.signOut();
-});
+// ── DOM 참조 ──
 
-// ── 홈 추천 콘텐츠 ──
+const dom = {
+  mobileMenuToggle: document.getElementById("mobile-menu-toggle"),
+  mobileNav: document.getElementById("mobile-nav"),
+  searchForm: document.getElementById("search-form"),
+  searchInput: document.getElementById("search-input"),
+  youtubeContent: document.getElementById("youtube-content"),
+  newsContent: document.getElementById("news-content"),
+  loadingOverlay: document.getElementById("loading-overlay"),
+  loadingMessage: document.getElementById("loading-message"),
+  loadingCancel: document.getElementById("loading-cancel"),
+  errorBox: document.getElementById("error-box"),
+  errorMessage: document.getElementById("error-message"),
+  errorClose: document.getElementById("error-close"),
+  chatWindow: document.getElementById("chat-window"),
+  chatFab: document.getElementById("chat-fab"),
+  chatClose: document.getElementById("chat-close"),
+  chatForm: document.getElementById("chat-form"),
+  chatInput: document.getElementById("chat-input"),
+  chatMessages: document.getElementById("chat-messages"),
+  loginButton: document.getElementById("login-button"),
+  logoutButton: document.getElementById("logout-button"),
+  userGreeting: document.getElementById("user-greeting"),
+  loginModal: document.getElementById("login-modal"),
+  loginModalClose: document.getElementById("login-modal-close"),
+  loginForm: document.getElementById("login-form"),
+  loginEmail: document.getElementById("login-email"),
+  loginPassword: document.getElementById("login-password"),
+  loginError: document.getElementById("login-error"),
+  loginErrorMessage: document.getElementById("login-error-message"),
+  loginErrorClose: document.getElementById("login-error-close"),
+  locationButton: document.getElementById("location-button"),
+};
 
-// ── 검색 → 결과 페이지 ──
-
-async function handleSearchSubmit(event) {
-  event.preventDefault();
-  hideError();
-  closeMobileMenu();
-
-  const raw = searchInput.value.trim();
-  if (!raw) {
-    showError("검색어 또는 링크를 입력해 주세요.");
-    return;
-  }
-
-  showLoading();
-  try {
-    const payload = await runSearch(raw);
-    saveSearchResults(payload);
-    goToResultsPage();
-  } catch (err) {
-    showError(`검색 중 문제가 발생했습니다: ${err.message}`);
-    hideLoading();
-  }
-}
-
-// ── 챗봇 (대화형 Agent) ──
-
+let searchInProgress = false;
+/** @type {Array<{role: string, content: string}>} */
 const chatHistory = [];
 
-function addChatBubble(text, sender) {
-  const row = document.createElement("div");
-  row.className = `chat-message-row chat-message-row--${sender}`;
+// ── Security helpers ──
 
-  if (sender === "bot") {
-    const avatar = document.createElement("img");
-    avatar.src = MASCOT_SRC;
-    avatar.alt = "";
-    avatar.className = "chat-mascot-avatar";
-    row.appendChild(avatar);
-  }
+/**
+ * 사용자에게 표시할 오류 메시지 정제 (스택·API 키 노출 방지)
+ * @param {unknown} error
+ * @param {string} fallback
+ * @returns {string}
+ */
+function sanitizeUserFacingMessage(error, fallback) {
+  if (!(error instanceof Error)) return fallback;
 
-  const bubble = document.createElement("div");
-  bubble.className = `chat-bubble ${sender}`;
-  bubble.textContent = text;
-  row.appendChild(bubble);
-  chatMessages.appendChild(row);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-  return bubble;
+  const message = error.message.trim().slice(0, 240);
+  const sensitive = /api[_-]?key|AIza|Bearer\s|stack| at \w+\(|deno\.|supabase\.co\/functions/i;
+
+  if (!message || sensitive.test(message)) return fallback;
+  return message;
 }
 
-function setChatSubmitting(isSubmitting) {
-  const submitButton = chatForm.querySelector(".chat-submit");
-  if (submitButton) {
-    submitButton.disabled = isSubmitting;
-    submitButton.textContent = isSubmitting ? "답변 생성 중..." : "메시지 보내기";
+/**
+ * 검색/챗 입력값 검증
+ * @param {string} raw
+ * @param {number} maxLength
+ * @param {string} emptyMessage
+ * @returns {string}
+ */
+function validateTextInput(raw, maxLength, emptyMessage) {
+  const cleaned = raw.replace(/[\u0000-\u001F\u007F]/g, " ").replace(/\s+/g, " ").trim();
+
+  if (!cleaned) throw new Error(emptyMessage);
+  if (cleaned.length > maxLength) {
+    throw new Error(`입력은 ${maxLength}자 이내로 작성해 주세요.`);
   }
-  chatInput.disabled = isSubmitting;
+
+  return cleaned;
 }
 
-async function handleChatSubmit(event) {
-  event.preventDefault();
-  const text = chatInput.value.trim();
-  if (!text) return;
+/**
+ * 이메일 형식 간단 검증
+ * @param {string} email
+ */
+function validateEmailInput(email) {
+  const trimmed = email.trim().slice(0, AppConfig.MAX_EMAIL_LENGTH);
+  if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+    throw new Error("올바른 이메일 주소를 입력해 주세요.");
+  }
+  return trimmed;
+}
 
-  addChatBubble(text, "user");
-  chatInput.value = "";
-  chatHistory.push({ role: "user", content: text });
-
-  const thinkingBubble = addChatBubble("보안관이 생각하고 있습니다...", "bot");
-  setChatSubmitting(true);
-
+/**
+ * 챗봇 링크 분석 결과 URL 검증
+ * @param {unknown} url
+ * @returns {string|null}
+ */
+function validateLinkAnalysisUrl(url) {
+  if (typeof url !== "string" || !url.trim()) return null;
   try {
-    const data = await chatWithAgent(text, chatHistory.slice(0, -1));
-    thinkingBubble.textContent = data.reply;
-    chatHistory.push({ role: "assistant", content: data.reply });
-
-    if (data.linkAnalysis && !Array.isArray(data.linkAnalysis)) {
-      const payload = {
-        query: data.linkAnalysis.url,
-        type: "link",
-        summary: data.linkAnalysis.status === "위험"
-          ? "⚠️ 챗봇 링크 검사 · 위험 신호 감지"
-          : "✅ 챗봇 링크 검사 · 비교적 안전",
-        items: [linkAnalysisToItem(data.linkAnalysis, data.linkAnalysis.url)],
-      };
-      saveSearchResults(payload);
-
-      const detailBubble = document.createElement("div");
-      detailBubble.className = "chat-bubble bot chat-action";
-      detailBubble.innerHTML = `<button type="button" class="chat-result-link">📋 상세 검사 결과 보기</button>`;
-      detailBubble.querySelector("button").addEventListener("click", goToResultsPage);
-      chatMessages.appendChild(detailBubble);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-  } catch (err) {
-    thinkingBubble.textContent = `죄송합니다. 오류가 발생했습니다: ${err.message}`;
-    chatHistory.pop();
-  } finally {
-    setChatSubmitting(false);
+    return normalizeUrl(url);
+  } catch {
+    return null;
   }
 }
 
-function toggleChat() {
-  chatWindow.classList.toggle("hidden");
-  if (!chatWindow.classList.contains("hidden")) chatInput.focus();
-}
+// ── Persistent Alert UI ──
 
-// ── 네비게이션 ──
+/** @namespace AlertUI */
+const AlertUI = {
+  /**
+   * 로딩 오버레이 표시 (자동 해제 없음 — 사용자가 취소해야 함)
+   * @param {string} [message]
+   */
+  showLoading(message) {
+    if (dom.loadingMessage && message) {
+      dom.loadingMessage.textContent = message;
+    }
+    dom.loadingOverlay?.classList.remove("hidden");
+    dom.loadingOverlay?.setAttribute("aria-hidden", "false");
+  },
 
-function setActiveNav(section) {
-  document.querySelectorAll(".top-nav-link, .mobile-nav-link").forEach((el) => {
-    const match = el.dataset.section === section;
-    el.classList.toggle("nav-active", match && el.classList.contains("top-nav-link"));
-    el.classList.toggle("mobile-nav-active", match && el.classList.contains("mobile-nav-link"));
-  });
-}
+  /** 로딩 오버레이 숨김 */
+  hideLoading() {
+    dom.loadingOverlay?.classList.add("hidden");
+    dom.loadingOverlay?.setAttribute("aria-hidden", "true");
+    searchInProgress = false;
+  },
 
-document.querySelectorAll("[data-section]").forEach((link) => {
-  link.addEventListener("click", (event) => {
-    if (link.getAttribute("href") === "#") event.preventDefault();
-    setActiveNav(link.dataset.section);
-    closeMobileMenu();
-    if (link.dataset.section === "consult") chatWindow.classList.remove("hidden");
-  });
-});
+  /**
+   * 지속형 오류 알림 (닫기 버튼 필수)
+   * @param {string} message
+   */
+  showError(message) {
+    if (dom.errorMessage) dom.errorMessage.textContent = message;
+    dom.errorBox?.classList.remove("hidden");
+    dom.errorBox?.setAttribute("aria-hidden", "false");
+    dom.errorClose?.focus();
+  },
 
-// ── 초기화 ──
+  hideError() {
+    dom.errorBox?.classList.add("hidden");
+    dom.errorBox?.setAttribute("aria-hidden", "true");
+  },
 
-function updateSectionMoreLink(linkEl, page, categoryId) {
-  if (!linkEl) return;
-  linkEl.href = buildBrowsePageUrl(page, categoryId);
-}
+  /**
+   * @param {string} message
+   */
+  showLoginError(message) {
+    if (dom.loginErrorMessage) dom.loginErrorMessage.textContent = message;
+    dom.loginError?.classList.remove("hidden");
+  },
 
-document.addEventListener("DOMContentLoaded", () => {
-  applyWeatherBackground(null);
+  hideLoginError() {
+    dom.loginError?.classList.add("hidden");
+    if (dom.loginErrorMessage) dom.loginErrorMessage.textContent = "";
+  },
+};
 
-  const youtubeMore = document.getElementById("youtube-more");
-  const newsMore = document.getElementById("news-more");
-  const welfareMore = document.getElementById("welfare-more");
+// ── Mobile navigation ──
 
-  setupCategoryTabs(
-    document.getElementById("youtube-categories"),
-    YOUTUBE_CATEGORIES,
-    youtubeContent,
-    loadHomeYoutubeRecommendations,
-    {
-      onCategoryChange: (categoryId) => updateSectionMoreLink(youtubeMore, "youtube", categoryId),
-    },
-  );
-  setupCategoryTabs(
-    document.getElementById("news-categories"),
-    NEWS_CATEGORIES,
-    newsContent,
-    loadHomeNewsRecommendations,
-    {
-      onCategoryChange: (categoryId) => updateSectionMoreLink(newsMore, "news", categoryId),
-    },
-  );
-  bindWelfareCategoryReload(
+const NavigationUI = {
+  closeMobileMenu() {
+    dom.mobileNav?.classList.add("hidden");
+    dom.mobileMenuToggle?.setAttribute("aria-expanded", "false");
+  },
+
+  toggleMobileMenu() {
+    if (!dom.mobileNav) return;
+    const willOpen = dom.mobileNav.classList.contains("hidden");
+    dom.mobileNav.classList.toggle("hidden", !willOpen);
+    dom.mobileMenuToggle?.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  },
+
+  /**
+   * @param {HTMLAnchorElement|null} linkEl
+   * @param {string} page
+   * @param {string} categoryId
+   */
+  updateSectionMoreLink(linkEl, page, categoryId) {
+    if (!linkEl) return;
+    linkEl.href = buildBrowsePageUrl(page, categoryId);
+  },
+};
+
+// ── Auth ──
+
+const AuthModule = {
+  /**
+   * @param {import('@supabase/supabase-js').User|null} user
+   */
+  updateAuthUI(user) {
+    if (user) {
+      const emailLocal = user.email?.split("@")[0] ?? "회원";
+      const safeName = emailLocal.replace(/[^\w.\-가-힣]/g, "").slice(0, 32) || "회원";
+      if (dom.userGreeting) dom.userGreeting.textContent = `${safeName}님`;
+      dom.userGreeting?.classList.remove("hidden");
+      dom.loginButton?.classList.add("hidden");
+      dom.logoutButton?.classList.remove("hidden");
+    } else {
+      dom.userGreeting?.classList.add("hidden");
+      dom.loginButton?.classList.remove("hidden");
+      dom.logoutButton?.classList.add("hidden");
+    }
+  },
+
+  async initAuth() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    AuthModule.updateAuthUI(session?.user ?? null);
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      AuthModule.updateAuthUI(session?.user ?? null);
+    });
+  },
+
+  openLoginModal() {
+    AlertUI.hideLoginError();
+    dom.loginModal?.classList.remove("hidden");
+    dom.loginEmail?.focus();
+  },
+
+  closeLoginModal() {
+    dom.loginModal?.classList.add("hidden");
+    dom.loginForm?.reset();
+    AlertUI.hideLoginError();
+  },
+
+  async handleLoginSubmit(event) {
+    event.preventDefault();
+    AlertUI.hideLoginError();
+
+    try {
+      const email = validateEmailInput(dom.loginEmail?.value ?? "");
+      const password = dom.loginPassword?.value ?? "";
+
+      if (!password) throw new Error("비밀번호를 입력해 주세요.");
+
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        AlertUI.showLoginError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해 주세요.");
+        return;
+      }
+
+      AuthModule.closeLoginModal();
+    } catch (err) {
+      AlertUI.showLoginError(sanitizeUserFacingMessage(err, "로그인 중 문제가 발생했습니다."));
+    }
+  },
+
+  async handleLogout() {
+    await supabaseClient.auth.signOut();
+  },
+};
+
+// ── Search ──
+
+const SearchModule = {
+  /**
+   * 검색 실행 후 결과 페이지로 이동
+   * @param {SubmitEvent} event
+   */
+  async handleSearchSubmit(event) {
+    event.preventDefault();
+    if (searchInProgress) return;
+
+    AlertUI.hideError();
+    NavigationUI.closeMobileMenu();
+
+    try {
+      const query = validateTextInput(
+        dom.searchInput?.value ?? "",
+        AppConfig.MAX_SEARCH_LENGTH,
+        "검색어 또는 링크를 입력해 주세요.",
+      );
+
+      searchInProgress = true;
+      AlertUI.showLoading("안전 검사를 진행하고 있습니다. 잠시만 기다려주세요...");
+
+      const payload = await runSearch(query);
+      saveSearchResults(payload);
+      goToResultsPage();
+    } catch (err) {
+      AlertUI.hideLoading();
+      AlertUI.showError(sanitizeUserFacingMessage(err, "검색 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요."));
+    }
+  },
+
+  handleLoadingCancel() {
+    AlertUI.hideLoading();
+    AlertUI.showError("검사를 취소했습니다. 다시 검색해 주세요.");
+  },
+};
+
+// ── Chat (XSS-safe: textContent + createElement only) ──
+
+const ChatModule = {
+  /**
+   * 채팅 말풍선 추가 — 외부/LLM 텍스트는 textContent만 사용
+   * @param {string} text
+   * @param {ChatSender} sender
+   * @returns {HTMLDivElement}
+   */
+  renderChatBubble(text, sender) {
+    const row = document.createElement("div");
+    row.className = sender === "bot"
+      ? "chat-message-row chat-message-row--bot"
+      : "chat-message-row chat-message-row--user";
+
+    if (sender === "bot") {
+      const avatar = document.createElement("img");
+      avatar.src = MASCOT_SRC;
+      avatar.alt = "";
+      avatar.className = "chat-mascot-avatar";
+      avatar.setAttribute("loading", "lazy");
+      row.appendChild(avatar);
+    }
+
+    const bubble = document.createElement("div");
+    bubble.className = sender === "bot" ? "chat-bubble bot" : "chat-bubble user";
+    bubble.textContent = String(text ?? "").slice(0, AppConfig.MAX_CHAT_LENGTH);
+    row.appendChild(bubble);
+
+    dom.chatMessages?.appendChild(row);
+    if (dom.chatMessages) dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+
+    return bubble;
+  },
+
+  /**
+   * @param {boolean} isSubmitting
+   */
+  setSubmitting(isSubmitting) {
+    const submitButton = dom.chatForm?.querySelector(".chat-submit");
+    if (submitButton) {
+      submitButton.disabled = isSubmitting;
+      submitButton.textContent = isSubmitting ? "답변 생성 중..." : "메시지 보내기";
+    }
+    if (dom.chatInput) dom.chatInput.disabled = isSubmitting;
+  },
+
+  /** 링크 분석 결과 보기 버튼 (DOM API만 사용) */
+  renderLinkResultAction() {
+    const detailRow = document.createElement("div");
+    detailRow.className = "chat-message-row chat-message-row--bot";
+
+    const detailBubble = document.createElement("div");
+    detailBubble.className = "chat-bubble bot chat-action";
+
+    const resultButton = document.createElement("button");
+    resultButton.type = "button";
+    resultButton.className = "btn btn--primary";
+    resultButton.textContent = "📋 상세 검사 결과 보기";
+    resultButton.addEventListener("click", goToResultsPage);
+
+    detailBubble.appendChild(resultButton);
+    detailRow.appendChild(detailBubble);
+    dom.chatMessages?.appendChild(detailRow);
+
+    if (dom.chatMessages) dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+  },
+
+  /**
+   * @param {SubmitEvent} event
+   */
+  async handleChatSubmit(event) {
+    event.preventDefault();
+
+    try {
+      const text = validateTextInput(
+        dom.chatInput?.value ?? "",
+        AppConfig.MAX_CHAT_LENGTH,
+        "메시지를 입력해 주세요.",
+      );
+
+      AlertUI.hideError();
+      ChatModule.renderChatBubble(text, "user");
+      if (dom.chatInput) dom.chatInput.value = "";
+      chatHistory.push({ role: "user", content: text });
+
+      const thinkingBubble = ChatModule.renderChatBubble("보안관이 생각하고 있습니다...", "bot");
+      ChatModule.setSubmitting(true);
+
+      const data = await chatWithAgent(text, chatHistory.slice(0, -1));
+      thinkingBubble.textContent = String(data.reply ?? "").slice(0, AppConfig.MAX_CHAT_LENGTH);
+      chatHistory.push({ role: "assistant", content: data.reply });
+
+      if (data.linkAnalysis && !Array.isArray(data.linkAnalysis)) {
+        const safeUrl = validateLinkAnalysisUrl(data.linkAnalysis.url);
+
+        if (safeUrl) {
+          const payload = {
+            query: safeUrl,
+            type: "link",
+            summary: data.linkAnalysis.status === "위험"
+              ? "⚠️ 챗봇 링크 검사 · 위험 신호 감지"
+              : "✅ 챗봇 링크 검사 · 비교적 안전",
+            items: [linkAnalysisToItem(data.linkAnalysis, safeUrl)],
+          };
+          saveSearchResults(payload);
+          ChatModule.renderLinkResultAction();
+        }
+      }
+    } catch (err) {
+      chatHistory.pop();
+      const lastBotRow = dom.chatMessages?.querySelector(".chat-message-row--bot:last-child .chat-bubble");
+      if (lastBotRow) {
+        lastBotRow.textContent = sanitizeUserFacingMessage(
+          err,
+          "죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+        );
+      }
+    } finally {
+      ChatModule.setSubmitting(false);
+    }
+  },
+
+  toggleChatWindow() {
+    dom.chatWindow?.classList.toggle("hidden");
+    if (dom.chatWindow && !dom.chatWindow.classList.contains("hidden")) {
+      dom.chatInput?.focus();
+    }
+  },
+
+  closeChatWindow() {
+    dom.chatWindow?.classList.add("hidden");
+  },
+};
+
+// ── Home content bootstrap ──
+
+const HomeModule = {
+  initCategoryTabs() {
+    const youtubeMore = document.getElementById("youtube-more");
+    const newsMore = document.getElementById("news-more");
+    const welfareMore = document.getElementById("welfare-more");
+
     setupCategoryTabs(
-      document.getElementById("welfare-categories"),
-      WELFARE_CATEGORIES,
-      document.getElementById("welfare-content"),
-      (container, query, options) => loadHomeWelfareInfo(container, query, options),
-      {
-        onCategoryChange: (categoryId) => updateSectionMoreLink(welfareMore, "welfare", categoryId),
-      },
-    ).reload,
-  );
-  initHomeLocationServices();
-  addChatBubble("안녕하세요! 저는 디지털 보안관 강아지예요. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.", "bot");
-  initAuth();
-});
+      document.getElementById("youtube-categories"),
+      YOUTUBE_CATEGORIES,
+      dom.youtubeContent,
+      loadHomeYoutubeRecommendations,
+      { onCategoryChange: (id) => NavigationUI.updateSectionMoreLink(youtubeMore, "youtube", id) },
+    );
 
-const locationButton = document.getElementById("location-button");
-if (locationButton) {
-  locationButton.addEventListener("click", () => {
-    cachedUserLocation = null;
-    initHomeLocationServices(true);
-  });
+    setupCategoryTabs(
+      document.getElementById("news-categories"),
+      NEWS_CATEGORIES,
+      dom.newsContent,
+      loadHomeNewsRecommendations,
+      { onCategoryChange: (id) => NavigationUI.updateSectionMoreLink(newsMore, "news", id) },
+    );
+
+    bindWelfareCategoryReload(
+      setupCategoryTabs(
+        document.getElementById("welfare-categories"),
+        WELFARE_CATEGORIES,
+        document.getElementById("welfare-content"),
+        (container, query, options) => loadHomeWelfareInfo(container, query, options),
+        { onCategoryChange: (id) => NavigationUI.updateSectionMoreLink(welfareMore, "welfare", id) },
+      ).reload,
+    );
+  },
+
+  initLocationServices() {
+    dom.locationButton?.addEventListener("click", () => {
+      cachedUserLocation = null;
+      initHomeLocationServices(true);
+    });
+  },
+};
+
+// ── Event bindings & boot ──
+
+function bindEvents() {
+  dom.mobileMenuToggle?.addEventListener("click", () => NavigationUI.toggleMobileMenu());
+  dom.searchForm?.addEventListener("submit", (e) => SearchModule.handleSearchSubmit(e));
+  dom.loadingCancel?.addEventListener("click", () => SearchModule.handleLoadingCancel());
+  dom.errorClose?.addEventListener("click", () => AlertUI.hideError());
+  dom.loginButton?.addEventListener("click", () => AuthModule.openLoginModal());
+  dom.loginModalClose?.addEventListener("click", () => AuthModule.closeLoginModal());
+  dom.loginForm?.addEventListener("submit", (e) => AuthModule.handleLoginSubmit(e));
+  dom.loginErrorClose?.addEventListener("click", () => AlertUI.hideLoginError());
+  dom.logoutButton?.addEventListener("click", () => AuthModule.handleLogout());
+  dom.chatFab?.addEventListener("click", () => ChatModule.toggleChatWindow());
+  dom.chatClose?.addEventListener("click", () => ChatModule.closeChatWindow());
+  dom.chatForm?.addEventListener("submit", (e) => ChatModule.handleChatSubmit(e));
 }
 
-searchForm.addEventListener("submit", handleSearchSubmit);
-errorClose.addEventListener("click", hideError);
-chatFab.addEventListener("click", toggleChat);
-chatClose.addEventListener("click", () => chatWindow.classList.add("hidden"));
-chatForm.addEventListener("submit", handleChatSubmit);
+/**
+ * 앱 초기화
+ */
+function initApp() {
+  applyWeatherBackground(null);
+  HomeModule.initCategoryTabs();
+  HomeModule.initLocationServices();
+  initHomeLocationServices();
+  ChatModule.renderChatBubble(
+    "안녕하세요! 저는 디지털 보안관 강아지예요. 의심스러운 문자, 링크, 전화 사기 등 무엇이든 편하게 물어보세요.",
+    "bot",
+  );
+  AuthModule.initAuth();
+  bindEvents();
+
+  if (new URLSearchParams(location.search).get("consult") === "1") {
+    dom.chatWindow?.classList.remove("hidden");
+    dom.chatInput?.focus();
+  }
+}
+
+document.addEventListener("DOMContentLoaded", initApp);

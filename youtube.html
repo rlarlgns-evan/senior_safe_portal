@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 </head>
-<body class="browse-page" data-browse="youtube">
+<body class="browse-page" data-browse="youtube" data-nav="youtube">
 
   <div class="app-layout">
     <header class="site-header">
@@ -17,14 +17,8 @@
           <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="40" height="40" />
           <span class="site-brand-text">시니어 디지털 보안관</span>
         </a>
-        <div class="header-end">
-          <nav class="top-nav" aria-label="주요 메뉴">
-            <a class="top-nav-link" href="index.html" data-browse-nav="home">홈</a>
-            <a class="top-nav-link nav-active" href="youtube.html" data-browse-nav="youtube">유튜브</a>
-            <a class="top-nav-link" href="news.html" data-browse-nav="news">뉴스</a>
-            <a class="top-nav-link" href="welfare.html" data-browse-nav="welfare">복지정보</a>
-          </nav>
-        </div>
+
+        <nav class="top-nav" aria-label="주요 메뉴" data-auto-nav></nav>
       </div>
     </header>
 

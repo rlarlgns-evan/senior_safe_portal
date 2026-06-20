@@ -91,12 +91,24 @@ async function fetchWeather(lat: number, lng: number) {
   };
 }
 
-function buildLocationLabel(geo: ReverseGeocode): { region: string; city: string; label: string } {
-  const region = geo.principalSubdivision || geo.countryName || "대한민국";
-  const city = geo.city || geo.locality || region;
-  const label = geo.locality && geo.locality !== city
-    ? `${city} ${geo.locality}`
-    : city;
+function buildLocationLabel(geo: Record<string, unknown>): { region: string; city: string; label: string } {
+  const admin = (geo.localityInfo as { administrative?: Array<{ name?: string; adminLevel?: number }> } | undefined)
+    ?.administrative;
+  let region = String(geo.principalSubdivision ?? geo.countryName ?? "대한민국");
+  let city = String(geo.city ?? geo.locality ?? region);
+
+  if (Array.isArray(admin)) {
+    const findAdmin = (level: number) => admin.find((item) => item.adminLevel === level)?.name;
+    const province = findAdmin(4) || findAdmin(3);
+    const district = findAdmin(6) || findAdmin(8) || findAdmin(5);
+    if (province) region = province;
+    if (district) city = district;
+  }
+
+  const locality = typeof geo.locality === "string" ? geo.locality : "";
+  const label = city && city !== region
+    ? (locality && locality !== city ? `${city} ${locality}` : city)
+    : region;
 
   return { region, city, label };
 }

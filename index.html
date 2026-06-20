@@ -3,36 +3,32 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://oweduuhfkiutlszfwukt.supabase.co wss://oweduuhfkiutlszfwukt.supabase.co https://api.open-meteo.com https://api.bigdatacloud.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests" />
   <title>시니어 디지털 보안관</title>
-  <link rel="icon" href="assets/mascot-sheriff.png" type="image/png" />
+  <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 </head>
-<body>
+<body data-nav="home">
 
   <div class="app-layout">
 
     <header class="site-header">
       <div class="site-header-row">
-        <a class="site-brand" href="#home-section" data-section="home">
-          <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="40" height="40" />
+        <a class="site-brand" href="index.html">
+          <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="48" height="48" />
           <span class="site-brand-text">시니어 디지털 보안관</span>
         </a>
 
+        <nav class="top-nav" aria-label="주요 메뉴" data-auto-nav></nav>
+
         <div class="header-end">
-          <nav class="top-nav" aria-label="주요 메뉴">
-            <a class="top-nav-link nav-active" href="#home-section" data-section="home">홈</a>
-            <a class="top-nav-link" href="#youtube-section" data-section="youtube">유튜브</a>
-            <a class="top-nav-link" href="#news-section" data-section="news">뉴스</a>
-            <a class="top-nav-link" href="#welfare-section" data-section="welfare">복지정보</a>
-            <a class="top-nav-link" href="#" data-section="consult">상담</a>
-          </nav>
 
           <div class="auth-area" id="auth-area">
             <span id="user-greeting" class="user-greeting hidden"></span>
-            <button type="button" id="login-button" class="auth-button auth-login">로그인</button>
-            <button type="button" id="logout-button" class="auth-button auth-logout hidden">로그아웃</button>
+            <button type="button" id="login-button" class="auth-button auth-login btn btn--primary">로그인</button>
+            <button type="button" id="logout-button" class="auth-button auth-logout btn btn--secondary hidden">로그아웃</button>
           </div>
 
           <button type="button" id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="메뉴 열기" aria-expanded="false">
@@ -41,18 +37,11 @@
         </div>
       </div>
 
-      <nav id="mobile-nav" class="mobile-nav hidden" aria-label="모바일 메뉴">
-        <a class="mobile-nav-link mobile-nav-active" href="#home-section" data-section="home">홈</a>
-        <a class="mobile-nav-link" href="#youtube-section" data-section="youtube">유튜브</a>
-        <a class="mobile-nav-link" href="#news-section" data-section="news">뉴스</a>
-        <a class="mobile-nav-link" href="#welfare-section" data-section="welfare">복지정보</a>
-        <a class="mobile-nav-link" href="#" data-section="consult">상담</a>
-      </nav>
+      <nav id="mobile-nav" class="mobile-nav hidden" aria-label="모바일 메뉴" data-auto-nav="true"></nav>
     </header>
 
     <main class="main-content" id="home-section">
 
-      <!-- 검색 영역 -->
       <section class="hero-section" id="hero-section">
         <div class="hero-weather-bg" id="hero-weather-bg" aria-hidden="true">
           <div class="weather-sky"></div>
@@ -70,44 +59,44 @@
         </div>
 
         <div class="hero-content">
-        <div class="hero-weather-bar">
-          <div id="weather-widget" class="weather-card" aria-live="polite">
-            <div class="weather-icon-wrap" aria-hidden="true">
-              <span id="weather-icon" class="material-symbols-outlined">partly_cloudy_day</span>
-            </div>
-            <div class="weather-details">
-              <div class="weather-primary">
-                <span id="weather-temp" class="weather-temp">--°</span>
-                <span id="weather-main" class="weather-location">날씨 확인 중...</span>
+          <div class="hero-weather-bar">
+            <div id="weather-widget" class="weather-card" aria-live="polite">
+              <div class="weather-icon-wrap" aria-hidden="true">
+                <span id="weather-icon" class="material-symbols-outlined">partly_cloudy_day</span>
               </div>
-              <p id="weather-sub" class="weather-meta">위치를 불러오고 있습니다</p>
+              <div class="weather-details">
+                <div class="weather-primary">
+                  <span id="weather-temp" class="weather-temp">--°</span>
+                  <span id="weather-main" class="weather-location">날씨 확인 중...</span>
+                </div>
+                <p id="weather-sub" class="weather-meta">위치를 불러오고 있습니다</p>
+              </div>
+              <button type="button" id="location-button" class="weather-locate-btn btn btn--secondary hidden" aria-label="내 위치로 날씨 보기">
+                <span class="material-symbols-outlined" aria-hidden="true">my_location</span>
+                <span class="weather-locate-label">내 위치</span>
+              </button>
             </div>
-            <button type="button" id="location-button" class="weather-locate-btn hidden" aria-label="내 위치로 날씨 보기" title="내 위치 사용">
-              <span class="material-symbols-outlined" aria-hidden="true">my_location</span>
-            </button>
           </div>
-        </div>
 
-        <div class="hero-intro">
-          <img src="assets/mascot-sheriff.png" alt="" class="hero-mascot" width="140" height="140" />
-          <p class="hero-subtitle">무엇이든 안전하게 검색하세요</p>
-        </div>
-
-        <form id="search-form" class="search-form" novalidate>
-          <label for="search-input" class="form-label">검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요</label>
-          <div class="search-row">
-            <input id="search-input" type="text" class="search-input" placeholder="예: 건강 정보, https://example.com" autocomplete="off" />
-            <button type="submit" class="search-button">
-              <span class="material-symbols-outlined" aria-hidden="true">search</span>
-              검색하기
-            </button>
+          <div class="hero-intro">
+            <img src="assets/mascot-sheriff.png" alt="" class="hero-mascot" width="140" height="140" />
+            <p class="hero-subtitle">무엇이든 안전하게 검색하세요</p>
           </div>
-          <p class="form-help">링크는 안전 검사 · 일반 검색어는 유튜브 추천</p>
-        </form>
+
+          <form id="search-form" class="search-form" novalidate>
+            <label for="search-input" class="form-label">검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요</label>
+            <div class="search-row">
+              <input id="search-input" type="text" class="search-input" placeholder="예: 건강 정보, https://example.com" autocomplete="off" aria-describedby="search-help" />
+              <button type="submit" class="search-button btn btn--primary">
+                <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                검색하기
+              </button>
+            </div>
+            <p id="search-help" class="form-help">링크는 안전 검사 · 일반 검색어는 유튜브 추천</p>
+          </form>
         </div>
       </section>
 
-      <!-- 콘텐츠 3칸: 유튜브 · 뉴스 · 복지정보 -->
       <div class="content-grid">
         <section id="youtube-section" class="content-section content-column" aria-labelledby="youtube-heading">
           <div class="section-header">
@@ -118,7 +107,7 @@
           </div>
           <div id="youtube-categories" class="category-tabs" role="tablist" aria-label="유튜브 카테고리"></div>
           <div id="youtube-content" class="youtube-grid"></div>
-          <a id="youtube-more" class="section-more-link" href="youtube.html">더보기</a>
+          <a id="youtube-more" class="section-more-link btn btn--secondary" href="youtube.html">더보기</a>
         </section>
 
         <section id="news-section" class="content-section content-column" aria-labelledby="news-heading">
@@ -130,7 +119,7 @@
           </div>
           <div id="news-categories" class="category-tabs" role="tablist" aria-label="뉴스 카테고리"></div>
           <div id="news-content" class="news-list"></div>
-          <a id="news-more" class="section-more-link" href="news.html">더보기</a>
+          <a id="news-more" class="section-more-link btn btn--secondary" href="news.html">더보기</a>
         </section>
 
         <section id="welfare-section" class="content-section content-column welfare-section" aria-labelledby="welfare-heading">
@@ -148,13 +137,12 @@
               <p>근처 복지 시설과 혜택 정보를 찾고 있습니다...</p>
             </div>
           </div>
-          <a id="welfare-more" class="section-more-link" href="welfare.html">더보기</a>
+          <a id="welfare-more" class="section-more-link btn btn--secondary" href="welfare.html">더보기</a>
         </section>
       </div>
     </main>
   </div>
 
-  <!-- 플로팅 챗봇 -->
   <div class="chat-fab-wrap" id="floating-chat-container">
     <div id="chat-window" class="chat-window hidden" role="dialog" aria-labelledby="chat-title">
       <div class="chat-header">
@@ -165,27 +153,28 @@
             <p>대화하듯 편하게 물어보세요</p>
           </div>
         </div>
-        <button type="button" id="chat-close" class="icon-button" aria-label="챗봇 닫기">
+        <button type="button" id="chat-close" class="icon-button btn btn--danger btn--compact" aria-label="챗봇 닫기">
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          닫기
         </button>
       </div>
       <div id="chat-messages" class="chat-messages" role="log" aria-live="polite"></div>
       <form id="chat-form" class="chat-form">
         <label for="chat-input" class="form-label">메시지 또는 링크 입력</label>
-        <textarea id="chat-input" rows="3" class="chat-input" placeholder="의심스러운 문자 내용..."></textarea>
-        <button type="submit" class="chat-submit">메시지 보내기</button>
+        <textarea id="chat-input" rows="3" class="chat-input" placeholder="의심스러운 문자 내용을 입력하세요" aria-describedby="chat-input-help"></textarea>
+        <p id="chat-input-help" class="form-help">답변은 자동으로 사라지지 않습니다. 챗봇 창을 닫으려면 위 '닫기'를 누르세요.</p>
+        <button type="submit" class="chat-submit btn btn--primary">메시지 보내기</button>
       </form>
     </div>
-    <button type="button" id="chat-fab" class="chat-fab chat-fab--mascot">
+    <button type="button" id="chat-fab" class="chat-fab chat-fab--mascot btn btn--accent">
       <img src="assets/mascot-sheriff.png" alt="" class="chat-fab-img" width="48" height="48" />
       <span>보안관에게 물어보기</span>
     </button>
   </div>
 
-  <!-- 로그인 모달 -->
   <div id="login-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
-    <div class="modal-panel">
-      <button type="button" id="login-modal-close" class="modal-close" aria-label="닫기">X</button>
+    <div class="modal-panel card">
+      <button type="button" id="login-modal-close" class="modal-close btn btn--danger" aria-label="로그인 창 닫기">닫기</button>
       <h2 id="login-modal-title" class="modal-title">로그인</h2>
       <p class="modal-desc">이메일과 비밀번호로 로그인하세요. (Supabase 계정)</p>
       <form id="login-form" class="login-form">
@@ -193,25 +182,28 @@
         <input id="login-email" type="email" class="modal-input" placeholder="example@email.com" autocomplete="email" required />
         <label for="login-password" class="form-label">비밀번호</label>
         <input id="login-password" type="password" class="modal-input" placeholder="비밀번호" autocomplete="current-password" required />
-        <p id="login-error" class="login-error hidden" role="alert"></p>
-        <button type="submit" class="modal-submit">로그인하기</button>
+        <div id="login-error" class="login-error alert-persistent hidden" role="alert">
+          <p id="login-error-message"></p>
+          <button type="button" id="login-error-close" class="btn btn--danger">닫기</button>
+        </div>
+        <button type="submit" class="modal-submit btn btn--primary">로그인하기</button>
       </form>
       <p class="modal-note">계정이 없으시면 Supabase에서 회원가입 후 이용해 주세요.</p>
     </div>
   </div>
 
-  <!-- 로딩 / 오류 -->
-  <div id="loading-overlay" class="loading-overlay hidden" role="dialog" aria-modal="true" aria-live="assertive">
-    <div class="loading-box">
+  <div id="loading-overlay" class="loading-overlay hidden" role="alertdialog" aria-modal="true" aria-labelledby="loading-message" aria-hidden="true">
+    <div class="loading-box card alert-persistent">
       <img src="assets/mascot-sheriff.png" alt="" class="loading-mascot" width="96" height="96" />
-      <p>안전 검사를 진행하고 있습니다. 잠시만 기다려주세요...</p>
+      <p id="loading-message">안전 검사를 진행하고 있습니다. 잠시만 기다려주세요...</p>
+      <button type="button" id="loading-cancel" class="btn btn--secondary">검사 취소하기</button>
     </div>
   </div>
 
-  <div id="error-box" class="error-box hidden" role="alert">
-    <div class="error-content">
-      <p id="error-message"></p>
-      <button id="error-close" type="button" class="error-close" aria-label="오류 닫기">X</button>
+  <div id="error-box" class="error-box alert-persistent hidden" role="alertdialog" aria-modal="true" aria-labelledby="error-message" aria-hidden="true">
+    <div class="error-content card">
+      <p id="error-message" class="alert-body"></p>
+      <button id="error-close" type="button" class="error-close btn btn--danger" aria-label="오류 메시지 닫기">닫기</button>
     </div>
   </div>
 

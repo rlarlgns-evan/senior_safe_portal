@@ -139,27 +139,130 @@ const xmlParser = new XMLParser({
 function normalizeAreaName(value: string): string {
   return value
     .replace(/\s+/g, "")
-    .replace(/(특별자치시|특별자치도|광역시|특별시|자치시|자치도|시|도|구|군)$/u, "");
+    .replace(/(특별자치시|특별자치도|광역시|특별시|자치시|자치도|시|도|구|군)$/u, "")
+    .toLowerCase();
+}
+
+const ENGLISH_REGION_ALIASES: Record<string, string> = {
+  seoul: "서울",
+  busan: "부산",
+  daegu: "대구",
+  incheon: "인천",
+  gwangju: "광주",
+  daejeon: "대전",
+  ulsan: "울산",
+  sejong: "세종",
+  gyeonggi: "경기",
+  gangwon: "강원",
+  chungbuk: "충북",
+  chungcheongbuk: "충북",
+  chungnam: "충남",
+  chungcheongnam: "충남",
+  jeonbuk: "전북",
+  jeonnam: "전남",
+  gyeongbuk: "경북",
+  gyeongsangbuk: "경북",
+  gyeongnam: "경남",
+  gyeongsangnam: "경남",
+  jeju: "제주",
+};
+
+function normalizeRegionInput(region: string): string {
+  let value = region.trim();
+  const lower = value.toLowerCase();
+  for (const [english, korean] of Object.entries(ENGLISH_REGION_ALIASES)) {
+    if (lower.includes(english)) {
+      return korean;
+    }
+  }
+  return value;
 }
 
 function resolveRegionCodes(region: string, city: string): RegionCodes {
-  const regionKey = Object.keys(CTPRVN_CODES).find((key) =>
-    region.includes(key) || key.includes(normalizeAreaName(region))
-  );
-  const ctprvn = regionKey ? CTPRVN_CODES[regionKey] : CTPRVN_CODES["서울"];
+  const regionInput = normalizeRegionInput(region);
+  const cityInput = city.trim();
 
-  const cityNormalized = normalizeAreaName(city);
-  const signguMap = SIGNGU_CODES[ctprvn.code] ?? {};
-  const signguKey = Object.keys(signguMap).find((key) =>
-    city.includes(key) || cityNormalized.includes(key) || key.includes(cityNormalized)
+  const regionKey = Object.keys(CTPRVN_CODES).find((key) =>
+    regionInput.includes(key) || key.includes(normalizeAreaName(regionInput))
   );
+  let ctprvn = regionKey ? CTPRVN_CODES[regionKey] : null;
+
+  const cityNormalized = normalizeAreaName(cityInput);
+  let signguCd = "";
+  let signguNm = cityInput || ctprvn?.name || "서울특별시";
+
+  if (ctprvn) {
+    const signguMap = SIGNGU_CODES[ctprvn.code] ?? {};
+    const signguKey = Object.keys(signguMap).find((key) =>
+      cityInput.includes(key) || cityNormalized.includes(normalizeAreaName(key)) || normalizeAreaName(key).includes(cityNormalized)
+    );
+    if (signguKey) {
+      signguCd = signguMap[signguKey];
+      signguNm = cityInput || signguKey;
+    }
+  } else {
+    for (const [code, signguMap] of Object.entries(SIGNGU_CODES)) {
+      const signguKey = Object.keys(signguMap).find((key) =>
+        cityInput.includes(key) || cityNormalized.includes(normalizeAreaName(key)) || normalizeAreaName(key).includes(cityNormalized)
+      );
+      if (!signguKey) continue;
+
+      const matched = Object.entries(CTPRVN_CODES).find(([, value]) => value.code === code);
+      if (!matched) continue;
+
+      ctprvn = matched[1];
+      signguCd = signguMap[signguKey];
+      signguNm = cityInput || signguKey;
+      break;
+    }
+  }
+
+  if (!ctprvn) {
+    ctprvn = CTPRVN_CODES["서울"];
+  }
+
+  if (!signguCd && ctprvn) {
+    const signguMap = SIGNGU_CODES[ctprvn.code] ?? {};
+    const signguKey = Object.keys(signguMap).find((key) =>
+      cityInput.includes(key) || cityNormalized.includes(normalizeAreaName(key)) || normalizeAreaName(key).includes(cityNormalized)
+    );
+    if (signguKey) {
+      signguCd = signguMap[signguKey];
+      signguNm = cityInput || signguKey;
+    }
+  }
 
   return {
     ctprvnCd: ctprvn.code,
-    signguCd: signguKey ? signguMap[signguKey] : "",
+    signguCd,
     ctprvnNm: ctprvn.name,
-    signguNm: city || ctprvn.name,
+    signguNm,
   };
+}
+
+function serviceMatchesRegion(
+  service: WelfareServiceSummary | WelfareServiceDetail,
+  codes: RegionCodes,
+): boolean {
+  if (!service.region?.trim()) return true;
+
+  const serviceRegionNorm = normalizeAreaName(service.region);
+  const targetRegionNorm = normalizeAreaName(codes.ctprvnNm);
+  if (!serviceRegionNorm || !targetRegionNorm) return true;
+
+  return (
+    serviceRegionNorm.includes(targetRegionNorm.slice(0, 2)) ||
+    targetRegionNorm.includes(serviceRegionNorm.slice(0, 2)) ||
+    serviceRegionNorm.includes(normalizeAreaName(codes.ctprvnNm.replace(/(특별|광역|자치)/gu, "")))
+  );
+}
+
+function filterLocalServicesByRegion<T extends WelfareServiceSummary>(
+  services: T[],
+  codes: RegionCodes,
+): T[] {
+  const filtered = services.filter((service) => serviceMatchesRegion(service, codes));
+  return filtered.length > 0 ? filtered : services;
 }
 
 function asArray<T>(value: T | T[] | undefined): T[] {
@@ -497,9 +600,12 @@ Deno.serve(async (req: Request) => {
       }),
     );
 
-    const services = servicesRaw
-      .filter((service) => matchesWelfareCategory(service, category))
-      .slice(0, serviceLimit);
+    const services = filterLocalServicesByRegion(
+      servicesRaw
+        .filter((service) => matchesWelfareCategory(service, category))
+        .slice(0, serviceLimit),
+      codes,
+    );
 
     const nationalRaw = await fetchNationalWelfareServices(serviceKey, category === "all" ? serviceLimit : serviceLimit * 2);
     const nationalServices = nationalRaw

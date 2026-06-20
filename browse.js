@@ -45,19 +45,10 @@ function getInitialCategoryId(categories) {
   return categories[0].id;
 }
 
-function setBrowseNavActive(type) {
-  document.querySelectorAll(".top-nav-link[data-browse-nav]").forEach((link) => {
-    const match = link.dataset.browseNav === type;
-    link.classList.toggle("nav-active", match);
-  });
-}
-
 async function initBrowsePage() {
   const type = getBrowseType();
   const config = BROWSE_CONFIG[type];
   if (!config) return;
-
-  setBrowseNavActive(type);
 
   const tabsContainer = document.getElementById("browse-categories");
   const contentContainer = document.getElementById("browse-content");
