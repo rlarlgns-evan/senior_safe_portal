@@ -1407,6 +1407,29 @@ function injectSiteHeader() {
   header.innerHTML = getSiteHeaderHtml();
 }
 
+function getAuthFieldHtml({ id, type, label, placeholder, autocomplete, minlength }) {
+  const icon = type === "email" ? "mail" : "lock";
+  const minAttr = minlength ? ` minlength="${minlength}"` : "";
+
+  return `
+    <div class="auth-field">
+      <label for="${id}" class="auth-field-label">${label}</label>
+      <div class="auth-input-row">
+        <span class="material-symbols-outlined auth-field-icon" aria-hidden="true">${icon}</span>
+        <input
+          id="${id}"
+          type="${type}"
+          class="auth-input"
+          placeholder="${placeholder}"
+          autocomplete="${autocomplete}"
+          ${minAttr}
+          required
+        />
+      </div>
+    </div>
+  `;
+}
+
 function getAuthSocialButtonsHtml() {
   const providers = [
     { id: "google", label: "Google", icon: "assets/social-google.svg" },
@@ -1418,8 +1441,7 @@ function getAuthSocialButtonsHtml() {
     <div class="auth-social-buttons" role="group" aria-label="간편 로그인">
       ${providers.map(({ id, label, icon }) => `
         <button type="button" class="auth-social-btn auth-social-btn--${id}" data-social-provider="${id}" aria-label="${label}로 로그인">
-          <img src="${icon}" alt="" class="auth-social-icon" width="40" height="40" />
-          <span class="auth-social-label">${label}</span>
+          <img src="${icon}" alt="" class="auth-social-icon" width="36" height="36" />
         </button>
       `).join("")}
     </div>
@@ -1428,11 +1450,16 @@ function getAuthSocialButtonsHtml() {
 
 function getLoginModalHtml() {
   return `
-    <div id="login-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
-      <div class="modal-panel card">
-        <button type="button" id="login-modal-close" class="modal-close btn btn--danger" aria-label="로그인 창 닫기">닫기</button>
-        <h2 id="login-modal-title" class="modal-title">로그인</h2>
-        <p id="login-modal-desc" class="modal-desc">아이디와 비밀번호로 로그인하거나 간편 로그인을 이용하세요.</p>
+    <div id="login-modal" class="modal-overlay auth-modal hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
+      <div class="modal-panel auth-modal-panel card">
+        <button type="button" id="login-modal-close" class="modal-close auth-modal-close" aria-label="로그인 창 닫기">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+        <header class="auth-modal-header">
+          <h2 id="login-modal-title" class="modal-title auth-modal-title">로그인</h2>
+          <span class="auth-modal-title-line" aria-hidden="true"></span>
+          <p id="login-modal-desc" class="modal-desc auth-modal-desc">아이디와 비밀번호로 로그인하거나 간편 로그인을 이용하세요.</p>
+        </header>
         <div id="login-error" class="login-error alert-persistent hidden" role="alert">
           <p id="login-error-message"></p>
           <button type="button" id="login-error-close" class="btn btn--danger">닫기</button>
@@ -1442,31 +1469,58 @@ function getLoginModalHtml() {
           <button type="button" id="login-success-close" class="btn btn--secondary">확인</button>
         </div>
         <form id="login-form" class="login-form auth-form">
-          <label for="login-email" class="form-label">아이디 (이메일)</label>
-          <input id="login-email" type="email" class="modal-input" placeholder="example@email.com" autocomplete="username email" required />
-          <label for="login-password" class="form-label">비밀번호</label>
-          <input id="login-password" type="password" class="modal-input" placeholder="비밀번호" autocomplete="current-password" required />
+          ${getAuthFieldHtml({
+            id: "login-email",
+            type: "email",
+            label: "아이디 (이메일)",
+            placeholder: "아이디 (이메일)",
+            autocomplete: "username email",
+          })}
+          ${getAuthFieldHtml({
+            id: "login-password",
+            type: "password",
+            label: "비밀번호",
+            placeholder: "비밀번호",
+            autocomplete: "current-password",
+          })}
           <div class="auth-form-footer">
             <button type="button" id="auth-link-signup" class="auth-switch-link">회원가입</button>
           </div>
-          <button type="submit" class="modal-submit btn btn--primary">로그인하기</button>
+          <button type="submit" class="modal-submit auth-modal-submit btn btn--primary">로그인하기</button>
         </form>
         <div id="auth-social-section" class="auth-social-section">
           <p class="auth-divider" aria-hidden="true"><span>또는</span></p>
           ${getAuthSocialButtonsHtml()}
         </div>
         <form id="signup-form" class="login-form auth-form hidden" hidden>
-          <label for="signup-email" class="form-label">아이디 (이메일)</label>
-          <input id="signup-email" type="email" class="modal-input" placeholder="example@email.com" autocomplete="username email" required />
-          <label for="signup-password" class="form-label">비밀번호</label>
-          <input id="signup-password" type="password" class="modal-input" placeholder="6자 이상" autocomplete="new-password" required minlength="6" />
-          <label for="signup-password-confirm" class="form-label">비밀번호 확인</label>
-          <input id="signup-password-confirm" type="password" class="modal-input" placeholder="비밀번호를 다시 입력" autocomplete="new-password" required minlength="6" />
+          ${getAuthFieldHtml({
+            id: "signup-email",
+            type: "email",
+            label: "아이디 (이메일)",
+            placeholder: "아이디 (이메일)",
+            autocomplete: "username email",
+          })}
+          ${getAuthFieldHtml({
+            id: "signup-password",
+            type: "password",
+            label: "비밀번호",
+            placeholder: "6자 이상",
+            autocomplete: "new-password",
+            minlength: 6,
+          })}
+          ${getAuthFieldHtml({
+            id: "signup-password-confirm",
+            type: "password",
+            label: "비밀번호 확인",
+            placeholder: "비밀번호를 다시 입력",
+            autocomplete: "new-password",
+            minlength: 6,
+          })}
           <p class="modal-note auth-form-note">가입 후 이메일 확인이 필요할 수 있습니다. 메일함을 확인해 주세요.</p>
           <div class="auth-form-footer">
             <button type="button" id="auth-link-login" class="auth-switch-link">로그인</button>
           </div>
-          <button type="submit" class="modal-submit btn btn--primary">회원가입하기</button>
+          <button type="submit" class="modal-submit auth-modal-submit btn btn--primary">회원가입하기</button>
         </form>
       </div>
     </div>
@@ -1570,6 +1624,8 @@ const SiteAuth = {
         ? "아이디와 비밀번호로 로그인하거나 간편 로그인을 이용하세요."
         : "아이디와 비밀번호로 새 계정을 만드세요.";
     }
+
+    document.querySelector(".auth-modal-header")?.classList.toggle("auth-modal-header--signup", !isLogin);
 
     SiteAuth.hideLoginError();
     SiteAuth.hideLoginSuccess();
