@@ -1458,7 +1458,6 @@ function getLoginModalHtml() {
         <header class="auth-modal-header">
           <h2 id="login-modal-title" class="modal-title auth-modal-title">로그인</h2>
           <span class="auth-modal-title-line" aria-hidden="true"></span>
-          <p id="login-modal-desc" class="modal-desc auth-modal-desc">아이디와 비밀번호로 로그인하거나 간편 로그인을 이용하세요.</p>
         </header>
         <div id="login-error" class="login-error alert-persistent hidden" role="alert">
           <p id="login-error-message"></p>
@@ -1617,15 +1616,7 @@ const SiteAuth = {
     socialSection?.classList.toggle("hidden", !isLogin);
 
     const title = document.getElementById("login-modal-title");
-    const desc = document.getElementById("login-modal-desc");
     if (title) title.textContent = isLogin ? "로그인" : "회원가입";
-    if (desc) {
-      desc.textContent = isLogin
-        ? "아이디와 비밀번호로 로그인하거나 간편 로그인을 이용하세요."
-        : "아이디와 비밀번호로 새 계정을 만드세요.";
-    }
-
-    document.querySelector(".auth-modal-header")?.classList.toggle("auth-modal-header--signup", !isLogin);
 
     SiteAuth.hideLoginError();
     SiteAuth.hideLoginSuccess();
