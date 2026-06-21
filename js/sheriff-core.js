@@ -540,43 +540,61 @@ function renderVerifiedBadge(label) {
   `;
 }
 
-function renderYoutubeThumbnailCard(item) {
+function wrapContentCardGrid(html, options = {}) {
+  const homeClass = options.home ? " content-card-grid--home" : "";
+  return `<div class="content-card-grid${homeClass}">${html}</div>`;
+}
+
+function renderYoutubeCard(item) {
   if (item.status === "danger") {
     return `
-      <article class="browse-yt-card browse-yt-card-blocked" title="${escapeHtml(item.title)}">
-        <div class="browse-yt-thumb browse-yt-thumb-blocked">
+      <article class="media-card media-card--blocked" title="${escapeHtml(item.title)}">
+        <div class="media-card-media media-card-media--blocked">
           <span class="material-symbols-outlined" aria-hidden="true">block</span>
           <span>차단됨</span>
         </div>
-        <p class="browse-yt-label">${escapeHtml(item.title)}</p>
+        <div class="media-card-body">
+          <h4 class="media-card-title">${escapeHtml(item.title)}</h4>
+        </div>
       </article>
     `;
   }
 
   return `
-    <a class="browse-yt-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(item.title)}">
-      <article class="browse-yt-card">
-        <div class="browse-yt-thumb">
+    <a class="media-card-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(item.title)}">
+      <article class="media-card">
+        <div class="media-card-media">
           <img src="${escapeHtml(item.thumbnail)}" alt="" loading="lazy" />
           ${renderVerifiedBadge("확인된 영상")}
         </div>
-        <p class="browse-yt-label">${escapeHtml(item.title)}</p>
+        <div class="media-card-body">
+          <h4 class="media-card-title">${escapeHtml(item.title)}</h4>
+          ${item.channel ? `<p class="media-card-meta">${escapeHtml(item.channel)}</p>` : ""}
+        </div>
       </article>
     </a>
   `;
 }
 
-function renderYoutubeHomeCard(item) {
+function renderNewsCard(article) {
+  const href = article.originallink || article.link;
+  const thumb = article.thumbnail || getFaviconThumbnail(href);
+  const isLogo = !article.thumbnail || thumb.includes("google.com/s2/favicons");
+  const thumbHtml = thumb
+    ? `<img src="${escapeHtml(thumb)}" alt="" loading="lazy" />`
+    : `<span class="material-symbols-outlined" aria-hidden="true">newspaper</span>`;
+
   return `
-    <a class="video-card-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">
-      <article class="video-card-ui">
-        <div class="video-thumb">
-          <img src="${escapeHtml(item.thumbnail)}" alt="" loading="lazy" />
-          ${renderVerifiedBadge("확인된 영상")}
+    <a class="media-card-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">
+      <article class="media-card">
+        <div class="media-card-media${isLogo ? " media-card-media--logo" : ""}">
+          ${thumbHtml}
+          ${renderVerifiedBadge("확인된 기사")}
         </div>
-        <div class="card-body">
-          <h4 class="card-title">${escapeHtml(item.title)}</h4>
-          <p class="card-meta">${escapeHtml(item.channel)}</p>
+        <div class="media-card-body">
+          <h4 class="media-card-title">${escapeHtml(article.title)}</h4>
+          ${article.summary ? `<p class="media-card-meta">${escapeHtml(article.summary)}</p>` : ""}
+          <span class="media-card-foot">${escapeHtml(article.pubDate || "자세히 읽기")} →</span>
         </div>
       </article>
     </a>
@@ -670,9 +688,9 @@ function renderYoutubeItems(container, items, preview, renderOptions = {}) {
       ? renderYoutubeFeedFallbackNotice()
       : "";
   if (preview) {
-    container.innerHTML = notice + items.map(renderYoutubeHomeCard).join("");
+    container.innerHTML = notice + wrapContentCardGrid(items.map(renderYoutubeCard).join(""), { home: true });
   } else {
-    container.innerHTML = notice + `<div class="browse-grid browse-youtube-grid">${items.map(renderYoutubeThumbnailCard).join("")}</div>`;
+    container.innerHTML = notice + wrapContentCardGrid(items.map(renderYoutubeCard).join(""));
   }
 }
 
@@ -690,29 +708,7 @@ async function searchNews(query, display = 5) {
 }
 
 function renderNewsHomeCard(article) {
-  const href = article.originallink || article.link;
-  const thumb = article.thumbnail || getFaviconThumbnail(href);
-  const isLogo = !article.thumbnail || thumb.includes("google.com/s2/favicons");
-  const thumbClass = isLogo ? "news-thumb news-thumb-logo" : "news-thumb";
-  const thumbHtml = thumb
-    ? `<img src="${escapeHtml(thumb)}" alt="" loading="lazy" />`
-    : `<span class="material-symbols-outlined" aria-hidden="true">newspaper</span>`;
-
-  return `
-    <a class="news-card-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">
-      <article class="news-card-ui">
-        <div class="${thumbClass}">
-          ${thumbHtml}
-          ${renderVerifiedBadge("확인된 기사")}
-        </div>
-        <div class="news-body">
-          <h4 class="news-title">${escapeHtml(article.title)}</h4>
-          <p class="news-summary">${escapeHtml(article.summary)}</p>
-          <span class="news-link">${escapeHtml(article.pubDate || "자세히 읽기")} →</span>
-        </div>
-      </article>
-    </a>
-  `;
+  return renderNewsCard(article);
 }
 
 async function loadHomeNewsRecommendations(container, query, options = {}) {
@@ -729,9 +725,12 @@ async function loadHomeNewsRecommendations(container, query, options = {}) {
     }
 
     if (preview) {
-      container.innerHTML = visibleArticles.map(renderNewsHomeCard).join("");
+      container.innerHTML = wrapContentCardGrid(
+        visibleArticles.map(renderNewsCard).join(""),
+        { home: true },
+      );
     } else {
-      container.innerHTML = `<div class="browse-grid browse-news-grid">${visibleArticles.map(renderNewsHomeCard).join("")}</div>`;
+      container.innerHTML = wrapContentCardGrid(visibleArticles.map(renderNewsCard).join(""));
     }
   } catch {
     container.innerHTML = mascotLoadingHtml("뉴스를 불러오지 못했습니다. Supabase에 search-news 배포 및 네이버 API 키를 확인해 주세요.");
@@ -1023,14 +1022,20 @@ function renderWelfareServiceCard(service, compact = false) {
 
   if (compact) {
     return `
-      <article class="welfare-card welfare-card-compact">
-        <div class="welfare-badge">${badge}</div>
-        <h4 class="welfare-title">${escapeHtml(service.servNm)}</h4>
-        ${metaParts.length ? `<p class="welfare-meta">${escapeHtml(metaParts.join(" · "))}</p>` : ""}
-        ${summaryText ? `<p class="welfare-address">${escapeHtml(summaryText)}</p>` : ""}
-        ${service.onlineAvailable === "Y" ? `<span class="welfare-online">온라인 신청 가능</span>` : ""}
-        <a class="welfare-link" href="${escapeHtml(service.link)}" target="_blank" rel="noopener noreferrer">자세히 보기 →</a>
-      </article>
+      <a class="media-card-link" href="${escapeHtml(service.link)}" target="_blank" rel="noopener noreferrer">
+        <article class="media-card media-card--welfare">
+          <div class="media-card-media media-card-media--icon">
+            <span class="material-symbols-outlined" aria-hidden="true">volunteer_activism</span>
+            <span class="media-card-badge">${badge}</span>
+          </div>
+          <div class="media-card-body">
+            <h4 class="media-card-title">${escapeHtml(service.servNm)}</h4>
+            ${metaParts.length ? `<p class="media-card-meta">${escapeHtml(metaParts.join(" · "))}</p>` : ""}
+            ${summaryText ? `<p class="media-card-meta">${escapeHtml(summaryText)}</p>` : ""}
+            ${service.onlineAvailable === "Y" ? `<span class="media-card-foot media-card-foot--accent">온라인 신청 가능</span>` : `<span class="media-card-foot">자세히 보기 →</span>`}
+          </div>
+        </article>
+      </a>
     `;
   }
 
@@ -1163,7 +1168,7 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
         if (nationalPreview.length > 0) {
           container.innerHTML = `
             <p class="welfare-source-note">우리 지역 지자체 복지를 찾지 못해 전국 복지를 보여드립니다.</p>
-            <div class="home-preview-list">${nationalPreview.map((s) => renderWelfareServiceCard(s, true)).join("")}</div>
+            ${wrapContentCardGrid(nationalPreview.map((s) => renderWelfareServiceCard(s, true)).join(""), { home: true })}
           `;
           return;
         }
@@ -1171,7 +1176,10 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
         return;
       }
 
-      container.innerHTML = `<div class="home-preview-list">${localServices.map((s) => renderWelfareServiceCard(s, true)).join("")}</div>`;
+      container.innerHTML = wrapContentCardGrid(
+        localServices.map((s) => renderWelfareServiceCard(s, true)).join(""),
+        { home: true },
+      );
       return;
     }
 
@@ -1180,10 +1188,10 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
     }
 
     const localHtml = localServices.length > 0
-      ? `<div class="browse-grid browse-welfare-grid">${localServices.map((s) => renderWelfareServiceCard(s, true)).join("")}</div>`
+      ? wrapContentCardGrid(localServices.map((s) => renderWelfareServiceCard(s, true)).join(""))
       : emptyLocal;
     const nationalHtml = nationalServices.length > 0
-      ? `<div class="browse-grid browse-welfare-grid">${nationalServices.map((s) => renderWelfareServiceCard(s, true)).join("")}</div>`
+      ? wrapContentCardGrid(nationalServices.map((s) => renderWelfareServiceCard(s, true)).join(""))
       : emptyNational;
 
     container.innerHTML = `
@@ -1467,6 +1475,10 @@ function getLoginModalHtml() {
           <p id="login-success-message"></p>
           <button type="button" id="login-success-close" class="btn btn--secondary">확인</button>
         </div>
+        <div id="auth-social-section" class="auth-social-section">
+          ${getAuthSocialButtonsHtml()}
+          <p class="auth-divider" aria-hidden="true"><span>또는</span></p>
+        </div>
         <form id="login-form" class="login-form auth-form">
           ${getAuthFieldHtml({
             id: "login-email",
@@ -1487,10 +1499,6 @@ function getLoginModalHtml() {
           </div>
           <button type="submit" class="modal-submit auth-modal-submit btn btn--primary">로그인하기</button>
         </form>
-        <div id="auth-social-section" class="auth-social-section">
-          <p class="auth-divider" aria-hidden="true"><span>또는</span></p>
-          ${getAuthSocialButtonsHtml()}
-        </div>
         <form id="signup-form" class="login-form auth-form hidden" hidden>
           ${getAuthFieldHtml({
             id: "signup-email",
