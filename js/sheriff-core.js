@@ -1516,10 +1516,6 @@ function getLoginModalHtml() {
           <p id="login-success-message"></p>
           <button type="button" id="login-success-close" class="btn btn--secondary">확인</button>
         </div>
-        <div id="auth-social-section" class="auth-social-section">
-          ${getAuthSocialButtonsHtml()}
-          <p class="auth-divider" aria-hidden="true"><span>또는</span></p>
-        </div>
         <form id="login-form" class="login-form auth-form">
           ${getAuthFieldHtml({
             id: "login-email",
@@ -1540,6 +1536,10 @@ function getLoginModalHtml() {
           </div>
           <button type="submit" class="modal-submit auth-modal-submit btn btn--primary">로그인하기</button>
         </form>
+        <p id="auth-divider" class="auth-divider" aria-hidden="true"><span>또는</span></p>
+        <div id="auth-social-section" class="auth-social-section">
+          ${getAuthSocialButtonsHtml()}
+        </div>
         <form id="signup-form" class="login-form auth-form hidden" hidden>
           ${getAuthFieldHtml({
             id: "signup-email",
@@ -1658,11 +1658,13 @@ const SiteAuth = {
     const loginForm = document.getElementById("login-form");
     const signupForm = document.getElementById("signup-form");
     const socialSection = document.getElementById("auth-social-section");
+    const authDivider = document.getElementById("auth-divider");
 
     loginForm?.classList.toggle("hidden", !isLogin);
     signupForm?.classList.toggle("hidden", isLogin);
     if (signupForm) signupForm.hidden = isLogin;
     socialSection?.classList.toggle("hidden", !isLogin);
+    authDivider?.classList.toggle("hidden", !isLogin);
 
     const title = document.getElementById("login-modal-title");
     if (title) title.textContent = isLogin ? "로그인" : "회원가입";
