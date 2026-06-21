@@ -126,7 +126,7 @@
   --accent-yellow-dark: var(--color-accent-dark);
 
   /* Typography — 기준 100% × 0.67 (PC에서 브라우저 67% 배율과 동일한 체감) */
-  --ui-scale: 0.58;
+  --ui-scale: 0.5;
   --font-base: calc(22px * var(--ui-scale));
   --font-lg: calc(26px * var(--ui-scale));
   --font-xl: calc(30px * var(--ui-scale));
