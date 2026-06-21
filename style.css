@@ -2526,13 +2526,10 @@ button.back-link-prominent {
 }
 
 .auth-modal-close {
-  position: absolute;
-  top: 0.85rem;
-  right: 0.85rem;
   display: grid;
   place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
   padding: 0;
   border: none;
   border-radius: 999px;
@@ -2540,6 +2537,7 @@ button.back-link-prominent {
   color: var(--color-text-muted);
   cursor: pointer;
   font-family: inherit;
+  justify-self: end;
 }
 
 .auth-modal-close:hover,
@@ -2551,12 +2549,27 @@ button.back-link-prominent {
 
 .auth-modal-close .material-symbols-outlined {
   font-size: 1.5rem;
+  line-height: 1;
+}
+
+.auth-modal-header-row {
+  display: grid;
+  grid-template-columns: 2.75rem 1fr 2.75rem;
+  align-items: start;
+  gap: 0.25rem;
+  margin-bottom: 1.15rem;
+}
+
+.auth-modal-header-spacer {
+  width: 2.75rem;
+  height: 2.75rem;
 }
 
 .auth-modal-header {
   text-align: center;
-  margin-bottom: 1.15rem;
-  padding-right: 2rem;
+  margin: 0;
+  padding: 0.15rem 0 0;
+  grid-column: 2;
 }
 
 .auth-modal-title {
@@ -2808,53 +2821,76 @@ button.back-link-prominent {
 
 .auth-social-buttons {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.25rem;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
   margin: 0;
 }
 
 .auth-social-btn {
-  display: grid;
-  place-items: center;
-  width: 3.25rem;
-  height: 3.25rem;
-  padding: 0;
-  border: none;
-  border-radius: 999px;
-  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 1rem;
+  border-radius: 6px;
   cursor: pointer;
   font-family: inherit;
-  transition: transform 0.12s, box-shadow 0.12s;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.2;
+  transition: background-color 0.15s, border-color 0.15s, opacity 0.15s;
 }
 
-.auth-social-btn:hover,
 .auth-social-btn:focus-visible {
-  transform: translateY(-2px);
-  outline: none;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
-.auth-social-btn--google:hover,
-.auth-social-btn--google:focus-visible {
-  box-shadow: 0 6px 16px rgba(66, 133, 244, 0.25);
+.auth-social-btn--google {
+  background: #ffffff;
+  border: 1px solid #747775;
+  color: #1f1f1f;
 }
 
-.auth-social-btn--naver:hover,
-.auth-social-btn--naver:focus-visible {
-  box-shadow: 0 6px 16px rgba(3, 199, 90, 0.22);
+.auth-social-btn--google:hover {
+  background: #f8f9fa;
+  border-color: #5f6368;
 }
 
-.auth-social-btn--kakao:hover,
-.auth-social-btn--kakao:focus-visible {
-  box-shadow: 0 6px 16px rgba(254, 229, 0, 0.35);
+.auth-social-btn--naver {
+  background: #03c75a;
+  border: none;
+  color: #ffffff;
+}
+
+.auth-social-btn--naver:hover {
+  background: #02b350;
+}
+
+.auth-social-btn--kakao {
+  background: #fee500;
+  border: none;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.auth-social-btn--kakao:hover {
+  background: #f5dc00;
 }
 
 .auth-social-icon {
-  width: 36px;
-  height: 36px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
   flex-shrink: 0;
+}
+
+.auth-social-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .auth-divider {

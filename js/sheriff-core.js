@@ -1440,16 +1440,32 @@ function getAuthFieldHtml({ id, type, label, placeholder, autocomplete, minlengt
 
 function getAuthSocialButtonsHtml() {
   const providers = [
-    { id: "google", label: "Google", icon: "assets/social-google.svg" },
-    { id: "naver", label: "네이버", icon: "assets/social-naver.svg" },
-    { id: "kakao", label: "카카오", icon: "assets/social-kakao.svg" },
+    {
+      id: "google",
+      label: "Google로 로그인",
+      icon: "assets/social-google-g.svg",
+      text: "Google로 로그인",
+    },
+    {
+      id: "naver",
+      label: "네이버 로그인",
+      icon: "assets/social-naver-n.svg",
+      text: "네이버 로그인",
+    },
+    {
+      id: "kakao",
+      label: "카카오 로그인",
+      icon: "assets/social-kakao-symbol.svg",
+      text: "카카오 로그인",
+    },
   ];
 
   return `
     <div class="auth-social-buttons" role="group" aria-label="간편 로그인">
-      ${providers.map(({ id, label, icon }) => `
-        <button type="button" class="auth-social-btn auth-social-btn--${id}" data-social-provider="${id}" aria-label="${label}로 로그인">
-          <img src="${icon}" alt="" class="auth-social-icon" width="36" height="36" />
+      ${providers.map(({ id, label, icon, text }) => `
+        <button type="button" class="auth-social-btn auth-social-btn--${id}" data-social-provider="${id}" aria-label="${label}">
+          <img src="${icon}" alt="" class="auth-social-icon" width="20" height="20" />
+          <span class="auth-social-text">${text}</span>
         </button>
       `).join("")}
     </div>
@@ -1460,13 +1476,16 @@ function getLoginModalHtml() {
   return `
     <div id="login-modal" class="modal-overlay auth-modal hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
       <div class="modal-panel auth-modal-panel card">
-        <button type="button" id="login-modal-close" class="modal-close auth-modal-close" aria-label="로그인 창 닫기">
-          <span class="material-symbols-outlined" aria-hidden="true">close</span>
-        </button>
-        <header class="auth-modal-header">
-          <h2 id="login-modal-title" class="modal-title auth-modal-title">로그인</h2>
-          <span class="auth-modal-title-line" aria-hidden="true"></span>
-        </header>
+        <div class="auth-modal-header-row">
+          <div class="auth-modal-header-spacer" aria-hidden="true"></div>
+          <header class="auth-modal-header">
+            <h2 id="login-modal-title" class="modal-title auth-modal-title">로그인</h2>
+            <span class="auth-modal-title-line" aria-hidden="true"></span>
+          </header>
+          <button type="button" id="login-modal-close" class="modal-close auth-modal-close" aria-label="로그인 창 닫기">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>
+        </div>
         <div id="login-error" class="login-error alert-persistent hidden" role="alert">
           <p id="login-error-message"></p>
           <button type="button" id="login-error-close" class="btn btn--danger">닫기</button>
