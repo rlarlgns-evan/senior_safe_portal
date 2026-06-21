@@ -188,11 +188,23 @@
     --space-page-x: 24px;
     --space-header-x: 32px;
     --space-main-x: 40px;
-    --space-cards-x: 120px;
+    --space-cards-x: 56px;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --space-cards-x: 80px;
   }
 }
 
 @media (min-width: 1400px) {
+  :root {
+    --space-cards-x: 120px;
+  }
+}
+
+@media (min-width: 1600px) {
   :root {
     --space-cards-x: 180px;
   }
@@ -805,6 +817,75 @@ button.back-link-prominent {
   max-width: var(--layout-max-wide);
   margin: 0 auto;
   padding: 0;
+  align-items: start;
+}
+
+.home-cards-band .content-column {
+  align-self: start;
+  width: 100%;
+}
+
+.home-cards-band .youtube-grid,
+.home-cards-band .news-list,
+.home-cards-band .welfare-content {
+  flex: 0 0 auto;
+}
+
+.home-cards-band .section-more-link {
+  margin-top: 0.75rem;
+}
+
+.home-cards-band .category-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 0.35rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.home-cards-band .category-tab {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: fit-content;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+  overflow: visible;
+  text-overflow: unset;
+  white-space: nowrap;
+}
+
+.home-cards-band .content-card-grid {
+  gap: 0.65rem;
+}
+
+.home-cards-band .media-card-body {
+  padding: 0.55rem 0.65rem 0.65rem;
+}
+
+.home-cards-band .media-card-title {
+  font-size: 0.9rem;
+}
+
+.home-cards-band .media-card-meta,
+.home-cards-band .media-card-foot {
+  font-size: 0.82rem;
+  -webkit-line-clamp: 1;
+}
+
+.home-cards-band .verified-badge,
+.home-cards-band .media-card-badge {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.45rem;
+}
+
+.home-cards-band .section-header--welfare {
+  padding-bottom: 0.35rem;
+}
+
+.home-cards-band .welfare-location-label {
+  font-size: 0.8rem;
+  line-height: 1.3;
 }
 
 @media (min-width: 1024px) {
@@ -1641,21 +1722,13 @@ button.back-link-prominent {
 }
 
 .youtube-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-@media (min-width: 576px) {
-  .youtube-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+  display: block;
+  width: 100%;
 }
 
 .news-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: block;
+  width: 100%;
 }
 
 /* ── 통합 콘텐츠 카드 (유튜브 · 뉴스 · 복지) ── */
@@ -1673,9 +1746,19 @@ button.back-link-prominent {
 }
 
 @media (min-width: 900px) {
-  .content-card-grid:not(.content-card-grid--home) {
+  .content-card-grid:not(.content-card-grid--home):not([class*="content-card-grid--fit-"]) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
+
+.content-card-grid--fit-1 {
+  grid-template-columns: 1fr !important;
+  max-width: 360px;
+  margin-inline: auto;
+}
+
+.content-card-grid--fit-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
 
 .content-card-grid--home {

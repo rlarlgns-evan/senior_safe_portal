@@ -241,6 +241,8 @@ const YOUTUBE_CATEGORY_FALLBACK = {
     { video_id: "Nob6hMO60NE", title: "운동으로 꿈을 가르치는 지한구 선생님 [유퀴즈]", channel: "유 퀴즈 온 더 튜브", status: "안전" },
     { video_id: "lwycbWG8gJI", title: "유퀴즈 온더블럭 하이라이트", channel: "tvN D ENT", status: "안전" },
     { video_id: "kOYS9l8X8Hs", title: "놀면 뭐하니?", channel: "MBC Entertainment", status: "안전" },
+    { video_id: "j4dMnAPZuGM", title: "유퀴즈 온 더 블럭 클립", channel: "tvN D ENT", status: "안전" },
+    { video_id: "R82-N9mP6TU", title: "유퀴즈 온 더 블럭 베스트", channel: "tvN D ENT", status: "안전" },
   ],
   documentary: [
     { video_id: "cLVugRBot1c", title: "EBS 다큐프라임 - 공부의 배신 1부", channel: "EBS 다큐", status: "안전" },
@@ -266,12 +268,15 @@ function getYoutubeFallbackItems(categoryId, count, excludeIds = new Set()) {
   const sharedPool = Object.values(YOUTUBE_CATEGORY_FALLBACK).flat();
   const seen = new Set(excludeIds);
   const items = [];
+  const pools = [categoryPool, sharedPool];
 
-  for (const video of [...categoryPool, ...sharedPool]) {
-    if (!video?.video_id || seen.has(video.video_id)) continue;
-    seen.add(video.video_id);
-    items.push(videoResultToItem(video));
-    if (items.length >= count) break;
+  for (const pool of pools) {
+    for (const video of pool) {
+      if (!video?.video_id || seen.has(video.video_id)) continue;
+      seen.add(video.video_id);
+      items.push(videoResultToItem(video));
+      if (items.length >= count) return items;
+    }
   }
 
   return items;
@@ -542,7 +547,12 @@ function renderVerifiedBadge(label) {
 
 function wrapContentCardGrid(html, options = {}) {
   const homeClass = options.home ? " content-card-grid--home" : "";
-  return `<div class="content-card-grid${homeClass}">${html}</div>`;
+  const cardCount = (html.match(/\bmedia-card\b/g) || []).length;
+  let layoutClass = "";
+  if (!options.home && cardCount > 0 && cardCount < 3) {
+    layoutClass = ` content-card-grid--fit-${cardCount}`;
+  }
+  return `<div class="content-card-grid${homeClass}${layoutClass}">${html}</div>`;
 }
 
 function renderYoutubeCard(item) {
@@ -627,7 +637,10 @@ async function fetchYoutubeFeedFromDb(categoryId, neededCount) {
 async function fetchYoutubeItemsForCategory(categoryId, query, neededCount) {
   const cacheKey = buildYoutubeCacheKey(categoryId, query, neededCount);
   const cached = getCachedYoutubeItems(cacheKey);
-  if (cached) return { items: cached, source: "cache" };
+  if (cached) {
+    const items = padYoutubeItemsToCount(cached, categoryId, neededCount);
+    return { items, source: "cache" };
+  }
 
   const fromDb = await fetchYoutubeFeedFromDb(categoryId, neededCount);
   if (fromDb?.items?.length) {
@@ -662,13 +675,17 @@ async function loadHomeYoutubeRecommendations(container, query, options = {}) {
     renderYoutubeItems(container, items, preview, {
       quotaNotice: youtubeQuotaBlocked,
       feedFallbackNotice: source === "fallback",
+      categoryId,
     });
   } catch (err) {
     console.warn("YouTube recommendations failed:", err);
     const fallbackItems = padYoutubeItemsToCount([], categoryId, neededCount);
 
     if (fallbackItems.length > 0) {
-      renderYoutubeItems(container, fallbackItems, preview, { feedFallbackNotice: true });
+      renderYoutubeItems(container, fallbackItems, preview, {
+        feedFallbackNotice: true,
+        categoryId,
+      });
       return;
     }
 
@@ -677,7 +694,12 @@ async function loadHomeYoutubeRecommendations(container, query, options = {}) {
 }
 
 function renderYoutubeItems(container, items, preview, renderOptions = {}) {
-  if (!items.length) {
+  const neededCount = preview ? HOME_YOUTUBE_PREVIEW : BROWSE_YOUTUBE_LIMIT;
+  const displayItems = renderOptions.categoryId
+    ? padYoutubeItemsToCount(items, renderOptions.categoryId, neededCount)
+    : items;
+
+  if (!displayItems.length) {
     container.innerHTML = mascotLoadingHtml("추천 영상을 찾지 못했습니다. 잠시 후 새로고침해 주세요.");
     return;
   }
@@ -688,9 +710,9 @@ function renderYoutubeItems(container, items, preview, renderOptions = {}) {
       ? renderYoutubeFeedFallbackNotice()
       : "";
   if (preview) {
-    container.innerHTML = notice + wrapContentCardGrid(items.map(renderYoutubeCard).join(""), { home: true });
+    container.innerHTML = notice + wrapContentCardGrid(displayItems.map(renderYoutubeCard).join(""), { home: true });
   } else {
-    container.innerHTML = notice + wrapContentCardGrid(items.map(renderYoutubeCard).join(""));
+    container.innerHTML = notice + wrapContentCardGrid(displayItems.map(renderYoutubeCard).join(""));
   }
 }
 
@@ -1166,10 +1188,10 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
       if (localServices.length === 0) {
         const nationalPreview = nationalServices.slice(0, HOME_WELFARE_PREVIEW);
         if (nationalPreview.length > 0) {
-          container.innerHTML = `
-            <p class="welfare-source-note">우리 지역 지자체 복지를 찾지 못해 전국 복지를 보여드립니다.</p>
-            ${wrapContentCardGrid(nationalPreview.map((s) => renderWelfareServiceCard(s, true)).join(""), { home: true })}
-          `;
+          container.innerHTML = wrapContentCardGrid(
+            nationalPreview.map((s) => renderWelfareServiceCard(s, true)).join(""),
+            { home: true },
+          );
           return;
         }
         container.innerHTML = emptyLocal;
