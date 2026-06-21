@@ -125,26 +125,27 @@
   --accent-yellow: var(--color-accent);
   --accent-yellow-dark: var(--color-accent-dark);
 
-  /* Typography — global minimum 22px */
-  --font-base: 22px;
-  --font-lg: 26px;
-  --font-xl: 30px;
-  --font-2xl: 36px;
-  --font-search: 24px;
+  /* Typography — 기준 100% × 0.67 (PC에서 브라우저 67% 배율과 동일한 체감) */
+  --ui-scale: 0.67;
+  --font-base: calc(22px * var(--ui-scale));
+  --font-lg: calc(26px * var(--ui-scale));
+  --font-xl: calc(30px * var(--ui-scale));
+  --font-2xl: calc(36px * var(--ui-scale));
+  --font-search: calc(22px * var(--ui-scale));
   --font-family: "Inter", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
 
   /* Layout tokens */
-  --space-page-x: 12px;
-  --space-header-x: 16px;
-  --space-main-x: 20px;
-  --space-cards-x: 28px;
-  --space-card: 20px;
+  --space-page-x: calc(12px * var(--ui-scale));
+  --space-header-x: calc(16px * var(--ui-scale));
+  --space-main-x: calc(20px * var(--ui-scale));
+  --space-cards-x: calc(20px * var(--ui-scale));
+  --space-card: calc(20px * var(--ui-scale));
   --layout-max-wide: min(1440px, 100%);
   --layout-max-content: min(1240px, 100%);
   --layout-search-max: min(960px, 100%);
-  --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
+  --radius-sm: calc(8px * var(--ui-scale));
+  --radius-md: calc(16px * var(--ui-scale));
+  --radius-lg: calc(24px * var(--ui-scale));
   --radius-pill: 999px;
   --radius-full: 50%;
   --radius-card: var(--radius-lg);
@@ -168,45 +169,96 @@
   --shadow-mascot-lg: 0 10px 20px var(--color-shadow-neutral-15);
   --shadow-mascot-md: 0 4px 8px var(--color-shadow-neutral-10);
   --shadow-community-card: 0 2px 8px var(--color-shadow-neutral-04);
-  --header-min-height: 80px;
+  --header-min-height: calc(80px * var(--ui-scale));
   --card-border-width: 1px;
-  --btn-min-height: 60px;
-  --btn-border-width: 3px;
+  --btn-min-height: calc(60px * var(--ui-scale));
+  --btn-border-width: 2px;
+
+  /* 컴포넌트 크기 — --ui-scale 연동, 모바일에서 개별 오버라이드 */
+  --size-mascot: calc(96px * var(--ui-scale));
+  --size-search-mark: calc(44px * var(--ui-scale));
+  --size-search-mark-img: calc(32px * var(--ui-scale));
+  --size-search-input: calc(52px * var(--ui-scale));
+  --size-search-chip: calc(48px * var(--ui-scale));
+  --size-fab-mascot: calc(58px * var(--ui-scale));
+  --icon-base: calc(28px * var(--ui-scale));
+  --icon-lg: calc(32px * var(--ui-scale));
+}
+
+/* 모바일: 화면에 맞게 (PC 67% 축소와 별도 튜닝) */
+@media (max-width: 767px) {
+  :root {
+    --ui-scale: 1;
+    --font-base: 16px;
+    --font-lg: 18px;
+    --font-xl: 20px;
+    --font-2xl: 24px;
+    --font-search: 16px;
+    --space-page-x: 10px;
+    --space-header-x: 12px;
+    --space-main-x: 14px;
+    --space-cards-x: 12px;
+    --space-card: 12px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --header-min-height: 56px;
+    --btn-min-height: 44px;
+    --btn-border-width: 2px;
+    --size-mascot: 56px;
+    --size-search-mark: 32px;
+    --size-search-mark-img: 24px;
+    --size-search-input: 40px;
+    --size-search-chip: 38px;
+    --size-fab-mascot: 44px;
+    --icon-base: 22px;
+    --icon-lg: 26px;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+@media (min-width: 1100px) {
+  :root {
+    --size-mascot: calc(112px * var(--ui-scale));
+  }
 }
 
 @media (min-width: 768px) {
   :root {
-    --space-page-x: 18px;
-    --space-header-x: 24px;
-    --space-main-x: 28px;
-    --space-cards-x: 72px;
+    --space-page-x: calc(18px * var(--ui-scale));
+    --space-header-x: calc(24px * var(--ui-scale));
+    --space-main-x: calc(28px * var(--ui-scale));
+    --space-cards-x: calc(72px * var(--ui-scale));
   }
 }
 
 @media (min-width: 1024px) {
   :root {
-    --space-page-x: 24px;
-    --space-header-x: 32px;
-    --space-main-x: 40px;
-    --space-cards-x: 56px;
+    --space-page-x: calc(24px * var(--ui-scale));
+    --space-header-x: calc(32px * var(--ui-scale));
+    --space-main-x: calc(40px * var(--ui-scale));
+    --space-cards-x: calc(56px * var(--ui-scale));
   }
 }
 
 @media (min-width: 1280px) {
   :root {
-    --space-cards-x: 80px;
+    --space-cards-x: calc(80px * var(--ui-scale));
   }
 }
 
 @media (min-width: 1400px) {
   :root {
-    --space-cards-x: 120px;
+    --space-cards-x: calc(120px * var(--ui-scale));
   }
 }
 
 @media (min-width: 1600px) {
   :root {
-    --space-cards-x: 180px;
+    --space-cards-x: calc(180px * var(--ui-scale));
   }
 }
 
@@ -236,7 +288,7 @@ body {
 
 .material-symbols-outlined {
   font-variation-settings: "FILL" 1;
-  font-size: 28px;
+  font-size: var(--icon-base);
 }
 
 /* ── Global interactive focus (AAA) ── */
@@ -414,7 +466,7 @@ button.back-link-prominent {
 }
 
 .back-link-prominent .material-symbols-outlined {
-  font-size: 32px;
+  font-size: var(--icon-lg);
 }
 
 /* ── Global persistent header ── */
@@ -554,7 +606,7 @@ button.back-link-prominent {
 .top-nav-link {
   flex: 0 0 auto;
   position: relative;
-  padding: 0.55rem 1rem;
+  padding: calc(0.55rem * var(--ui-scale)) calc(1rem * var(--ui-scale));
   border-radius: var(--radius-pill);
   text-decoration: none;
   color: var(--color-text);
@@ -562,7 +614,7 @@ button.back-link-prominent {
   font-size: var(--font-lg);
   border: 2px solid transparent;
   white-space: nowrap;
-  min-height: 52px;
+  min-height: calc(52px * var(--ui-scale));
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -627,19 +679,14 @@ button.back-link-prominent {
 }
 
 @media (min-width: 1100px) {
-  .brand-mascot {
-    width: 112px;
-    height: 112px;
-  }
-
   .site-brand-text {
     font-size: 1.4rem;
   }
 
   .top-nav-link {
     font-size: var(--font-xl);
-    padding: 0.75rem 1.1rem;
-    min-height: 60px;
+    padding: calc(0.75rem * var(--ui-scale)) calc(1.1rem * var(--ui-scale));
+    min-height: var(--btn-min-height);
   }
 }
 
@@ -653,23 +700,20 @@ button.back-link-prominent {
   }
 
   .weather-card--header {
-    max-width: min(160px, 34vw);
-    padding: 0.22rem 0.38rem;
+    max-width: min(150px, 32vw);
+    padding: 0.2rem 0.35rem;
   }
 
   .weather-card--header .weather-location {
-    max-width: 4.2rem;
-    font-size: 0.68rem;
-  }
-
-  .brand-mascot {
-    width: 72px;
-    height: 72px;
+    max-width: 3.8rem;
+    font-size: 0.65rem;
   }
 
   .top-nav-link {
-    padding: 0.55rem 0.7rem;
-    min-height: 52px;
+    padding: 0.35rem 0.6rem;
+    font-size: var(--font-base);
+    font-weight: 700;
+    min-height: var(--btn-min-height);
   }
 }
 
@@ -765,13 +809,13 @@ button.back-link-prominent {
 }
 
 .brand-icon {
-  font-size: 32px !important;
+  font-size: var(--icon-lg) !important;
   color: var(--color-primary);
 }
 
 .brand-mascot {
-  width: 96px;
-  height: 96px;
+  width: var(--size-mascot);
+  height: var(--size-mascot);
   object-fit: contain;
   flex-shrink: 0;
   filter: drop-shadow(0 3px 6px var(--color-primary-alpha-18));
@@ -787,7 +831,7 @@ button.back-link-prominent {
 .home-search-band {
   width: 100%;
   box-sizing: border-box;
-  padding: 1.75rem var(--space-main-x) 1.5rem;
+  padding: calc(1.75rem * var(--ui-scale)) var(--space-main-x) calc(1.5rem * var(--ui-scale));
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
 }
@@ -808,7 +852,7 @@ button.back-link-prominent {
 .home-cards-band {
   width: 100%;
   box-sizing: border-box;
-  padding: 1rem var(--space-cards-x) 1.75rem;
+  padding: calc(1rem * var(--ui-scale)) var(--space-cards-x) calc(1.75rem * var(--ui-scale));
   background: var(--color-surface);
 }
 
@@ -848,8 +892,8 @@ button.back-link-prominent {
   flex: 0 0 auto;
   width: auto;
   min-width: fit-content;
-  padding: 0.4rem 0.75rem;
-  font-size: 0.82rem;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.9rem;
   overflow: visible;
   text-overflow: unset;
   white-space: nowrap;
@@ -859,38 +903,73 @@ button.back-link-prominent {
   gap: 0.65rem;
 }
 
-.home-cards-band .media-card-body {
-  padding: 0.55rem 0.65rem 0.65rem;
-}
-
-.home-cards-band .media-card-title {
-  font-size: 0.9rem;
-}
-
-.home-cards-band .media-card-meta,
-.home-cards-band .media-card-foot {
-  font-size: 0.82rem;
-  -webkit-line-clamp: 1;
-}
-
-.home-cards-band .verified-badge,
-.home-cards-band .media-card-badge {
-  font-size: 0.72rem;
-  padding: 0.15rem 0.45rem;
-}
-
-.home-cards-band .section-header--welfare {
-  padding-bottom: 0.35rem;
-}
-
-.home-cards-band .welfare-location-label {
-  font-size: 0.8rem;
-  line-height: 1.3;
+.home-cards-band .content-column {
+  padding: var(--space-card);
+  gap: 0.65rem;
 }
 
 @media (min-width: 1024px) {
   .home-cards-band {
-    padding: 1.25rem var(--space-cards-x) 2rem;
+    padding: calc(1.25rem * var(--ui-scale)) var(--space-cards-x) calc(2rem * var(--ui-scale));
+  }
+}
+
+@media (max-width: 767px) {
+  .home-search-band {
+    padding: 1rem var(--space-main-x) 0.85rem;
+  }
+
+  .home-cards-band {
+    padding: 0.75rem var(--space-cards-x) 1rem;
+  }
+
+  .home-cards-band .section-more-link {
+    margin-top: 0.5rem;
+    min-height: 40px;
+    font-size: 0.92rem;
+  }
+
+  .home-cards-band .category-tab {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  .home-cards-band .content-card-grid {
+    gap: 0.5rem;
+  }
+
+  .home-cards-band .media-card-body {
+    padding: 0.45rem 0.55rem 0.55rem;
+  }
+
+  .home-cards-band .media-card-title {
+    font-size: 0.88rem;
+  }
+
+  .home-cards-band .media-card-meta,
+  .home-cards-band .media-card-foot {
+    font-size: 0.8rem;
+    -webkit-line-clamp: 1;
+  }
+
+  .home-cards-band .verified-badge,
+  .home-cards-band .media-card-badge {
+    font-size: 0.7rem;
+    padding: 0.12rem 0.4rem;
+  }
+
+  .home-cards-band .section-header--welfare {
+    padding-bottom: 0.25rem;
+  }
+
+  .home-cards-band .welfare-location-label {
+    font-size: 0.78rem;
+    line-height: 1.25;
+  }
+
+  .home-cards-band .content-column {
+    padding: 0.75rem;
+    gap: 0.5rem;
   }
 }
 
@@ -1005,7 +1084,7 @@ button.back-link-prominent {
 }
 
 .weather-icon-wrap .material-symbols-outlined {
-  font-size: 30px !important;
+  font-size: calc(30px * var(--ui-scale)) !important;
   color: var(--color-primary);
 }
 
@@ -1068,7 +1147,7 @@ button.back-link-prominent {
 }
 
 .weather-locate-btn .material-symbols-outlined {
-  font-size: 20px !important;
+  font-size: calc(20px * var(--ui-scale)) !important;
 }
 
 .weather-locate-btn:hover {
@@ -1117,18 +1196,18 @@ button.back-link-prominent {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: var(--size-search-mark);
+  height: var(--size-search-mark);
 }
 
 .search-mark-img {
-  width: 32px;
-  height: 32px;
+  width: var(--size-search-mark-img);
+  height: var(--size-search-mark-img);
   object-fit: contain;
 }
 
 .search-mark-icon {
-  font-size: 28px !important;
+  font-size: var(--icon-base) !important;
   color: var(--color-primary);
   font-variation-settings: "FILL" 1;
 }
@@ -1136,7 +1215,7 @@ button.back-link-prominent {
 .search-input {
   flex: 1;
   min-width: 0;
-  min-height: 52px;
+  min-height: var(--size-search-input);
   padding: 0.55rem 0.35rem;
   border: none;
   border-radius: 0;
@@ -1163,7 +1242,7 @@ button.back-link-prominent {
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
-  min-height: 48px;
+  min-height: var(--size-search-chip);
   padding: 0 1rem;
   border: none;
   border-radius: var(--radius-pill);
@@ -1178,7 +1257,7 @@ button.back-link-prominent {
 }
 
 .search-submit-chip .material-symbols-outlined {
-  font-size: 22px !important;
+  font-size: var(--icon-base) !important;
 }
 
 .search-submit-chip:hover,
@@ -1197,28 +1276,8 @@ button.back-link-prominent {
     padding: 0.3rem 0.35rem 0.3rem 0.45rem;
   }
 
-  .search-mark {
-    width: 38px;
-    height: 38px;
-  }
-
-  .search-mark-img {
-    width: 28px;
-    height: 28px;
-  }
-
-  .search-input {
-    min-height: 46px;
-    font-size: var(--font-base);
-  }
-
   .search-input::placeholder {
     font-size: 0.95rem;
-  }
-
-  .search-submit-chip {
-    min-height: 42px;
-    padding: 0 0.75rem;
   }
 
   .search-submit-label {
@@ -1597,7 +1656,7 @@ button.back-link-prominent {
 }
 
 .content-grid .section-icon {
-  font-size: 22px !important;
+  font-size: var(--icon-base) !important;
 }
 
 .content-grid .welfare-location-label {
@@ -1674,7 +1733,7 @@ button.back-link-prominent {
 
 .section-icon {
   color: var(--color-primary);
-  font-size: 32px !important;
+  font-size: var(--icon-lg) !important;
 }
 
 .category-tabs {
@@ -1953,7 +2012,7 @@ button.back-link-prominent {
 }
 
 .video-thumb .material-symbols-outlined {
-  font-size: 48px;
+  font-size: calc(48px * var(--ui-scale));
   opacity: 0.35;
 }
 
@@ -2045,7 +2104,7 @@ button.back-link-prominent {
 }
 
 .news-thumb .material-symbols-outlined {
-  font-size: 36px;
+  font-size: calc(36px * var(--ui-scale));
   color: var(--color-primary);
   opacity: 0.45;
 }
@@ -2254,7 +2313,7 @@ button.back-link-prominent {
 }
 
 .chat-minimize-btn .material-symbols-outlined {
-  font-size: 24px !important;
+  font-size: calc(24px * var(--ui-scale)) !important;
 }
 
 .chat-messages {
@@ -2320,7 +2379,7 @@ button.back-link-prominent {
 }
 
 .chat-user-avatar .material-symbols-outlined {
-  font-size: 22px !important;
+  font-size: var(--icon-base) !important;
 }
 
 .chat-bubble {
@@ -2490,7 +2549,7 @@ button.back-link-prominent {
 }
 
 .chat-send-btn .material-symbols-outlined {
-  font-size: 28px !important;
+  font-size: var(--icon-base) !important;
   font-variation-settings: "FILL" 1;
 }
 
@@ -2523,8 +2582,8 @@ button.back-link-prominent {
 }
 
 .chat-fab--mascot .chat-fab-img {
-  width: 58px;
-  height: 58px;
+  width: var(--size-fab-mascot);
+  height: var(--size-fab-mascot);
   object-fit: contain;
   background: transparent;
   border: none;
@@ -2543,7 +2602,7 @@ button.back-link-prominent {
 }
 
 .chat-fab .material-symbols-outlined {
-  font-size: 28px;
+  font-size: var(--icon-base);
 }
 
 @media (min-width: 768px) {
