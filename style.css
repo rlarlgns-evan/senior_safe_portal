@@ -861,12 +861,16 @@ button.back-link-prominent {
   max-width: var(--layout-max-wide);
   margin: 0 auto;
   padding: 0;
-  align-items: start;
+  align-items: stretch;
+  gap: 0.75rem;
 }
 
 .home-cards-band .content-column {
-  align-self: start;
+  align-self: stretch;
   width: 100%;
+  padding: calc(var(--space-card) * 0.9);
+  gap: 0.5rem;
+  container-type: inline-size;
 }
 
 .home-cards-band .youtube-grid,
@@ -876,14 +880,17 @@ button.back-link-prominent {
 }
 
 .home-cards-band .section-more-link {
-  margin-top: 0.75rem;
+  margin-top: 0.55rem;
+  min-height: calc(var(--btn-min-height) * 0.85);
+  font-size: 0.82rem;
 }
 
 .home-cards-band .category-tabs {
   display: flex;
   flex-wrap: nowrap;
   overflow-x: auto;
-  gap: 0.35rem;
+  gap: 0.3rem;
+  margin-bottom: 0.1rem;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
 }
@@ -892,25 +899,82 @@ button.back-link-prominent {
   flex: 0 0 auto;
   width: auto;
   min-width: fit-content;
-  padding: 0.5rem 0.85rem;
-  font-size: 0.9rem;
+  padding: 0.38rem 0.7rem;
+  font-size: 0.82rem;
   overflow: visible;
   text-overflow: unset;
   white-space: nowrap;
 }
 
-.home-cards-band .content-card-grid {
-  gap: 0.65rem;
+.home-cards-band .section-header {
+  padding-bottom: 0.35rem;
+  margin-bottom: 0;
 }
 
-.home-cards-band .content-column {
-  padding: var(--space-card);
-  gap: 0.65rem;
+.home-cards-band .section-title {
+  font-size: 1rem;
+}
+
+.home-cards-band .welfare-location-label {
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+.home-cards-band .content-card-grid {
+  gap: 0.5rem;
+}
+
+.home-cards-band .media-card-media {
+  aspect-ratio: 2.2 / 1;
+  max-height: 82px;
+}
+
+.home-cards-band .media-card-media--icon {
+  max-height: 82px;
+}
+
+.home-cards-band .media-card-media--icon .material-symbols-outlined {
+  font-size: 1.65rem;
+}
+
+.home-cards-band .media-card-media .verified-badge,
+.home-cards-band .media-card-badge {
+  font-size: 0.68rem;
+  padding: 0.12rem 0.38rem;
+  top: 0.3rem;
+  left: 0.3rem;
+}
+
+.home-cards-band .media-card-body {
+  padding: 0.45rem 0.55rem 0.55rem;
+  gap: 0.22rem;
+}
+
+.home-cards-band .media-card-title {
+  font-size: 0.8rem;
+  line-height: 1.35;
+  -webkit-line-clamp: 2;
+}
+
+.home-cards-band .media-card-meta {
+  font-size: 0.72rem;
+  line-height: 1.35;
+  -webkit-line-clamp: 2;
+}
+
+.home-cards-band .media-card-foot {
+  font-size: 0.7rem;
+  padding-top: 0.05rem;
+  -webkit-line-clamp: 1;
 }
 
 @media (min-width: 1024px) {
   .home-cards-band {
     padding: calc(1.25rem * var(--ui-scale)) var(--space-cards-x) calc(2rem * var(--ui-scale));
+  }
+
+  .home-cards-band .content-grid {
+    gap: 0.85rem;
   }
 }
 
@@ -935,41 +999,46 @@ button.back-link-prominent {
   }
 
   .home-cards-band .content-card-grid {
-    gap: 0.5rem;
+    gap: 0.45rem;
+  }
+
+  .home-cards-band .media-card-media,
+  .home-cards-band .media-card-media--icon {
+    max-height: 72px;
   }
 
   .home-cards-band .media-card-body {
-    padding: 0.45rem 0.55rem 0.55rem;
+    padding: 0.4rem 0.5rem 0.5rem;
   }
 
   .home-cards-band .media-card-title {
-    font-size: 0.88rem;
+    font-size: 0.78rem;
   }
 
   .home-cards-band .media-card-meta,
   .home-cards-band .media-card-foot {
-    font-size: 0.8rem;
+    font-size: 0.68rem;
     -webkit-line-clamp: 1;
   }
 
   .home-cards-band .verified-badge,
   .home-cards-band .media-card-badge {
-    font-size: 0.7rem;
-    padding: 0.12rem 0.4rem;
+    font-size: 0.64rem;
+    padding: 0.1rem 0.32rem;
   }
 
   .home-cards-band .section-header--welfare {
-    padding-bottom: 0.25rem;
+    padding-bottom: 0.2rem;
   }
 
   .home-cards-band .welfare-location-label {
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     line-height: 1.25;
   }
 
   .home-cards-band .content-column {
-    padding: 0.75rem;
-    gap: 0.5rem;
+    padding: 0.65rem;
+    gap: 0.45rem;
   }
 }
 
@@ -1625,11 +1694,6 @@ button.back-link-prominent {
   min-height: 0;
   box-shadow: var(--shadow-card);
   container-type: inline-size;
-}
-
-.home-cards-band .content-column {
-  padding-left: calc(var(--space-card) + 10px);
-  padding-right: calc(var(--space-card) + 10px);
 }
 
 @media (min-width: 1024px) {
@@ -3003,16 +3067,50 @@ button.back-link-prominent {
 }
 
 .auth-social-btn--naver {
-  background: #03c75a;
+  justify-content: center;
+  gap: 0;
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 6px;
+  background: #03a94d;
   border: none;
   color: #ffffff;
 }
 
 .auth-social-btn--naver:hover {
-  background: #02b350;
+  background: #028f42;
+}
+
+.auth-social-btn--naver .auth-social-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.auth-social-btn--naver .auth-social-logo {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.auth-social-btn--naver .auth-social-text {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  color: #ffffff;
+  letter-spacing: -0.01em;
 }
 
 .auth-social-btn--kakao {
+  position: relative;
+  justify-content: center;
+  gap: 0;
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 12px;
   background: #fee500;
   border: none;
   color: rgba(0, 0, 0, 0.85);
@@ -3020,6 +3118,47 @@ button.back-link-prominent {
 
 .auth-social-btn--kakao:hover {
   background: #f5dc00;
+}
+
+.auth-social-btn--kakao .auth-social-symbol {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.auth-social-btn--kakao .auth-social-symbol img {
+  display: block;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.auth-social-text--kakao {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.auth-social-text--kakao .auth-social-text-short {
+  display: none;
+}
+
+@media (max-width: 360px) {
+  .auth-social-btn--kakao .auth-social-text-full {
+    display: none;
+  }
+
+  .auth-social-btn--kakao .auth-social-text-short {
+    display: inline;
+  }
 }
 
 .auth-social-icon {

@@ -1461,35 +1461,39 @@ function getAuthFieldHtml({ id, type, label, placeholder, autocomplete, minlengt
 }
 
 function getAuthSocialButtonsHtml() {
-  const providers = [
-    {
-      id: "google",
-      label: "Google로 로그인",
-      icon: "assets/social-google-g.svg",
-      text: "Google로 로그인",
-    },
-    {
-      id: "naver",
-      label: "네이버 로그인",
-      icon: "assets/social-naver-n.svg",
-      text: "네이버 로그인",
-    },
-    {
-      id: "kakao",
-      label: "카카오 로그인",
-      icon: "assets/social-kakao-symbol.svg",
-      text: "카카오 로그인",
-    },
-  ];
+  const googleButton = `
+    <button type="button" class="auth-social-btn auth-social-btn--google" data-social-provider="google" aria-label="Google로 로그인">
+      <img src="assets/social-google-g.svg" alt="" class="auth-social-icon" width="20" height="20" />
+      <span class="auth-social-text">Google로 로그인</span>
+    </button>
+  `;
+
+  const naverButton = `
+    <button type="button" class="auth-social-btn auth-social-btn--naver" data-social-provider="naver" aria-label="네이버 로그인">
+      <span class="auth-social-brand">
+        <img src="assets/social-naver-n.svg" alt="" class="auth-social-logo" width="16" height="16" />
+        <span class="auth-social-text">네이버 로그인</span>
+      </span>
+    </button>
+  `;
+
+  const kakaoButton = `
+    <button type="button" class="auth-social-btn auth-social-btn--kakao" data-social-provider="kakao" aria-label="카카오 로그인">
+      <span class="auth-social-symbol" aria-hidden="true">
+        <img src="assets/social-kakao-symbol.svg" alt="" width="18" height="18" />
+      </span>
+      <span class="auth-social-text auth-social-text--kakao">
+        <span class="auth-social-text-full">카카오 로그인</span>
+        <span class="auth-social-text-short" aria-hidden="true">로그인</span>
+      </span>
+    </button>
+  `;
 
   return `
     <div class="auth-social-buttons" role="group" aria-label="간편 로그인">
-      ${providers.map(({ id, label, icon, text }) => `
-        <button type="button" class="auth-social-btn auth-social-btn--${id}" data-social-provider="${id}" aria-label="${label}">
-          <img src="${icon}" alt="" class="auth-social-icon" width="20" height="20" />
-          <span class="auth-social-text">${text}</span>
-        </button>
-      `).join("")}
+      ${googleButton}
+      ${naverButton}
+      ${kakaoButton}
     </div>
   `;
 }
