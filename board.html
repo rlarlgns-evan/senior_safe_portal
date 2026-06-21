@@ -4,13 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>자유게시판 - 시니어 디지털 보안관</title>
-  <link rel="stylesheet" href="style.css?v=20260707" />
+  <link rel="stylesheet" href="style.css?v=20260802" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 </head>
 <body class="board-page" data-nav="board" data-page="board">
 
-  <div class="app-layout">
+  <div id="app-container" class="app-layout">
     <header class="site-header"></header>
 
     <main class="board-main">
@@ -28,13 +28,14 @@
         <h2 id="board-compose-title" class="board-compose-title">글쓰기</h2>
         <form id="board-form" class="board-form">
           <label for="board-name-input" class="form-label">이름</label>
-          <input id="board-name-input" type="text" class="modal-input" maxlength="32" placeholder="표시할 이름" required />
+          <input id="board-name-input" type="text" class="modal-input" maxlength="32" required aria-label="이름" />
           <label for="board-title-input" class="form-label">제목</label>
-          <input id="board-title-input" type="text" class="modal-input" maxlength="100" placeholder="제목을 입력하세요" required />
+          <input id="board-title-input" type="text" class="modal-input" maxlength="100" required aria-label="제목" />
           <label for="board-content-input" class="form-label">내용</label>
-          <textarea id="board-content-input" class="board-textarea" maxlength="2000" rows="8" placeholder="내용을 입력하세요" required></textarea>
-          <div id="board-form-error" class="login-error alert-persistent hidden" role="alert">
+          <textarea id="board-content-input" class="board-textarea" maxlength="2000" rows="8" required aria-label="내용"></textarea>
+          <div id="board-form-error" class="login-error alert-persistent hidden" role="alertdialog" aria-modal="true" aria-labelledby="board-form-error-message">
             <p id="board-form-error-message"></p>
+            <button type="button" id="board-form-error-close" class="btn btn--danger">닫기</button>
           </div>
           <div class="board-form-actions">
             <button type="button" id="board-compose-cancel" class="btn btn--secondary">취소</button>
@@ -84,7 +85,7 @@
 
         <div class="board-search-bar">
           <form id="board-search-form" class="search-form search-form--board" role="search">
-            <label for="board-search-input" class="sr-only">게시글 검색</label>
+            <label for="board-search-input" class="form-label">게시글 검색</label>
             <div class="search-row">
               <span class="search-mark" aria-hidden="true">
                 <span class="material-symbols-outlined search-mark-icon">forum</span>
@@ -93,8 +94,8 @@
                 id="board-search-input"
                 type="search"
                 class="search-input"
-                placeholder="검색어를 입력해주세요."
                 autocomplete="off"
+                aria-label="게시글 검색"
               />
               <button type="submit" class="search-submit-chip" aria-label="게시글 검색">
                 <span class="material-symbols-outlined" aria-hidden="true">search</span>
@@ -109,7 +110,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/core/utils.js"></script>
-  <script src="js/sheriff-core.js?v=20260707"></script>
+  <script src="js/sheriff-core.js?v=20260802"></script>
   <script src="js/pages/board.js"></script>
   <script src="js/bootstrap.js"></script>
 </body>

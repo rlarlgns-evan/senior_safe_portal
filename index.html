@@ -6,12 +6,13 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://oweduuhfkiutlszfwukt.supabase.co wss://oweduuhfkiutlszfwukt.supabase.co https://api.open-meteo.com https://api.bigdatacloud.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests" />
   <title>시니어 디지털 보안관</title>
   <link rel="icon" type="image/png" href="favicon.png" />
-  <link rel="stylesheet" href="style.css?v=20260707" />
+  <link rel="stylesheet" href="style.css?v=20260802" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 </head>
 <body data-nav="home" data-page="home" class="spa-app">
 
+  <div id="app-container" class="app-layout">
   <!-- Global persistent header — always visible across SPA views -->
   <header class="site-header global-header" role="banner" data-header-static="true">
     <div class="site-header-row">
@@ -21,24 +22,6 @@
       </a>
       <nav class="top-nav" aria-label="주요 메뉴" data-auto-nav></nav>
       <div class="header-end">
-        <aside class="header-weather" aria-label="오늘의 날씨">
-          <div id="weather-widget" class="weather-card weather-card--header" aria-live="polite">
-            <div class="weather-icon-wrap" aria-hidden="true">
-              <span id="weather-icon" class="material-symbols-outlined">partly_cloudy_day</span>
-            </div>
-            <div class="weather-details">
-              <div class="weather-primary">
-                <span id="weather-temp" class="weather-temp">--°</span>
-                <span id="weather-main" class="weather-location">날씨 확인 중...</span>
-              </div>
-              <p id="weather-sub" class="weather-meta">위치를 불러오고 있습니다</p>
-            </div>
-            <button type="button" id="location-button" class="weather-locate-btn btn btn--secondary hidden" aria-label="내 위치로 날씨 보기">
-              <span class="material-symbols-outlined" aria-hidden="true">my_location</span>
-              <span class="weather-locate-label">내 위치</span>
-            </button>
-          </div>
-        </aside>
         <div class="auth-area" id="auth-area">
           <a href="board.html" id="mypage-link" class="auth-button auth-mypage btn btn--secondary hidden">마이페이지</a>
           <span id="user-greeting" class="user-greeting hidden" aria-live="polite"></span>
@@ -62,12 +45,12 @@
         <section class="home-search-band" id="hero-section" aria-label="검색">
           <div class="home-search-inner">
             <form id="search-form" class="search-form search-form--home" novalidate>
-              <label for="search-input" class="sr-only">검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요</label>
+              <label for="search-input" class="form-label">검색어 또는 의심되는 인터넷 주소(링크)</label>
               <div class="search-row">
                 <span class="search-mark" aria-hidden="true">
                   <img src="assets/mascot-sheriff.png" alt="" class="search-mark-img" width="32" height="32" />
                 </span>
-                <input id="search-input" type="text" class="search-input" placeholder="검색어 또는 의심되는 인터넷 주소(링크)를 입력하세요" autocomplete="off" />
+                <input id="search-input" type="text" class="search-input" autocomplete="off" aria-label="검색어 또는 의심되는 인터넷 주소(링크)" />
                 <button type="submit" class="search-submit-chip" aria-label="검색하기">
                   <span class="material-symbols-outlined" aria-hidden="true">search</span>
                   <span class="search-submit-label">검색</span>
@@ -138,12 +121,12 @@
           </header>
 
           <form id="results-search-form" class="search-form results-search-form" novalidate>
-            <label for="results-search-input" class="sr-only">검색어 또는 의심되는 링크를 입력하세요</label>
+            <label for="results-search-input" class="form-label">검색어 또는 의심되는 링크</label>
             <div class="search-row">
               <span class="search-mark" aria-hidden="true">
                 <img src="assets/mascot-sheriff.png" alt="" class="search-mark-img" width="32" height="32" />
               </span>
-              <input id="results-search-input" type="text" class="search-input" placeholder="예: 건강, https://example.com" autocomplete="off" />
+              <input id="results-search-input" type="text" class="search-input" autocomplete="off" aria-label="검색어 또는 의심되는 링크" />
               <button type="submit" class="search-submit-chip" aria-label="검색하기">
                 <span class="material-symbols-outlined" aria-hidden="true">search</span>
                 <span class="search-submit-label">검색</span>
@@ -189,9 +172,11 @@
     </div>
   </div>
 
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/core/utils.js"></script>
-  <script src="js/sheriff-core.js?v=20260707"></script>
+  <script src="js/sheriff-core.js?v=20260802"></script>
   <script src="js/pages/results.js"></script>
   <script src="js/pages/home.js"></script>
   <script src="js/chat.js"></script>

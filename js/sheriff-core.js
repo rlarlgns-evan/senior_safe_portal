@@ -1244,9 +1244,9 @@ async function initBrowseWelfareLocation(forcePrompt = false) {
   let weather = null;
 
   try {
-    weather = await fetchWeather(location.latitude, location.longitude);
-  } catch {
     weather = await fetchLocationLabelDirect(location.latitude, location.longitude);
+  } catch {
+    throw new Error("위치 정보를 확인하지 못했습니다.");
   }
 
   cachedWelfareContext = { weather, locationSource: location.source, coords: location };
@@ -1262,52 +1262,30 @@ async function initBrowseWelfareLocation(forcePrompt = false) {
 
 async function initHomeLocationServices(forcePrompt = false) {
   const welfareContainer = document.getElementById("welfare-content");
-  const mainEl = document.getElementById("weather-main");
-  const subEl = document.getElementById("weather-sub");
-  const tempEl = document.getElementById("weather-temp");
-  const locationButton = document.getElementById("location-button");
-
-  if (tempEl) tempEl.textContent = "--°";
-  if (mainEl) mainEl.textContent = "날씨 확인 중...";
-  if (subEl) subEl.textContent = "위치를 불러오고 있습니다";
-  if (locationButton) locationButton.classList.add("hidden");
+  if (!welfareContainer) return;
 
   const location = await requestUserLocation(forcePrompt);
   let weather = null;
 
   try {
-    weather = await fetchWeather(location.latitude, location.longitude);
-    renderWeatherWidget(weather, location.source);
+    weather = await fetchLocationLabelDirect(location.latitude, location.longitude);
   } catch {
-    if (tempEl) tempEl.textContent = "--°";
-    if (mainEl) mainEl.textContent = "날씨를 불러올 수 없음";
-    if (subEl) subEl.textContent = "인터넷 연결을 확인해 주세요";
-    locationButton?.classList.remove("hidden");
+    welfareContainer.innerHTML = mascotLoadingHtml("위치 정보를 확인하지 못했습니다. 위치 권한 또는 인터넷 연결을 확인해 주세요.");
+    return;
   }
 
-  if (welfareContainer) {
-    try {
-      if (!weather) {
-        weather = await fetchLocationLabelDirect(location.latitude, location.longitude);
-      }
-    } catch {
-      welfareContainer.innerHTML = mascotLoadingHtml("위치 정보를 확인하지 못했습니다. 위치 권한 또는 인터넷 연결을 확인해 주세요.");
-      return;
+  try {
+    cachedWelfareContext = { weather, locationSource: location.source, coords: location };
+    if (welfareCategoryReload) {
+      await welfareCategoryReload();
+    } else {
+      await loadHomeWelfareInfo(welfareContainer, "all");
     }
-
-    try {
-      cachedWelfareContext = { weather, locationSource: location.source, coords: location };
-      if (welfareCategoryReload) {
-        await welfareCategoryReload();
-      } else {
-        await loadHomeWelfareInfo(welfareContainer, "all");
-      }
-    } catch (err) {
-      const detail = err instanceof Error ? err.message : "복지 정보를 불러오지 못했습니다.";
-      welfareContainer.innerHTML = mascotLoadingHtml(
-        `${detail} · search-welfare 함수와 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.`,
-      );
-    }
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : "복지 정보를 불러오지 못했습니다.";
+    welfareContainer.innerHTML = mascotLoadingHtml(
+      `${detail} · search-welfare 함수와 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.`,
+    );
   }
 }
 
@@ -1398,24 +1376,6 @@ function getSiteHeaderHtml() {
       </a>
       <nav class="top-nav" aria-label="주요 메뉴" data-auto-nav></nav>
       <div class="header-end">
-        <aside class="header-weather" aria-label="오늘의 날씨">
-          <div id="weather-widget" class="weather-card weather-card--header" aria-live="polite">
-            <div class="weather-icon-wrap" aria-hidden="true">
-              <span id="weather-icon" class="material-symbols-outlined">partly_cloudy_day</span>
-            </div>
-            <div class="weather-details">
-              <div class="weather-primary">
-                <span id="weather-temp" class="weather-temp">--°</span>
-                <span id="weather-main" class="weather-location">날씨 확인 중...</span>
-              </div>
-              <p id="weather-sub" class="weather-meta">위치를 불러오고 있습니다</p>
-            </div>
-            <button type="button" id="location-button" class="weather-locate-btn btn btn--secondary hidden" aria-label="내 위치로 날씨 보기">
-              <span class="material-symbols-outlined" aria-hidden="true">my_location</span>
-              <span class="weather-locate-label">내 위치</span>
-            </button>
-          </div>
-        </aside>
         <div class="auth-area" id="auth-area">
           <a href="board.html" id="mypage-link" class="auth-button auth-mypage btn btn--secondary hidden">마이페이지</a>
           <span id="user-greeting" class="user-greeting hidden"></span>
@@ -1437,23 +1397,23 @@ function injectSiteHeader() {
   header.innerHTML = getSiteHeaderHtml();
 }
 
-function getAuthFieldHtml({ id, type, label, placeholder, autocomplete, minlength }) {
+function getAuthFieldHtml({ id, type, label, autocomplete, minlength }) {
   const icon = type === "email" ? "mail" : "lock";
   const minAttr = minlength ? ` minlength="${minlength}"` : "";
 
   return `
     <div class="auth-field">
-      <label for="${id}" class="auth-field-label">${label}</label>
+      <label for="${id}" class="auth-field-label form-label">${label}</label>
       <div class="auth-input-row">
         <span class="material-symbols-outlined auth-field-icon" aria-hidden="true">${icon}</span>
         <input
           id="${id}"
           type="${type}"
           class="auth-input"
-          placeholder="${placeholder}"
           autocomplete="${autocomplete}"
           ${minAttr}
           required
+          aria-label="${label}"
         />
       </div>
     </div>
@@ -1525,14 +1485,12 @@ function getLoginModalHtml() {
             id: "login-email",
             type: "email",
             label: "아이디 (이메일)",
-            placeholder: "아이디 (이메일)",
             autocomplete: "username email",
           })}
           ${getAuthFieldHtml({
             id: "login-password",
             type: "password",
             label: "비밀번호",
-            placeholder: "비밀번호",
             autocomplete: "current-password",
           })}
           <div class="auth-form-footer">
@@ -1549,14 +1507,12 @@ function getLoginModalHtml() {
             id: "signup-email",
             type: "email",
             label: "아이디 (이메일)",
-            placeholder: "아이디 (이메일)",
             autocomplete: "username email",
           })}
           ${getAuthFieldHtml({
             id: "signup-password",
             type: "password",
-            label: "비밀번호",
-            placeholder: "6자 이상",
+            label: "비밀번호 (6자 이상)",
             autocomplete: "new-password",
             minlength: 6,
           })}
@@ -1564,7 +1520,6 @@ function getLoginModalHtml() {
             id: "signup-password-confirm",
             type: "password",
             label: "비밀번호 확인",
-            placeholder: "비밀번호를 다시 입력",
             autocomplete: "new-password",
             minlength: 6,
           })}
@@ -1914,12 +1869,6 @@ function closeMobileNavMenu() {
 }
 
 function initSiteWeather() {
-  if (!document.getElementById("weather-widget")) return;
-
-  document.getElementById("location-button")?.addEventListener("click", () => {
-    cachedUserLocation = null;
-    initHomeLocationServices(true);
-  });
-
+  if (!document.getElementById("welfare-content")) return;
   initHomeLocationServices();
 }

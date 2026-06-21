@@ -322,6 +322,7 @@ function bindBoardEvents() {
   });
 
   document.getElementById("board-compose-cancel")?.addEventListener("click", () => toggleCompose(false));
+  document.getElementById("board-form-error-close")?.addEventListener("click", () => hideBoardFormError());
   document.getElementById("board-form")?.addEventListener("submit", handleBoardSubmit);
 
   document.getElementById("board-detail-back")?.addEventListener("click", () => {
