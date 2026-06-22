@@ -2841,6 +2841,12 @@ button.back-link-prominent {
   outline: none;
 }
 
+.auth-input::placeholder {
+  color: var(--color-text-placeholder);
+  opacity: 0.55;
+  font-weight: 400;
+}
+
 .auth-modal-submit {
   width: 100%;
   min-height: 3rem;

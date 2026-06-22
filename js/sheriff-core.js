@@ -1413,9 +1413,10 @@ function injectSiteHeader() {
   header.innerHTML = getSiteHeaderHtml();
 }
 
-function getAuthFieldHtml({ id, type, label, autocomplete, minlength }) {
+function getAuthFieldHtml({ id, type, label, autocomplete, minlength, placeholder = "" }) {
   const icon = type === "email" ? "mail" : "lock";
   const minAttr = minlength ? ` minlength="${minlength}"` : "";
+  const placeholderAttr = placeholder ? ` placeholder="${placeholder}"` : "";
 
   return `
     <div class="auth-field">
@@ -1427,7 +1428,7 @@ function getAuthFieldHtml({ id, type, label, autocomplete, minlength }) {
           type="${type}"
           class="auth-input"
           autocomplete="${autocomplete}"
-          ${minAttr}
+          ${minAttr}${placeholderAttr}
           required
           aria-label="${label}"
         />
@@ -1500,8 +1501,9 @@ function getLoginModalHtml() {
           ${getAuthFieldHtml({
             id: "login-email",
             type: "email",
-            label: "아이디 (이메일)",
+            label: "아이디",
             autocomplete: "username email",
+            placeholder: "example@example.com",
           })}
           ${getAuthFieldHtml({
             id: "login-password",
