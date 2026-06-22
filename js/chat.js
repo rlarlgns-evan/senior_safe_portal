@@ -72,6 +72,40 @@ function formatChatTime(date = new Date()) {
   return date.toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit", hour12: true });
 }
 
+function createChatUserAvatarElement() {
+  const user = typeof SiteAuth?.getCurrentUser === "function" ? SiteAuth.getCurrentUser() : null;
+  const avatarUrl = typeof getUserAvatarUrl === "function" ? getUserAvatarUrl(user) : "";
+
+  if (avatarUrl) {
+    const photo = document.createElement("img");
+    photo.src = avatarUrl;
+    photo.alt = `${typeof getUserDisplayName === "function" ? getUserDisplayName(user) : "회원"} 프로필`;
+    photo.className = "chat-user-avatar chat-user-avatar--photo";
+    photo.loading = "lazy";
+    photo.referrerPolicy = "no-referrer";
+    photo.addEventListener("error", () => {
+      const fallback = document.createElement("div");
+      fallback.className = "chat-user-avatar";
+      fallback.setAttribute("aria-hidden", "true");
+      const icon = document.createElement("span");
+      icon.className = "material-symbols-outlined";
+      icon.textContent = "person";
+      fallback.appendChild(icon);
+      photo.replaceWith(fallback);
+    }, { once: true });
+    return photo;
+  }
+
+  const userAvatar = document.createElement("div");
+  userAvatar.className = "chat-user-avatar";
+  userAvatar.setAttribute("aria-hidden", "true");
+  const icon = document.createElement("span");
+  icon.className = "material-symbols-outlined";
+  icon.textContent = "person";
+  userAvatar.appendChild(icon);
+  return userAvatar;
+}
+
 const SiteChat = {
   onLinkResult: null,
 
@@ -100,18 +134,12 @@ const SiteChat = {
       avatar.alt = "";
       avatar.className = "chat-mascot-avatar";
       avatar.setAttribute("loading", "lazy");
-      content.appendChild(time);
       content.appendChild(bubble);
+      content.appendChild(time);
       row.appendChild(avatar);
       row.appendChild(content);
     } else {
-      const userAvatar = document.createElement("div");
-      userAvatar.className = "chat-user-avatar";
-      userAvatar.setAttribute("aria-hidden", "true");
-      const icon = document.createElement("span");
-      icon.className = "material-symbols-outlined";
-      icon.textContent = "person";
-      userAvatar.appendChild(icon);
+      const userAvatar = createChatUserAvatarElement();
       content.appendChild(bubble);
       content.appendChild(time);
       row.appendChild(content);

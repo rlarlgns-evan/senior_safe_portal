@@ -1561,8 +1561,33 @@ function getUserDisplayName(user) {
   return emailLocal.replace(/[^\w.\-가-힣]/g, "").slice(0, 32) || "회원";
 }
 
+function getUserAvatarUrl(user) {
+  if (!user) return "";
+  const meta = user.user_metadata || {};
+  const identities = Array.isArray(user.identities) ? user.identities : [];
+  const identityData = identities.find((item) => item?.identity_data)?.identity_data || {};
+
+  const candidates = [
+    meta.avatar_url,
+    meta.picture,
+    meta.profile_image,
+    meta.profile_image_url,
+    meta.photo_url,
+    meta.image,
+    identityData.avatar_url,
+    identityData.picture,
+    identityData.profile_image,
+    identityData.profile_image_url,
+    identityData.photo_url,
+  ];
+
+  const url = candidates.find((value) => typeof value === "string" && value.trim());
+  return url ? url.trim() : "";
+}
+
 const SiteAuth = {
   mode: "login",
+  user: null,
 
   /** @type {Record<"google"|"naver"|"kakao", (() => void|Promise<void>)|null>} */
   socialHandlers: {
@@ -1581,7 +1606,12 @@ const SiteAuth = {
     }
   },
 
+  getCurrentUser() {
+    return SiteAuth.user;
+  },
+
   updateAuthUI(user) {
+    SiteAuth.user = user ?? null;
     const greeting = document.getElementById("user-greeting");
     const mypageLink = document.getElementById("mypage-link");
     const loginBtn = document.getElementById("login-button");
