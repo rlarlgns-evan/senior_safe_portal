@@ -10,6 +10,7 @@ import {
   initSiteWeather,
 } from "./ui/core.js";
 import { injectSiteChat, initSiteChat } from "./ui/chat.js";
+import { pageUrl } from "./paths.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   injectSiteHeader();
@@ -38,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await initBrowsePage();
     if (["youtube", "news", "welfare"].includes(browseType)) {
       initSiteChat({
-        onLinkResult: () => { window.location.href = "index.html#results"; },
+        onLinkResult: () => { window.location.href = pageUrl("index", { hash: "results" }); },
       });
     }
   }

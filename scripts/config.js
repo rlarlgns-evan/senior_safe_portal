@@ -6,12 +6,12 @@ export const MASCOT_SRC = "assets/mascot-sheriff.png";
 export const MASCOT_POTATO_SRC = "assets/mascot-potato.png";
 
 export const SITE_NAV_ITEMS = [
-  { id: "home", href: "index.html", label: "홈" },
-  { id: "youtube", href: "youtube.html", label: "유튜브" },
-  { id: "news", href: "news.html", label: "뉴스" },
-  { id: "welfare", href: "welfare.html", label: "복지" },
-  { id: "board", href: "board.html", label: "자유게시판" },
-  { id: "info", href: "information.html", label: "정보" },
+  { id: "home", page: "index", label: "홈" },
+  { id: "youtube", page: "youtube", label: "유튜브" },
+  { id: "news", page: "news", label: "뉴스" },
+  { id: "welfare", page: "welfare", label: "복지" },
+  { id: "board", page: "board", label: "자유게시판" },
+  { id: "info", page: "information", label: "정보" },
 ];
 
 export const YOUTUBE_CATEGORIES = [

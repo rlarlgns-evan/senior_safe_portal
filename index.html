@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://oweduuhfkiutlszfwukt.supabase.co wss://oweduuhfkiutlszfwukt.supabase.co https://api.open-meteo.com https://api.bigdatacloud.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https: blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests" />
   <title>시니어 디지털 보안관</title>
-  <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192.png?v=3" />
-  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png?v=3" />
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=3" />
-  <link rel="stylesheet" href="styles/style.css?v=20260906" />
-  <link rel="stylesheet" href="styles/style-desktop.css?v=20260906" media="(min-width: 1024px)" />
-  <link rel="stylesheet" href="styles/style-mobile.css?v=20260906" media="(max-width: 1023px)" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192.png?v=4" />
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png?v=4" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=4" />
+  <link rel="stylesheet" href="styles/style.css?v=20260907" />
+  <link rel="stylesheet" href="styles/style-desktop.css?v=20260907" media="(min-width: 1024px)" />
+  <link rel="stylesheet" href="styles/style-mobile.css?v=20260907" media="(max-width: 1023px)" />
   <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 </head>
@@ -27,7 +27,7 @@
       <nav class="top-nav" aria-label="주요 메뉴" data-auto-nav></nav>
       <div class="header-end">
         <div class="auth-area" id="auth-area">
-          <a href="board.html" id="mypage-link" class="auth-button auth-mypage btn btn--secondary hidden">마이페이지</a>
+          <a href="pages/board.html" id="mypage-link" class="auth-button auth-mypage btn btn--secondary hidden">마이페이지</a>
           <span id="user-greeting" class="user-greeting hidden" aria-live="polite"></span>
           <button type="button" id="login-button" class="auth-button auth-login btn btn--primary">로그인</button>
           <button type="button" id="logout-button" class="auth-button auth-logout btn btn--secondary hidden">로그아웃</button>
@@ -74,7 +74,7 @@
               </div>
               <div id="youtube-categories" class="category-tabs" role="tablist" aria-label="유튜브 카테고리"></div>
               <div id="youtube-content" class="youtube-grid"></div>
-              <a id="youtube-more" class="section-more-link btn btn--secondary" href="youtube.html">더보기</a>
+              <a id="youtube-more" class="section-more-link btn btn--secondary" href="pages/youtube.html">더보기</a>
             </section>
 
             <section id="news-section" class="content-section content-column" aria-labelledby="news-heading">
@@ -86,7 +86,7 @@
               </div>
               <div id="news-categories" class="category-tabs" role="tablist" aria-label="뉴스 카테고리"></div>
               <div id="news-content" class="news-list"></div>
-              <a id="news-more" class="section-more-link btn btn--secondary" href="news.html">더보기</a>
+              <a id="news-more" class="section-more-link btn btn--secondary" href="pages/news.html">더보기</a>
             </section>
 
             <section id="welfare-section" class="content-section content-column welfare-section" aria-labelledby="welfare-heading">
@@ -104,7 +104,7 @@
                   <p>근처 복지 시설과 혜택 정보를 찾고 있습니다...</p>
                 </div>
               </div>
-              <a id="welfare-more" class="section-more-link btn btn--secondary" href="welfare.html">더보기</a>
+              <a id="welfare-more" class="section-more-link btn btn--secondary" href="pages/welfare.html">더보기</a>
             </section>
           </div>
         </section>
@@ -179,6 +179,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script type="module" src="scripts/main.js?v=20260906"></script>
+  <script type="module" src="scripts/main.js?v=20260907"></script>
 </body>
 </html>

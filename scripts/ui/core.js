@@ -25,6 +25,7 @@ import {
   ENGLISH_TO_KOREAN_REGION,
   ENGLISH_TO_KOREAN_CITY,
 } from '../config.js';
+import { assetUrl, pageUrl, buildBrowsePageUrl } from '../paths.js';
 import { escapeHtml, decodeHtmlEntities, sanitizeNewsText } from '../security/sanitize.js';
 import { isLikelyUrl, normalizeUrl } from '../security/url.js';
 import {
@@ -36,7 +37,7 @@ import {
 
 
 function mascotImg(className, alt = "디지털 보안관 마스코트") {
-  return `<img src="${MASCOT_SRC}" alt="${escapeHtml(alt)}" class="${className}" loading="lazy" />`;
+  return `<img src="${assetUrl(MASCOT_SRC)}" alt="${escapeHtml(alt)}" class="${className}" loading="lazy" />`;
 }
 
 function mascotLoadingHtml(message) {
@@ -302,13 +303,6 @@ function renderYoutubeQuotaNotice() {
       오늘 YouTube 검색 한도가 초과되어 검증된 추천 영상을 보여드립니다. 내일 오후 이후 다시 시도해 주세요.
     </p>
   `;
-}
-
-function buildBrowsePageUrl(page, categoryId) {
-  const params = new URLSearchParams();
-  if (categoryId) params.set("category", categoryId);
-  const query = params.toString();
-  return `${page}.html${query ? `?${query}` : ""}`;
 }
 
 function findCategoryById(categories, categoryId) {
@@ -1191,7 +1185,7 @@ function goToResultsPage() {
     window.location.hash = "results";
     return;
   }
-  window.location.href = "index.html#results";
+  window.location.href = pageUrl("index", { hash: "results" });
 }
 
 async function chatWithAgent(message, history) {
@@ -1213,14 +1207,14 @@ async function chatWithAgent(message, history) {
 function getSiteHeaderHtml() {
   return `
     <div class="site-header-row">
-      <a class="site-brand" href="index.html">
-        <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="44" height="44" />
+      <a class="site-brand" href="${pageUrl("index")}">
+        <img src="${assetUrl(MASCOT_SRC)}" alt="" class="brand-mascot" width="44" height="44" />
         <span class="site-brand-text">시니어 디지털 보안관</span>
       </a>
       <nav class="top-nav" aria-label="주요 메뉴" data-auto-nav></nav>
       <div class="header-end">
         <div class="auth-area" id="auth-area">
-          <a href="board.html" id="mypage-link" class="auth-button auth-mypage btn btn--secondary hidden">마이페이지</a>
+          <a href="${pageUrl("board")}" id="mypage-link" class="auth-button auth-mypage btn btn--secondary hidden">마이페이지</a>
           <span id="user-greeting" class="user-greeting hidden"></span>
           <button type="button" id="login-button" class="auth-button auth-login btn btn--primary">로그인</button>
           <button type="button" id="logout-button" class="auth-button auth-logout btn btn--secondary hidden">로그아웃</button>
@@ -1268,7 +1262,7 @@ function getAuthSocialButtonsHtml() {
   const googleButton = `
     <button type="button" class="auth-social-btn auth-social-btn--google" data-social-provider="google" aria-label="Google로 로그인">
       <span class="auth-google-mark" aria-hidden="true">
-        <img src="assets/social-google-g.svg" alt="" width="16" height="16" />
+        <img src="${assetUrl("assets/social-google-g.svg")}" alt="" width="16" height="16" />
       </span>
       <span class="auth-google-label">Google로 로그인</span>
     </button>
@@ -1277,7 +1271,7 @@ function getAuthSocialButtonsHtml() {
   const naverButton = `
     <button type="button" class="auth-social-btn auth-social-btn--naver" data-social-provider="naver" aria-label="네이버 로그인">
       <span class="auth-naver-mark" aria-hidden="true">
-        <img src="assets/social-naver-icon.png" alt="" width="16" height="16" />
+        <img src="${assetUrl("assets/social-naver-icon.png")}" alt="" width="16" height="16" />
       </span>
       <span class="auth-naver-label">네이버 로그인</span>
     </button>
@@ -1286,7 +1280,7 @@ function getAuthSocialButtonsHtml() {
   const kakaoButton = `
     <button type="button" class="auth-social-btn auth-social-btn--kakao" data-social-provider="kakao" aria-label="카카오 로그인">
       <span class="auth-kakao-mark" aria-hidden="true">
-        <img src="assets/social-kakao-symbol.svg" alt="" width="16" height="16" />
+        <img src="${assetUrl("assets/social-kakao-symbol.svg")}" alt="" width="16" height="16" />
       </span>
       <span class="auth-kakao-label">카카오 로그인</span>
     </button>
@@ -1672,14 +1666,14 @@ function getSiteFooterHtml() {
     <footer class="site-footer" aria-label="사이트 하단">
       <div class="site-footer-inner">
         <nav class="site-footer-nav" aria-label="정보 링크">
-          <a href="terms.html">이용약관</a>
+          <a href="${pageUrl("terms")}">이용약관</a>
           <span class="footer-divider" aria-hidden="true">·</span>
-          <a href="privacy.html">개인정보처리방침</a>
+          <a href="${pageUrl("privacy")}">개인정보처리방침</a>
           <span class="footer-divider" aria-hidden="true">·</span>
-          <a href="team.html">팀 소개</a>
+          <a href="${pageUrl("team")}">팀 소개</a>
         </nav>
         <div class="site-footer-bottom">
-          <img src="${MASCOT_POTATO_SRC}" alt="" class="footer-potato" width="40" height="40" loading="lazy" />
+          <img src="${assetUrl(MASCOT_POTATO_SRC)}" alt="" class="footer-potato" width="40" height="40" loading="lazy" />
           <p class="site-footer-copy">© 2026 샤이한 열정 감자들</p>
         </div>
       </div>
@@ -1702,9 +1696,9 @@ function buildNavLinksHtml(activeId, linkClass) {
   const isMobile = linkClass === "mobile-nav-link";
   const activeClass = isMobile ? " mobile-nav-active" : " nav-active";
 
-  return SITE_NAV_ITEMS.map(({ id, href, label }) => {
+  return SITE_NAV_ITEMS.map(({ id, page, label }) => {
     const active = id === activeId ? activeClass : "";
-    return `<a class="${linkClass}${active}" href="${href}" data-nav="${id}">${label}</a>`;
+    return `<a class="${linkClass}${active}" href="${pageUrl(page)}" data-nav="${id}">${label}</a>`;
   }).join("");
 }
 

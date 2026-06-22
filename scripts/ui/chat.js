@@ -1,4 +1,5 @@
 import { MASCOT_SRC, SEARCH_RESULTS_KEY } from "../config.js";
+import { assetUrl, pageUrl } from "../paths.js";
 import { AppConfig, sanitizeUserFacingMessage, validateTextInput, validateLinkAnalysisUrl } from "../security/validate.js";
 import {
   SiteAuth,
@@ -29,7 +30,7 @@ export function getSiteChatHtml() {
         <div class="chat-header">
           <div class="chat-header-info">
             <div class="chat-header-avatar">
-              <img src="assets/mascot-sheriff.png" alt="" class="chat-header-mascot" width="36" height="36" />
+              <img src="${assetUrl(MASCOT_SRC)}" alt="" class="chat-header-mascot" width="36" height="36" />
             </div>
             <div class="chat-header-text">
               <h3 id="chat-title">보안관 단디</h3>
@@ -61,7 +62,7 @@ export function getSiteChatHtml() {
         </div>
       </div>
       <button type="button" id="chat-fab" class="chat-fab chat-fab--mascot btn btn--accent">
-        <img src="assets/mascot-sheriff.png" alt="" class="chat-fab-img" width="28" height="28" />
+        <img src="${assetUrl(MASCOT_SRC)}" alt="" class="chat-fab-img" width="28" height="28" />
         <span>보안관 단디에게 물어보기</span>
       </button>
     </div>
@@ -188,7 +189,7 @@ export const SiteChat = {
       if (typeof SiteChat.onLinkResult === "function") {
         SiteChat.onLinkResult();
       } else {
-        window.location.href = "index.html#results";
+        window.location.href = pageUrl("index", { hash: "results" });
       }
     });
 

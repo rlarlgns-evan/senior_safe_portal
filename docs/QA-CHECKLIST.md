@@ -17,14 +17,15 @@
 - [ ] 링크/텍스트 검사 → `#results` SPA 전환
 - [ ] 유튜브·뉴스·복지 탭 자동 전환 (클릭 후 1분 일시정지)
 - [ ] 챗봇 열기·칩·입력·전송
-- [ ] `results.html` 접속 시 `index.html#results` 리다이렉트
+- [ ] `pages/results.html` 접속 시 `index.html#results` 리다이렉트
+- [ ] 루트 `results.html` 접속 시 `pages/results.html` 경유 리다이렉트
 
 ### youtube / news / welfare (data-page="browse")
 - [ ] 카테고리 탭·URL `?category=` 동기화
 - [ ] 썸네일·더보기 링크
 - [ ] 복지: 위치 재설정 버튼
 
-### board.html (data-page="board")
+### pages/board.html (data-page="board")
 - [ ] 비로그인: 읽기만, 글쓰기 시 로그인 유도
 - [ ] 로그인: 글 작성·본인 글 삭제 (confirm)
 - [ ] 조회수 증가 (RLS)
