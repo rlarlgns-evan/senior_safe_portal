@@ -123,17 +123,11 @@ body {
 }
 
 .home-search-band {
-  padding: 2rem var(--space-main-x) 1.5rem;
+  padding: 2.25rem var(--space-main-x) 1.75rem;
 }
 
 .home-search-inner {
-  width: min(100%, 40rem);
   max-width: 40rem;
-  margin-inline: auto;
-}
-
-.search-form--home .search-row {
-  margin-inline: auto;
 }
 
 /* ── 브라우즈·카드 그리드 ── */
