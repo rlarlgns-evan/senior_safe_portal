@@ -580,7 +580,7 @@ function renderYoutubeCard(item) {
         </div>
         <div class="media-card-body">
           <h4 class="media-card-title">${escapeHtml(item.title)}</h4>
-          ${item.channel ? `<p class="media-card-meta">${escapeHtml(item.channel)}</p>` : ""}
+          <p class="media-card-meta">${escapeHtml(item.channel || "YouTube")}</p>
           <span class="media-card-foot">영상 보기 →</span>
         </div>
       </article>
@@ -605,7 +605,7 @@ function renderNewsCard(article) {
         </div>
         <div class="media-card-body">
           <h4 class="media-card-title">${escapeHtml(article.title)}</h4>
-          ${article.summary ? `<p class="media-card-meta">${escapeHtml(article.summary)}</p>` : ""}
+          <p class="media-card-meta">${escapeHtml(article.summary || "관련 기사")}</p>
           <span class="media-card-foot">${escapeHtml(article.pubDate || "자세히 읽기")} →</span>
         </div>
       </article>

@@ -204,6 +204,7 @@ body {
 
 .home-cards-band .media-card-title {
   font-size: 0.8rem;
+  min-height: calc(0.8rem * 1.35 * 2);
 }
 
 .home-cards-band .media-card-meta {
@@ -213,6 +214,7 @@ body {
 
 .home-cards-band .media-card-foot {
   font-size: 0.65rem;
+  min-height: calc(0.65rem * 1.35);
 }
 
 .home-cards-band .media-card-media .verified-badge,

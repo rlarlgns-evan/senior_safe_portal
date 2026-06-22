@@ -831,6 +831,12 @@ button.back-link-prominent {
   --home-col-gap: 0.75rem;
   --home-card-thumb-ratio: 16 / 9;
   --home-header-h: 3rem;
+  --home-card-title-size: 0.85rem;
+  --home-card-title-lh: 1.35;
+  --home-card-meta-size: 0.75rem;
+  --home-card-meta-lh: 1.35;
+  --home-card-foot-size: 0.7rem;
+  --home-card-foot-lh: 1.35;
   width: 100%;
   box-sizing: border-box;
   padding: 1rem var(--space-cards-x) 1.25rem;
@@ -941,7 +947,7 @@ button.back-link-prominent {
 
 .home-cards-band .media-card {
   flex: 1 1 auto;
-  height: auto;
+  height: 100%;
   min-height: 0;
 }
 
@@ -950,6 +956,12 @@ button.back-link-prominent {
   width: 100%;
   max-height: none;
   flex-shrink: 0;
+}
+
+.home-cards-band .media-card-media--logo img {
+  object-fit: cover;
+  padding: 0;
+  background: var(--color-surface-thumbnail);
 }
 
 .home-cards-band .media-card-media--icon {
@@ -972,30 +984,47 @@ button.back-link-prominent {
 
 .home-cards-band .media-card-body {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   padding: var(--home-space);
   gap: 0.2rem;
-  min-height: 5.75rem;
+  min-height: 0;
   overflow: hidden;
 }
 
 .home-cards-band .media-card-title {
-  font-size: 0.85rem;
-  line-height: 1.35;
+  margin: 0;
+  font-size: var(--home-card-title-size);
+  line-height: var(--home-card-title-lh);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-height: calc(var(--home-card-title-size) * var(--home-card-title-lh) * 2);
 }
 
 .home-cards-band .media-card-meta {
-  font-size: 0.75rem;
-  line-height: 1.35;
+  margin: 0;
+  font-size: var(--home-card-meta-size);
+  line-height: var(--home-card-meta-lh);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  min-height: calc(0.75rem * 1.35 * 2);
+  overflow: hidden;
+  min-height: calc(var(--home-card-meta-size) * var(--home-card-meta-lh) * 2);
 }
 
 .home-cards-band .media-card-foot {
-  font-size: 0.7rem;
+  font-size: var(--home-card-foot-size);
+  line-height: var(--home-card-foot-lh);
   padding-top: 0;
   margin-top: auto;
+  flex-shrink: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
+  overflow: hidden;
+  min-height: calc(var(--home-card-foot-size) * var(--home-card-foot-lh));
 }
 
 .home-cards-band .section-more-link {
