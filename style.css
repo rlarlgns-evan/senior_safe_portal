@@ -2582,11 +2582,6 @@ button.back-link-prominent {
   cursor: not-allowed;
 }
 
-.chat-input-label {
-  margin: 0.5rem 0.75rem 0;
-  font-size: var(--chat-chip-size);
-}
-
 .chat-input {
   flex: 1;
   min-width: 0;
@@ -2602,6 +2597,12 @@ button.back-link-prominent {
   line-height: 1.4;
   resize: none;
   color: var(--color-text);
+}
+
+.chat-input::placeholder {
+  color: var(--color-text-placeholder);
+  opacity: 0.55;
+  font-weight: 600;
 }
 
 .chat-input:focus {

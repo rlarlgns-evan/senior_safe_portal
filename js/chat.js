@@ -44,9 +44,8 @@ function getSiteChatHtml() {
             <button type="button" class="chat-chip" data-chat-prompt="문자·카톡 사기를 당하지 않으려면 어떻게 해야 하나요?">📱 문자 사기 예방</button>
           </div>
           <form id="chat-form" class="chat-form">
-            <label for="chat-input" class="form-label chat-input-label">메시지 또는 링크 입력</label>
             <div class="chat-input-wrap">
-              <textarea id="chat-input" rows="1" class="chat-input" autocomplete="off" aria-label="메시지 또는 링크 입력"></textarea>
+              <textarea id="chat-input" rows="1" class="chat-input" placeholder="메시지 입력" autocomplete="off" aria-label="메시지 입력"></textarea>
               <button type="submit" class="chat-send-btn" aria-label="메시지 보내기">
                 <span class="material-symbols-outlined" aria-hidden="true">send</span>
               </button>
