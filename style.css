@@ -94,11 +94,11 @@
   --color-active: var(--accent-color);
 
   /* Social login — palette only */
-  --color-social-google-bg: var(--color-surface);
-  --color-social-google-border: var(--primary-color);
-  --color-social-google-text: var(--color-text);
-  --color-social-google-hover: var(--bg-color);
-  --color-social-google-border-hover: var(--primary-color);
+  --color-social-google-bg: #FFFFFF;
+  --color-social-google-border: #747775;
+  --color-social-google-text: #1F1F1F;
+  --color-social-google-hover: #F8F9FA;
+  --color-social-google-border-hover: #747775;
   --color-social-naver: #03A94D;
   --color-social-naver-hover: #038F44;
   --color-social-kakao: #FEE500;
@@ -3055,14 +3055,59 @@ button.back-link-prominent {
 }
 
 .auth-social-btn--google {
-  background: var(--color-social-google-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  height: 48px;
+  padding: 0 12px;
   border: 1px solid var(--color-social-google-border);
+  border-radius: 4px;
+  background: var(--color-social-google-bg);
   color: var(--color-social-google-text);
+  cursor: pointer;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .auth-social-btn--google:hover {
   background: var(--color-social-google-hover);
   border-color: var(--color-social-google-border-hover);
+  filter: none;
+  opacity: 1;
+}
+
+.auth-social-btn--google:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.auth-google-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  background: #FFFFFF;
+}
+
+.auth-google-mark img {
+  display: block;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.auth-google-label {
+  font-family: "Roboto", var(--font-family);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--color-social-google-text);
+  letter-spacing: 0;
 }
 
 .auth-social-btn--naver {
@@ -3097,15 +3142,15 @@ button.back-link-prominent {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 }
 
 .auth-naver-mark img {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
 }
 

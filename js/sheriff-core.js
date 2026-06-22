@@ -1440,15 +1440,17 @@ function getAuthFieldHtml({ id, type, label, autocomplete, minlength, placeholde
 function getAuthSocialButtonsHtml() {
   const googleButton = `
     <button type="button" class="auth-social-btn auth-social-btn--google" data-social-provider="google" aria-label="Google로 로그인">
-      <img src="assets/social-google-g.svg" alt="" class="auth-social-icon" width="20" height="20" />
-      <span class="auth-social-text">Google로 로그인</span>
+      <span class="auth-google-mark" aria-hidden="true">
+        <img src="assets/social-google-g.svg" alt="" width="20" height="20" />
+      </span>
+      <span class="auth-google-label">Google로 로그인</span>
     </button>
   `;
 
   const naverButton = `
     <button type="button" class="auth-social-btn auth-social-btn--naver" data-social-provider="naver" aria-label="네이버 로그인">
       <span class="auth-naver-mark" aria-hidden="true">
-        <img src="assets/social-naver-n.svg" alt="" width="16" height="16" />
+        <img src="assets/social-naver-icon.png" alt="" width="20" height="20" />
       </span>
       <span class="auth-naver-label">네이버 로그인</span>
     </button>
