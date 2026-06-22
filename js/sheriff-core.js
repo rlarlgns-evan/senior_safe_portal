@@ -1447,10 +1447,7 @@ function getAuthSocialButtonsHtml() {
 
   const naverButton = `
     <button type="button" class="auth-social-btn auth-social-btn--naver" data-social-provider="naver" aria-label="네이버 로그인">
-      <span class="auth-social-brand">
-        <img src="assets/social-naver-n.svg" alt="" class="auth-social-logo" width="16" height="16" />
-        <span class="auth-social-text">네이버 로그인</span>
-      </span>
+      <img src="assets/social-naver-login-wide.png" alt="" class="auth-social-naver-wide" width="320" height="48" />
     </button>
   `;
 

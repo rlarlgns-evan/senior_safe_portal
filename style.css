@@ -3068,16 +3068,33 @@ button.back-link-prominent {
 .auth-social-btn--naver {
   justify-content: center;
   gap: 0;
-  min-height: var(--btn-min-height);
-  padding: 0 1rem;
-  border-radius: var(--radius-md);
-  background: var(--color-social-naver);
+  min-height: 0;
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
   border: none;
-  color: var(--color-text-on-primary);
 }
 
 .auth-social-btn--naver:hover {
-  background: var(--color-social-naver-hover);
+  background: transparent;
+  opacity: 0.92;
+}
+
+.auth-social-btn--naver:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.auth-social-naver-wide {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 48px;
+  object-fit: contain;
+  object-position: center;
+  pointer-events: none;
 }
 
 .auth-social-btn--naver .auth-social-brand {
