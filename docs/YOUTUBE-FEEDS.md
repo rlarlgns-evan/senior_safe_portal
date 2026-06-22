@@ -22,6 +22,7 @@ Supabase **SQL Editor** → `supabase/migrations/youtube_feeds.sql` 실행
 
 ### 3. Supabase Edge Function Secrets
 
+
 **Project Settings → Edge Functions → Secrets**
 
 | Name | 설명 |
@@ -77,7 +78,7 @@ Supabase **Table Editor** → `youtube_feeds` 5행 확인
 $env:SUPABASE_URL="https://oweduuhfkiutlszfwukt.supabase.co"
 $env:SUPABASE_SERVICE_ROLE_KEY="(service_role)"
 $env:CRON_SECRET="(CRON_SECRET)"
-node scripts/refresh-youtube-feeds.mjs
+node tools/refresh-youtube-feeds.mjs
 ```
 
 ---

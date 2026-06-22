@@ -1,14 +1,12 @@
-/**
- * XSS-safe 유틸 · 입력 검증 · 사용자용 오류 메시지
- */
+import { normalizeUrl } from "./url.js";
 
-const AppConfig = Object.freeze({
+export const AppConfig = Object.freeze({
   MAX_SEARCH_LENGTH: 500,
   MAX_CHAT_LENGTH: 2000,
   MAX_EMAIL_LENGTH: 254,
 });
 
-function sanitizeUserFacingMessage(error, fallback) {
+export function sanitizeUserFacingMessage(error, fallback) {
   if (!(error instanceof Error)) return fallback;
 
   const message = error.message.trim().slice(0, 240);
@@ -27,7 +25,7 @@ function sanitizeUserFacingMessage(error, fallback) {
   return message;
 }
 
-function validateTextInput(raw, maxLength, emptyMessage) {
+export function validateTextInput(raw, maxLength, emptyMessage) {
   const cleaned = raw.replace(/[\u0000-\u001F\u007F]/g, " ").replace(/\s+/g, " ").trim();
 
   if (!cleaned) throw new Error(emptyMessage);
@@ -38,7 +36,7 @@ function validateTextInput(raw, maxLength, emptyMessage) {
   return cleaned;
 }
 
-function validateEmailInput(email) {
+export function validateEmailInput(email) {
   const trimmed = email.trim().slice(0, AppConfig.MAX_EMAIL_LENGTH);
   if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
     throw new Error("올바른 이메일 주소를 입력해 주세요.");
@@ -46,7 +44,7 @@ function validateEmailInput(email) {
   return trimmed;
 }
 
-function validatePasswordInput(password, minLength = 6) {
+export function validatePasswordInput(password, minLength = 6) {
   if (!password) throw new Error("비밀번호를 입력해 주세요.");
   if (password.length < minLength) {
     throw new Error(`비밀번호는 ${minLength}자 이상 입력해 주세요.`);
@@ -57,7 +55,7 @@ function validatePasswordInput(password, minLength = 6) {
   return password;
 }
 
-function validateLinkAnalysisUrl(url) {
+export function validateLinkAnalysisUrl(url) {
   if (typeof url !== "string" || !url.trim()) return null;
   try {
     return normalizeUrl(url);
@@ -66,6 +64,6 @@ function validateLinkAnalysisUrl(url) {
   }
 }
 
-function confirmCriticalAction(message) {
+export function confirmCriticalAction(message) {
   return window.confirm(message);
 }

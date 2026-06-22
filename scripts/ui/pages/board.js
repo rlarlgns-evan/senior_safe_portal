@@ -1,6 +1,10 @@
-/**
- * 자유게시판 — Supabase board_posts (표 · 검색 · 페이지네이션)
- */
+import { AppConfig, sanitizeUserFacingMessage, validateTextInput, confirmCriticalAction } from "../../security/validate.js";
+import {
+  escapeHtml,
+  getUserDisplayName,
+  SiteAuth,
+  supabaseClient
+} from "../core.js";
 
 const BOARD_TABLE = "board_posts";
 const BOARD_PAGE_SIZE = 10;
@@ -348,7 +352,7 @@ function bindBoardEvents() {
   });
 }
 
-async function initBoardPage() {
+export async function initBoardPage() {
   bindBoardEvents();
 
   const { data: { session } } = await supabaseClient.auth.getSession();

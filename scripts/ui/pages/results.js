@@ -1,6 +1,6 @@
-/**
- * 검사 결과 렌더링 (SPA · 공유 모듈)
- */
+import { escapeHtml } from "../../security/sanitize.js";
+import { AppConfig, sanitizeUserFacingMessage, validateTextInput } from "../../security/validate.js";
+import { runSearch, saveSearchResults, loadSearchResults } from "../core.js";
 
 const RESULTS_STATUS_CONFIG = {
   safe: {
@@ -26,7 +26,7 @@ const RESULTS_STATUS_CONFIG = {
   },
 };
 
-const ResultsModule = {
+export const ResultsModule = {
   els() {
     return {
       summary: document.getElementById("results-summary"),

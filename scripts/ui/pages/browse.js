@@ -1,8 +1,19 @@
-/**
- * 유튜브 · 뉴스 · 복지 전체 보기
- */
+import { AppConfig, sanitizeUserFacingMessage, validateTextInput, confirmCriticalAction } from "../../security/validate.js";
+import {
+  buildBrowsePageUrl,
+  setupCategoryTabs,
+  YOUTUBE_CATEGORIES,
+  NEWS_CATEGORIES,
+  WELFARE_CATEGORIES,
+  loadHomeYoutubeRecommendations,
+  loadHomeNewsRecommendations,
+  loadHomeWelfareInfo,
+  mascotLoadingHtml,
+  resetCachedUserLocation,
+  initBrowseWelfareLocation
+} from "../core.js";
 
-const BROWSE_CONFIG = {
+export const BROWSE_CONFIG = {
   youtube: {
     page: "youtube",
     categories: YOUTUBE_CATEGORIES,
@@ -31,7 +42,7 @@ function getInitialCategoryId(categories) {
   return categories[0].id;
 }
 
-async function initBrowsePage() {
+export async function initBrowsePage() {
   const type = getBrowseType();
   const config = BROWSE_CONFIG[type];
   if (!config) return;
@@ -73,7 +84,7 @@ async function initBrowsePage() {
   const locationButton = document.getElementById("browse-location-button");
   if (locationButton && type === "welfare") {
     locationButton.addEventListener("click", async () => {
-      cachedUserLocation = null;
+      resetCachedUserLocation();
       contentContainer.innerHTML = mascotLoadingHtml("위치를 다시 확인하고 있습니다...");
       await initBrowseWelfareLocation(true);
       locationButton.focus();

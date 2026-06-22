@@ -4,11 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>팀 소개 - 시니어 디지털 보안관</title>
-  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-  <link rel="stylesheet" href="style.css?v=20260905" />
-  <link rel="stylesheet" href="style-desktop.css?v=20260905" media="(min-width: 1024px)" />
-  <link rel="stylesheet" href="style-mobile.css?v=20260905" media="(max-width: 1023px)" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192.png?v=3" />
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png?v=3" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=3" />
+  <link rel="stylesheet" href="styles/style.css?v=20260906" />
+  <link rel="stylesheet" href="styles/style-desktop.css?v=20260906" media="(min-width: 1024px)" />
+  <link rel="stylesheet" href="styles/style-mobile.css?v=20260906" media="(max-width: 1023px)" />
   <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 </head>
@@ -22,33 +23,155 @@
         <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
         홈으로 돌아가기
       </a>
-      <article class="info-panel">
+      <article class="info-panel legal-doc">
         <h1>팀 소개</h1>
-        <p class="info-lead">어르신의 디지털 안전과 일상 편의를 위해 함께 만든 서비스입니다.</p>
+        <p class="info-lead">
+          「시니어 디지털 보안관」은 어르신과 보호자가 스마트폰·인터넷을 더 안전하고 편하게 쓰실 수 있도록
+          기획·디자인·개발을 함께하는 <strong>샤이한 열정 감자</strong> 팀이 만든 공익 지향 웹 서비스입니다.
+          피싱·스미싱 예방부터 일상 정보 안내까지, 디지털 취약 계층의 눈높이에 맞춘 실용적인 도구를 제공하는 것이 목표입니다.
+        </p>
+        <p class="privacy-meta"><strong>최종 업데이트:</strong> 2026년 6월 22일</p>
 
-        <div class="info-team-mascot">
-          <img src="assets/mascot-potato.png" alt="" width="88" height="88" />
-          <div>
-            <strong>샤이한 열정 감자</strong>
-            <p>수줍지만 열정 넘치는 감자 탐험대! 어르신이 인터넷 세상을 안전하게 걸어 다니도록 돕는 것이 우리의 목표입니다.</p>
-          </div>
+        <h2>1. 운영 팀</h2>
+        <p>샤이한 열정 감자는 수줍지만 꾸준한 열정으로 문제를 해결하는 소규모 제작 팀입니다. 서비스 기획, 시니어 친화 UI/UX 설계, 프론트엔드·백엔드 개발, 콘텐츠 큐레이션을 분담하며 아래 원칙을 지킵니다.</p>
+        <ol class="privacy-list">
+          <li><strong>어르신 우선:</strong> 글씨 크기, 버튼 크기, 단계 수를 줄여 누구나 혼자서도 이용할 수 있는 화면을 지향합니다.</li>
+          <li><strong>안전 우선:</strong> 의심 링크·문자에 대한 경각심을 높이고, 확인 절차를 안내하는 데 집중합니다.</li>
+          <li><strong>투명한 운영:</strong> <a href="terms.html">이용약관</a>과 <a href="privacy.html">개인정보 처리방침</a>을 공개하고, 문의·제안 채널을 열어 두었습니다.</li>
+          <li><strong>지속 개선:</strong> 이용자 피드백과 오류 제보를 반영해 기능을 보완하고 접근성을 높입니다.</li>
+        </ol>
+
+        <h2>2. 서비스 소개</h2>
+        <p>시니어 디지털 보안관은 한곳에서 디지털 안전 점검과 생활 정보를 함께 볼 수 있는 시니어 친화 포털입니다. 마스코트 <strong>보안관 단디</strong>가 검색·상담·안내 전반을 돕습니다.</p>
+        <ul>
+          <li>의심 URL·문자 내용을 입력하면 AI·외부 분석을 통해 위험 여부를 참고용으로 안내합니다.</li>
+          <li>유튜브·뉴스·복지 정보를 카테고리별로 모아 보기 쉽게 정리합니다.</li>
+          <li>위치를 허용하시면 우리 동네 날씨·지역 맞춤 복지 혜택을 함께 보여 드립니다.</li>
+          <li>회원 가입 후 자유게시판에서 경험과 정보를 나눌 수 있습니다.</li>
+        </ul>
+        <p>본 서비스는 교육·참고 목적의 무료 웹사이트이며, 링크 검사·AI 상담 결과는 최종 판단을 대신하지 않습니다. 금융·개인정보 요구가 있을 때는 반드시 가족·공식 기관을 통해 재확인해 주세요.</p>
+
+        <h2>3. 주요 기능</h2>
+        <div class="privacy-table-wrap">
+          <table class="privacy-table">
+            <caption class="sr-only">주요 기능 표</caption>
+            <thead>
+              <tr>
+                <th scope="col">기능</th>
+                <th scope="col">설명</th>
+                <th scope="col">비고</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>링크·문자 안전 검사</td>
+                <td>URL 또는 문자 내용을 분석해 피싱·스미싱 위험 신호를 참고용으로 표시</td>
+                <td>비회원 이용 가능</td>
+              </tr>
+              <tr>
+                <td>유튜브·뉴스 추천</td>
+                <td>시니어·보안·건강 등 주제별 영상·기사 큐레이션 및 더보기 페이지</td>
+                <td>외부 API 연동</td>
+              </tr>
+              <tr>
+                <td>복지·날씨 안내</td>
+                <td>행정구역 기반 복지 서비스 목록, 현재 위치·기본 지역 날씨</td>
+                <td>위치 권한 선택</td>
+              </tr>
+              <tr>
+                <td>보안관 단디 AI 상담</td>
+                <td>디지털 보안·일상 IT 이용 관련 질문에 챗봇이 답변</td>
+                <td>참고용 상담</td>
+              </tr>
+              <tr>
+                <td>자유게시판</td>
+                <td>회원 전용 글 작성·열람·삭제, 작성자 표시</td>
+                <td>로그인 필요</td>
+              </tr>
+              <tr>
+                <td>회원 로그인</td>
+                <td>이메일·비밀번호 가입, Google·네이버·카카오 간편 로그인</td>
+                <td>Supabase 인증</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <h2>시니어 디지털 보안관이란?</h2>
-        <p>피싱·스미싱 링크 검사, 안전한 유튜브·뉴스 추천, 우리 동네 맞춤 복지 정보, 보안관 단디 AI 상담을 한곳에서 제공하는 시니어 친화 포털입니다. 큰 글씨와 단순한 화면으로 누구나 쉽게 이용할 수 있도록 설계했습니다.</p>
+        <h2>4. 시니어 친화 설계</h2>
+        <p>어르신이 자주 겪는 어려움—작은 글씨, 복잡한 메뉴, 낯선 용어—을 줄이기 위해 화면 전반에 아래 기준을 적용했습니다.</p>
+        <ul>
+          <li>큰 제목·버튼·입력창과 충분한 터치 영역(모바일·태블릿 대응)</li>
+          <li>한 화면에 한 가지 목적이 드러나도록 단계·탭 구성 단순화</li>
+          <li>경고·안내 문구를 쉬운 말로 풀어 쓰고, 위험·주의 상태를 색·아이콘으로 구분</li>
+          <li>로딩·오류 시 마스코트와 함께 다음 행동(다시 시도, 홈으로)을 안내</li>
+          <li>키보드·스크린리더 이용을 고려한 시맨틱 HTML과 대체 텍스트</li>
+        </ul>
 
-        <h2>만든 사람들</h2>
-        <p>샤이한 열정 감자 팀은 디자인, 개발, 콘텐츠 기획을 함께하며 어르신과 보호자 모두에게 도움이 되는 서비스를 만들고 있습니다.</p>
+        <h2>5. 기술 및 운영 환경</h2>
+        <p>별도 앱 설치 없이 웹 브라우저에서 이용할 수 있도록 정적 프론트엔드와 클라우드 백엔드를 조합했습니다.</p>
+        <div class="privacy-table-wrap">
+          <table class="privacy-table">
+            <caption class="sr-only">기술 스택 표</caption>
+            <thead>
+              <tr>
+                <th scope="col">구분</th>
+                <th scope="col">사용 기술·서비스</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>프론트엔드</td>
+                <td>HTML, CSS, JavaScript(ES Modules), GitHub Pages 호스팅</td>
+              </tr>
+              <tr>
+                <td>백엔드·인증</td>
+                <td>Supabase(회원 인증, Edge Functions, PostgreSQL)</td>
+              </tr>
+              <tr>
+                <td>AI·검색 연동</td>
+                <td>Google Gemini·YouTube API, 네이버 뉴스 검색 API, 공공데이터포털 복지 API</td>
+              </tr>
+              <tr>
+                <td>보안</td>
+                <td>HTTPS, 입력값 검증·XSS 방지, API 키 서버 측 보관</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-        <h2>문의</h2>
-        <p>서비스 이용 중 불편한 점이나 제안이 있으시면 GitHub 저장소 이슈 또는 프로젝트 담당자에게 연락해 주세요.</p>
+        <h2>6. 데이터·콘텐츠 출처</h2>
+        <ol class="privacy-list">
+          <li>뉴스·영상·복지 목록은 각 제공처의 API·공개 데이터를 바탕으로 하며, 저작권·이용 조건은 원 제공자에게 있습니다.</li>
+          <li>링크 검사·AI 응답은 당시 수집된 정보와 모델 분석에 따른 참고 결과이며, 100% 정확성을 보장하지 않습니다.</li>
+          <li>이용자가 입력한 검색어·URL·게시글 등의 처리 방식은 <a href="privacy.html">개인정보 처리방침</a>을 따릅니다.</li>
+        </ol>
+
+        <h2>7. 제작·운영 역할</h2>
+        <p>팀 내에서 아래 영역을 맡아 서비스를 기획부터 배포·유지보수까지 진행합니다. (개인 연락처는 공개하지 않으며, 아래 문의 채널을 이용해 주세요.)</p>
+        <ul>
+          <li><strong>서비스 기획·콘텐츠:</strong> 어르신 이용 시나리오 정의, 안내 문구·카테고리 구성</li>
+          <li><strong>UI/UX·디자인:</strong> 시니어 친화 화면, 마스코트·아이콘, 반응형 레이아웃</li>
+          <li><strong>프론트엔드 개발:</strong> 페이지·모듈 구조, 검색·게시판·챗봇 클라이언트</li>
+          <li><strong>백엔드·인프라:</strong> Supabase Edge Functions, 외부 API 연동, 배포 자동화</li>
+        </ul>
+
+        <h2>8. 문의·제안·오류 신고</h2>
+        <p>서비스 이용 중 불편한 점, 기능 제안, 버그·오타 제보, 개인정보 관련 문의는 아래로 연락해 주시면 확인 후 답변·반영하겠습니다.</p>
+        <dl class="privacy-contact">
+          <div><dt>운영 주체</dt><dd>시니어 디지털 보안관 운영팀(샤이한 열정 감자)</dd></div>
+          <div><dt>서비스 주소</dt><dd><a href="https://rlarlgns-evan.github.io/senior_safe_portal/" target="_blank" rel="noopener noreferrer">rlarlgns-evan.github.io/senior_safe_portal</a></dd></div>
+          <div><dt>소스 코드</dt><dd><a href="https://github.com/rlarlgns-evan/senior_safe_portal" target="_blank" rel="noopener noreferrer">GitHub 저장소</a></dd></div>
+          <div><dt>문의·제보</dt><dd><a href="https://github.com/rlarlgns-evan/senior_safe_portal/issues" target="_blank" rel="noopener noreferrer">GitHub 이슈</a></dd></div>
+          <div><dt>관련 문서</dt><dd><a href="terms.html">이용약관</a> · <a href="privacy.html">개인정보 처리방침</a> · <a href="information.html">이용 안내</a></dd></div>
+        </dl>
+
+        <h2>부칙</h2>
+        <p>본 팀 소개는 서비스 변경·기능 추가에 따라 수시로 업데이트될 수 있습니다. 중요한 변경 사항은 본 페이지 또는 서비스 공지를 통해 안내합니다.</p>
       </article>
     </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/core/utils.js"></script>
-  <script src="js/sheriff-core.js?v=20260905"></script>
-  <script src="js/bootstrap.js"></script>
+  <script type="module" src="scripts/main.js?v=20260906"></script>
 </body>
 </html>

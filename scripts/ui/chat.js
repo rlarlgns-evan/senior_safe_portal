@@ -1,6 +1,13 @@
-/**
- * 공통 챗봇 — 홈 · 유튜브 · 뉴스 · 복지 페이지
- */
+import { MASCOT_SRC, SEARCH_RESULTS_KEY } from "../config.js";
+import { AppConfig, sanitizeUserFacingMessage, validateTextInput, validateLinkAnalysisUrl } from "../security/validate.js";
+import {
+  SiteAuth,
+  getUserDisplayName,
+  getUserAvatarUrl,
+  chatWithAgent,
+  saveSearchResults,
+  linkAnalysisToItem,
+} from "./core.js";
 
 /** @type {Array<{role: string, content: string}>} */
 const chatHistory = [];
@@ -15,7 +22,7 @@ const chatDom = {
   get messages() { return document.getElementById("chat-messages"); },
 };
 
-function getSiteChatHtml() {
+export function getSiteChatHtml() {
   return `
     <div class="chat-fab-wrap" id="floating-chat-container">
       <div id="chat-window" class="chat-window hidden" role="dialog" aria-labelledby="chat-title">
@@ -61,17 +68,17 @@ function getSiteChatHtml() {
   `;
 }
 
-function injectSiteChat() {
+export function injectSiteChat() {
   if (document.getElementById("floating-chat-container")) return;
   const host = document.getElementById("app-container") || document.body;
   host.insertAdjacentHTML("beforeend", getSiteChatHtml());
 }
 
-function formatChatTime(date = new Date()) {
+export function formatChatTime(date = new Date()) {
   return date.toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit", hour12: true });
 }
 
-function createChatUserAvatarElement() {
+export function createChatUserAvatarElement() {
   const user = typeof SiteAuth?.getCurrentUser === "function" ? SiteAuth.getCurrentUser() : null;
   const avatarUrl = typeof getUserAvatarUrl === "function" ? getUserAvatarUrl(user) : "";
 
@@ -105,7 +112,7 @@ function createChatUserAvatarElement() {
   return userAvatar;
 }
 
-const SiteChat = {
+export const SiteChat = {
   onLinkResult: null,
 
   renderChatBubble(text, sender, options = {}) {
@@ -281,7 +288,7 @@ const SiteChat = {
 /**
  * @param {{ onLinkResult?: () => void, openOnLoad?: boolean }} [options]
  */
-function initSiteChat(options = {}) {
+export function initSiteChat(options = {}) {
   if (siteChatInitialized) return;
   siteChatInitialized = true;
 

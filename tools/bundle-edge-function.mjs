@@ -4,9 +4,9 @@
  * Supabase 대시보드(한 파일만 업로드) 배포용.
  *
  * 사용법:
- *   node scripts/bundle-edge-function.mjs analyze-link
- *   node scripts/bundle-edge-function.mjs search-videos
- *   node scripts/bundle-edge-function.mjs --all
+ *   node tools/bundle-edge-function.mjs analyze-link
+ *   node tools/bundle-edge-function.mjs search-videos
+ *   node tools/bundle-edge-function.mjs --all
  *
  * 결과: supabase/deploy/<함수명>.ts
  */
@@ -76,7 +76,7 @@ function bundleFunction(name) {
   const bundled = [
     "// ── Supabase 대시보드 배포용 (자동 생성) ──",
     `// 원본: supabase/functions/${name}/index.ts + _shared/*`,
-    "// node scripts/bundle-edge-function.mjs " + name,
+    "// node tools/bundle-edge-function.mjs " + name,
     "",
     ...sharedParts,
     "",
@@ -94,7 +94,7 @@ function bundleFunction(name) {
 const arg = process.argv[2];
 
 if (!arg) {
-  console.error("사용법: node scripts/bundle-edge-function.mjs <함수명|--all>");
+  console.error("사용법: node tools/bundle-edge-function.mjs <함수명|--all>");
   process.exit(1);
 }
 

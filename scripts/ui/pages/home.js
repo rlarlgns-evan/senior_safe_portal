@@ -1,6 +1,20 @@
-/**
- * 홈 SPA — ViewRouter · 검색
- */
+import { AppConfig, sanitizeUserFacingMessage, validateTextInput, confirmCriticalAction } from "../../security/validate.js";
+import {
+  runSearch,
+  saveSearchResults,
+  loadSearchResults,
+  buildBrowsePageUrl,
+  setupCategoryTabs,
+  YOUTUBE_CATEGORIES,
+  NEWS_CATEGORIES,
+  WELFARE_CATEGORIES,
+  loadHomeYoutubeRecommendations,
+  loadHomeNewsRecommendations,
+  loadHomeWelfareInfo,
+  bindWelfareCategoryReload
+} from "../core.js";
+import { initSiteChat } from "../chat.js";
+import { ResultsModule } from "./results.js";
 
 const homeDom = {
   mobileMenuToggle: document.getElementById("mobile-menu-toggle"),
@@ -23,7 +37,7 @@ const homeDom = {
 
 let searchInProgress = false;
 
-const ViewRouter = {
+export const ViewRouter = {
   current: "home",
 
   show(viewId) {
@@ -101,7 +115,7 @@ const NavigationUI = {
   },
 };
 
-const SearchModule = {
+export const SearchModule = {
   async handleSearchSubmit(event) {
     event.preventDefault();
     if (searchInProgress) return;
@@ -136,7 +150,7 @@ const SearchModule = {
   },
 };
 
-const HomeModule = {
+export const HomeModule = {
   initCategoryTabs() {
     const youtubeMore = document.getElementById("youtube-more");
     const newsMore = document.getElementById("news-more");
@@ -195,7 +209,7 @@ function bindHomeEvents() {
   });
 }
 
-function initHomePage() {
+export function initHomePage() {
   ViewRouter.initFromLocation();
   HomeModule.initCategoryTabs();
   initSiteChat({
