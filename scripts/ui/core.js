@@ -1,9 +1,8 @@
 /**
  * Core UI + orchestration (from sheriff-core.js)
  */
-import { SITE_ASSET_VERSION } from "../config.js";
-import { supabaseClient } from `../api/client.js?v=${SITE_ASSET_VERSION}`;
-import { getInvokeErrorMessage } from `../api/errors.js?v=${SITE_ASSET_VERSION}`;
+import { supabaseClient } from "../api/client.js";
+import { getInvokeErrorMessage } from "../api/errors.js";
 import {
   SEARCH_RESULTS_KEY,
   MASCOT_SRC,
@@ -26,15 +25,15 @@ import {
   ENGLISH_TO_KOREAN_REGION,
   ENGLISH_TO_KOREAN_CITY,
 } from "../config.js";
-import { assetUrl, pageUrl, buildBrowsePageUrl } from `../paths.js?v=${SITE_ASSET_VERSION}`;
-import { escapeHtml, decodeHtmlEntities, sanitizeNewsText } from `../security/sanitize.js?v=${SITE_ASSET_VERSION}`;
-import { isLikelyUrl, normalizeUrl } from `../security/url.js?v=${SITE_ASSET_VERSION}`;
+import { assetUrl, pageUrl, buildBrowsePageUrl } from "../paths.js";
+import { escapeHtml, decodeHtmlEntities, sanitizeNewsText } from "../security/sanitize.js";
+import { isLikelyUrl, normalizeUrl } from "../security/url.js";
 import {
   sanitizeUserFacingMessage,
   validateTextInput,
   validateEmailInput,
   validatePasswordInput,
-} from `../security/validate.js?v=${SITE_ASSET_VERSION}`;
+} from "../security/validate.js";
 
 
 function mascotImg(className, alt = "디지털 보안관 마스코트") {

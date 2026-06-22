@@ -9,9 +9,9 @@ import {
   SiteAuth,
   injectSiteFooter,
   initHomeLocationServices,
-} from `./ui/core.js?v=${SITE_ASSET_VERSION}`;
-import { injectSiteChat, initSiteChat } from `./ui/chat.js?v=${SITE_ASSET_VERSION}`;
-import { pageUrl } from `./paths.js?v=${SITE_ASSET_VERSION}`;
+} from "./ui/core.js";
+import { injectSiteChat, initSiteChat } from "./ui/chat.js";
+import { pageUrl } from "./paths.js";
 
 const pageModuleUrl = (path) => `${path}?v=${SITE_ASSET_VERSION}`;
 

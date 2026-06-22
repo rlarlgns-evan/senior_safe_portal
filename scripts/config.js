@@ -2,7 +2,7 @@
 export const SUPABASE_URL = "https://oweduuhfkiutlszfwukt.supabase.co";
 export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93ZWR1dWhma2l1dGxzemZ3dWt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjMyNzUsImV4cCI6MjA5NzUzOTI3NX0.n25pwv-WuWOBIGY7cwJCYj1TxILYpy2XA2nn7a6ySMY";
 export const SEARCH_RESULTS_KEY = "sheriff-search-results";
-export const SITE_ASSET_VERSION = "20260908";
+export const SITE_ASSET_VERSION = "20260909";
 export const MASCOT_SRC = "assets/mascot-sheriff.png";
 export const MASCOT_POTATO_SRC = "assets/mascot-potato.png";
 
