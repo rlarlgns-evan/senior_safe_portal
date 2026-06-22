@@ -101,7 +101,7 @@ body {
 .home-cards-band {
   --home-space: 0.5rem;
   --home-col-gap: 0.625rem;
-  --home-card-h: 6.75rem;
+  --home-card-thumb-ratio: 16 / 9;
   --home-header-h: 2.65rem;
   padding: 0.75rem var(--space-cards-x) 1rem;
 }
@@ -114,11 +114,6 @@ body {
 .home-cards-band .category-tab {
   padding: 0.28rem 0.55rem;
   font-size: 0.76rem;
-}
-
-.home-cards-band .media-card-media,
-.home-cards-band .media-card-media--icon {
-  max-height: 72px;
 }
 
 .content-card-grid:not(.content-card-grid--home) {
