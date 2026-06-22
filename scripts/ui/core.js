@@ -1789,7 +1789,6 @@ export {
   initSiteNavigation,
   closeMobileNavMenu,
   initSiteWeather,
-  resetCachedUserLocation,
   YOUTUBE_CATEGORIES,
   NEWS_CATEGORIES,
   WELFARE_CATEGORIES,
