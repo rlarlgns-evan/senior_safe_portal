@@ -794,14 +794,19 @@ button.back-link-prominent {
 .home-search-inner {
   width: 100%;
   max-width: var(--layout-search-max);
-  margin: 0 auto;
+  margin: 0;
   flex: 0 1 auto;
 }
 
 .search-form--home {
   width: 100%;
   max-width: 100%;
-  margin: 0 auto;
+  margin: 0;
+}
+
+/* 검색 밴드 바로 아래 카드 영역 — 상단 여백 중복 제거 */
+.home-search-band + .home-cards-band {
+  padding-top: 0;
 }
 
 /* 2) 유튜브·뉴스·복지 카드 단 — 간격 토큰 통일 */
@@ -1183,7 +1188,13 @@ button.back-link-prominent {
 .search-form {
   max-width: 100%;
   width: 100%;
-  margin: 0 auto;
+  margin: 0;
+}
+
+.search-form--home {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
 }
 
 .search-row {
@@ -1191,11 +1202,12 @@ button.back-link-prominent {
   align-items: center;
   gap: 0.35rem;
   width: 100%;
+  margin: 0;
   background: var(--color-surface);
   border: 2px solid var(--color-primary);
   border-radius: var(--radius-pill);
-  padding: 0.4rem 0.45rem;
-  box-shadow: var(--shadow-search);
+  padding: 0.35rem 0.45rem;
+  box-shadow: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
@@ -1230,13 +1242,19 @@ button.back-link-prominent {
   min-width: 0;
   width: 100%;
   min-height: var(--size-search-input);
-  padding: 0.55rem 0.35rem;
+  padding: 0 0.35rem;
   border: none;
   border-radius: 0;
   background: transparent;
   font-size: var(--font-search);
   font-family: inherit;
   color: var(--color-text);
+  line-height: 1.3;
+}
+
+.search-form--home .search-input,
+.search-form--home .search-submit-chip {
+  min-height: var(--size-search-input);
 }
 
 .search-form--home .form-label {
@@ -3287,7 +3305,7 @@ button.back-link-prominent {
 }
 
 .results-content-band {
-  padding-top: 1rem;
+  padding-top: 0;
 }
 
 .results-list {
