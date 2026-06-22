@@ -52,13 +52,8 @@ export async function initBrowsePage() {
   if (!tabsContainer || !contentContainer) return;
 
   if (type === "welfare") {
-    contentContainer.innerHTML = mascotLoadingHtml("위치 정보를 확인한 뒤 복지 정보를 불러옵니다...");
-    try {
-      await initBrowseWelfareLocation();
-    } catch {
-      contentContainer.innerHTML = mascotLoadingHtml("복지 정보를 불러오지 못했습니다.");
-      return;
-    }
+    contentContainer.innerHTML = mascotLoadingHtml("복지 정보를 불러오고 있습니다...");
+    await initBrowseWelfareLocation();
   }
 
   const initialId = getInitialCategoryId(config.categories);

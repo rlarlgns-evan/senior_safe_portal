@@ -768,13 +768,112 @@ function filterLocalWelfareByRegion(services, apiData) {
   });
 }
 
-function formatWelfareLocationLabel(apiData, fallbackLabel, locationSource) {
+function formatWelfareLocationLabel(apiData, fallbackLabel, locationSource, nationalOnly = false) {
+  if (nationalOnly) {
+    return "📍 위치 미확인 · 전국 복지 안내";
+  }
   const resolved = [apiData?.region, apiData?.city].filter(Boolean).join(" ");
   const suffix = locationSource === "default" ? " (기본 위치 · 서울)" : "";
   if (resolved) {
     return `📍 ${resolved}${suffix} · 지역 맞춤 복지`;
   }
   return `📍 ${fallbackLabel}${suffix} · 지역 맞춤 복지`;
+}
+
+const NATIONAL_WELFARE_API_REGION = "서울특별시";
+const NATIONAL_WELFARE_API_CITY = "서울";
+
+function createNationalWelfareContext(coords = null) {
+  return {
+    nationalOnly: true,
+    locationSource: "national",
+    coords,
+    weather: {
+      region: "",
+      city: "",
+      label: "전국",
+    },
+  };
+}
+
+async function resolveWelfareLocationContext(forcePrompt = false) {
+  const location = await requestUserLocation(forcePrompt);
+
+  if (location.source === "default") {
+    return createNationalWelfareContext(location);
+  }
+
+  try {
+    const weather = await fetchLocationLabelDirect(location.latitude, location.longitude);
+    return {
+      nationalOnly: false,
+      locationSource: location.source,
+      coords: location,
+      weather,
+    };
+  } catch {
+    return createNationalWelfareContext(location);
+  }
+}
+
+function updateWelfareLocationLabels() {
+  if (!cachedWelfareContext) return;
+
+  const { weather, locationSource, nationalOnly } = cachedWelfareContext;
+  const homeLabel = document.getElementById("welfare-location-label");
+  const browseLabel = document.getElementById("browse-welfare-location");
+
+  if (homeLabel) {
+    homeLabel.textContent = formatWelfareLocationLabel(null, weather.label, locationSource, nationalOnly);
+  }
+
+  if (browseLabel) {
+    browseLabel.textContent = nationalOnly
+      ? "📍 위치 미확인 · 전국 복지 안내"
+      : `📍 ${weather.label}`;
+  }
+}
+
+async function fetchNationalWelfareData(categoryId, fetchLimit, preview, coords) {
+  return fetchWelfareInfo(
+    NATIONAL_WELFARE_API_REGION,
+    NATIONAL_WELFARE_API_CITY,
+    categoryId,
+    fetchLimit,
+    coords,
+    { preview },
+  );
+}
+
+function renderNationalWelfareContent(container, nationalServices, categoryId, preview, data) {
+  const categoryLabel = WELFARE_CATEGORIES.find((cat) => cat.id === categoryId)?.label ?? "전체";
+  const emptyNational = mascotLoadingHtml(`${categoryLabel} 분야 전국 복지서비스를 찾지 못했습니다.`);
+
+  if (preview) {
+    const nationalPreview = nationalServices.slice(0, HOME_WELFARE_PREVIEW);
+    container.innerHTML = nationalPreview.length > 0
+      ? wrapContentCardGrid(
+          nationalPreview.map((s) => renderWelfareServiceCard(s, true)).join(""),
+          { home: true },
+        )
+      : emptyNational;
+    return;
+  }
+
+  const nationalHtml = nationalServices.length > 0
+    ? wrapContentCardGrid(nationalServices.map((s) => renderWelfareServiceCard(s, true)).join(""))
+    : emptyNational;
+
+  container.innerHTML = `
+    <div class="welfare-services welfare-services-browse">
+      <section class="welfare-block">
+        <h4 class="welfare-subheading">전국 · 중앙부처 복지</h4>
+        <p class="welfare-source-note">위치를 확인하지 못해 전국 단위 복지 정보를 보여 드립니다 · 복지서비스정보 API</p>
+        ${nationalHtml}
+      </section>
+      ${renderWelfareQuickLinks(data.links)}
+    </div>
+  `;
 }
 
 async function fetchLocationLabelDirect(latitude, longitude) {
@@ -991,27 +1090,38 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
     if (!cachedWelfareContext) return;
   }
 
-  const { weather, locationSource, coords } = cachedWelfareContext;
+  const { weather, locationSource, coords, nationalOnly } = cachedWelfareContext;
 
   if (locationLabel) {
-    locationLabel.textContent = formatWelfareLocationLabel(null, weather.label, locationSource);
+    locationLabel.textContent = formatWelfareLocationLabel(null, weather.label, locationSource, nationalOnly);
   }
 
-  container.innerHTML = mascotLoadingHtml("우리 지역 복지 혜택을 찾고 있습니다...");
+  container.innerHTML = mascotLoadingHtml(
+    nationalOnly ? "전국 복지 혜택을 불러오고 있습니다..." : "우리 지역 복지 혜택을 찾고 있습니다...",
+  );
 
   try {
     const fetchLimit = preview ? HOME_WELFARE_PREVIEW + 3 : BROWSE_WELFARE_LIMIT;
-    const data = await fetchWelfareInfo(
-      weather.region,
-      weather.city,
-      categoryId,
-      fetchLimit,
-      coords,
-      { preview },
-    );
+    const data = nationalOnly
+      ? await fetchNationalWelfareData(categoryId, fetchLimit, preview, coords)
+      : await fetchWelfareInfo(
+        weather.region,
+        weather.city,
+        categoryId,
+        fetchLimit,
+        coords,
+        { preview },
+      );
 
     if (locationLabel) {
-      locationLabel.textContent = formatWelfareLocationLabel(data, weather.label, locationSource);
+      locationLabel.textContent = formatWelfareLocationLabel(data, weather.label, locationSource, nationalOnly);
+    }
+
+    if (nationalOnly) {
+      const nationalServices = filterWelfareServices(data.nationalServices, categoryId)
+        .slice(0, preview ? HOME_WELFARE_PREVIEW : BROWSE_WELFARE_LIMIT);
+      renderNationalWelfareContent(container, nationalServices, categoryId, preview, data);
+      return;
     }
 
     let localServices = filterLocalWelfareByRegion(
@@ -1085,23 +1195,8 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
 }
 
 async function initBrowseWelfareLocation(forcePrompt = false) {
-  const location = await requestUserLocation(forcePrompt);
-  let weather = null;
-
-  try {
-    weather = await fetchLocationLabelDirect(location.latitude, location.longitude);
-  } catch {
-    throw new Error("위치 정보를 확인하지 못했습니다.");
-  }
-
-  cachedWelfareContext = { weather, locationSource: location.source, coords: location };
-
-  const locationLabel = document.getElementById("browse-welfare-location");
-  if (locationLabel) {
-    const suffix = location.source === "default" ? " (기본 위치 · 서울)" : "";
-    locationLabel.textContent = `📍 ${weather.label}${suffix}`;
-  }
-
+  cachedWelfareContext = await resolveWelfareLocationContext(forcePrompt);
+  updateWelfareLocationLabels();
   return cachedWelfareContext;
 }
 
@@ -1109,28 +1204,25 @@ async function initHomeLocationServices(forcePrompt = false) {
   const welfareContainer = document.getElementById("welfare-content");
   if (!welfareContainer) return;
 
-  const location = await requestUserLocation(forcePrompt);
-  let weather = null;
-
   try {
-    weather = await fetchLocationLabelDirect(location.latitude, location.longitude);
-  } catch {
-    welfareContainer.innerHTML = mascotLoadingHtml("위치 정보를 확인하지 못했습니다. 위치 권한 또는 인터넷 연결을 확인해 주세요.");
-    return;
-  }
+    cachedWelfareContext = await resolveWelfareLocationContext(forcePrompt);
+    updateWelfareLocationLabels();
 
-  try {
-    cachedWelfareContext = { weather, locationSource: location.source, coords: location };
     if (welfareCategoryReload) {
       await welfareCategoryReload();
     } else {
       await loadHomeWelfareInfo(welfareContainer, "all");
     }
   } catch (err) {
-    const detail = err instanceof Error ? err.message : "복지 정보를 불러오지 못했습니다.";
-    welfareContainer.innerHTML = mascotLoadingHtml(
-      `${detail} · search-welfare 함수와 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.`,
-    );
+    console.warn("Welfare location init failed, using national fallback:", err);
+    cachedWelfareContext = createNationalWelfareContext();
+    updateWelfareLocationLabels();
+
+    if (welfareCategoryReload) {
+      await welfareCategoryReload();
+    } else {
+      await loadHomeWelfareInfo(welfareContainer, "all");
+    }
   }
 }
 
