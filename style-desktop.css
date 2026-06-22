@@ -169,7 +169,7 @@ body {
 }
 
 .home-search-inner {
-  max-width: 40rem;
+  max-width: var(--layout-search-max);
 }
 
 /* ── 브라우즈·카드 그리드 ── */

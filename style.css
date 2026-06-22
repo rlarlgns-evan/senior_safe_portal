@@ -797,12 +797,11 @@ button.back-link-prominent {
 /* 1) 검색 단 */
 .home-search-band {
   --search-band-pad: 1.5rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: block;
   width: 100%;
   box-sizing: border-box;
-  padding: var(--search-band-pad);
+  padding-block: var(--search-band-pad);
+  padding-inline: var(--space-cards-x);
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
 }
@@ -810,14 +809,13 @@ button.back-link-prominent {
 .home-search-inner {
   width: 100%;
   max-width: var(--layout-search-max);
-  margin: 0;
-  flex: 0 1 auto;
+  margin-inline: auto;
 }
 
 .search-form--home {
   width: 100%;
   max-width: 100%;
-  margin: 0;
+  margin-inline: auto;
 }
 
 /* 검색 밴드 바로 아래 카드 영역 — 상단 여백 중복 제거 */
@@ -1246,7 +1244,7 @@ button.back-link-prominent {
 .search-form--home {
   width: 100%;
   max-width: 100%;
-  margin: 0;
+  margin-inline: auto;
 }
 
 .search-row {

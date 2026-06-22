@@ -138,10 +138,12 @@ body {
 
 .home-search-band {
   --search-band-pad: 1rem;
+  padding-inline: var(--space-cards-x);
 }
 
 .home-search-inner {
   max-width: 100%;
+  margin-inline: auto;
 }
 
 .home-cards-band {
