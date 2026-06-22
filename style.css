@@ -2773,7 +2773,7 @@ button.back-link-prominent {
 
 .auth-modal-title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   color: var(--color-text-main);
@@ -2856,7 +2856,7 @@ button.back-link-prominent {
   background: var(--color-primary);
   color: var(--color-text-on-primary);
   font-weight: 800;
-  font-size: var(--font-lg);
+  font-size: 1.125rem;
   letter-spacing: 0.06em;
   cursor: pointer;
   font-family: inherit;

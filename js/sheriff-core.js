@@ -1514,7 +1514,7 @@ function getLoginModalHtml() {
           <div class="auth-form-footer">
             <button type="button" id="auth-link-signup" class="auth-switch-link">회원가입</button>
           </div>
-          <button type="submit" class="modal-submit auth-modal-submit btn btn--primary">로그인하기</button>
+          <button type="submit" class="modal-submit auth-modal-submit btn btn--primary">로그인</button>
         </form>
         <p id="auth-divider" class="auth-divider" aria-hidden="true"><span>또는</span></p>
         <div id="auth-social-section" class="auth-social-section">
