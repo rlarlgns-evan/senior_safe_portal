@@ -91,7 +91,7 @@ body {
 }
 
 .home-search-band {
-  padding: 1.15rem var(--space-main-x) 1rem;
+  --search-band-pad: 1.25rem;
 }
 
 .home-search-inner {
@@ -131,7 +131,7 @@ body {
 
 /* ── 검색 ── */
 .search-row {
-  padding: 0.3rem 0.35rem 0.3rem 0.45rem;
+  padding: 0.35rem 0.4rem;
 }
 
 .search-submit-label {

@@ -780,10 +780,13 @@ button.back-link-prominent {
 
 /* 1) 검색 단 */
 .home-search-band {
-  display: block;
+  --search-band-pad: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   box-sizing: border-box;
-  padding: 1.5rem var(--space-main-x) 1.25rem;
+  padding: var(--search-band-pad);
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
 }
@@ -791,7 +794,8 @@ button.back-link-prominent {
 .home-search-inner {
   width: 100%;
   max-width: var(--layout-search-max);
-  margin-inline: auto;
+  margin: 0 auto;
+  flex: 0 1 auto;
 }
 
 .search-form--home {
@@ -1190,7 +1194,7 @@ button.back-link-prominent {
   background: var(--color-surface);
   border: 2px solid var(--color-primary);
   border-radius: var(--radius-pill);
-  padding: 0.35rem 0.4rem 0.35rem 0.55rem;
+  padding: 0.4rem 0.45rem;
   box-shadow: var(--shadow-search);
   transition: border-color 0.15s, box-shadow 0.15s;
 }
