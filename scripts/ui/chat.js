@@ -61,8 +61,8 @@ export function getSiteChatHtml() {
           </form>
         </div>
       </div>
-      <button type="button" id="chat-fab" class="chat-fab chat-fab--mascot btn btn--accent">
-        <img src="${assetUrl(MASCOT_SRC)}" alt="" class="chat-fab-img" width="28" height="28" />
+      <button type="button" id="chat-fab" class="chat-fab chat-fab--mascot">
+        <img src="${assetUrl(MASCOT_SRC)}" alt="" class="chat-fab-img" width="42" height="42" />
         <span>보안관 단디에게 물어보기</span>
       </button>
     </div>

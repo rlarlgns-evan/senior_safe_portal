@@ -165,7 +165,8 @@ body {
 }
 
 .home-search-band {
-  --search-band-pad: 2rem;
+  --search-band-gap: 2.25rem;
+  --search-band-offset: 0.625rem;
 }
 
 .home-search-inner {
@@ -190,12 +191,12 @@ body {
 }
 
 .chat-fab.chat-fab--mascot {
-  min-height: 2rem;
-  padding: 0.12rem 0.55rem 0.12rem 0.12rem;
+  min-height: 3rem;
+  padding: 0.18rem 0.825rem 0.18rem 0.18rem;
 }
 
 .chat-fab--mascot span {
-  font-size: 0.8125rem;
+  font-size: 1.21875rem;
 }
 
 .chat-window {
