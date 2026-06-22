@@ -55,7 +55,7 @@ function getSiteChatHtml() {
         </div>
       </div>
       <button type="button" id="chat-fab" class="chat-fab chat-fab--mascot btn btn--accent">
-        <img src="assets/mascot-sheriff.png" alt="" class="chat-fab-img" width="40" height="40" />
+        <img src="assets/mascot-sheriff.png" alt="" class="chat-fab-img" width="32" height="32" />
         <span>보안관 단디에게 물어보기</span>
       </button>
     </div>

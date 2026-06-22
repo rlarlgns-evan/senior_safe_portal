@@ -9,6 +9,7 @@
   --space-main-x: 1.5rem;
   --space-cards-x: 1.25rem;
   --space-header-x: 1.5rem;
+  --header-min-height: 3.25rem;
 }
 
 body {
@@ -35,17 +36,58 @@ body {
 }
 
 .site-header-row {
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto 1fr;
   grid-template-areas: "brand nav login";
-  padding: 0.65rem var(--space-header-x);
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.45rem var(--space-header-x);
+  min-height: 3.25rem;
+}
+
+.site-brand {
+  justify-self: start;
+  gap: 0.45rem;
+}
+
+.brand-mascot {
+  width: 2.75rem;
+  height: 2.75rem;
 }
 
 .site-brand-text {
-  font-size: 1.25rem;
+  font-size: 1rem;
+  font-weight: 800;
 }
 
 .top-nav {
   display: flex !important;
+  justify-self: center;
+  justify-content: center;
+  width: max-content;
+  max-width: 100%;
+  gap: 0.25rem;
+}
+
+.top-nav-link {
+  font-size: 1rem;
+  font-weight: 700;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.8rem;
+}
+
+.header-end {
+  justify-self: end;
+}
+
+.auth-button {
+  min-height: 2.5rem;
+  padding: 0.4rem 1rem;
+  font-size: 1rem;
+}
+
+.user-greeting {
+  font-size: 1rem;
+  max-width: 120px;
 }
 
 .mobile-menu-toggle {
@@ -96,6 +138,15 @@ body {
   right: max(1.5rem, calc((100vw - var(--app-max-width)) / 2 + 1.5rem));
   left: auto;
   align-items: flex-end;
+}
+
+.chat-fab.chat-fab--mascot {
+  min-height: 2.25rem;
+  padding: 0.15rem 0.7rem 0.15rem 0.15rem;
+}
+
+.chat-fab--mascot span {
+  font-size: 0.875rem;
 }
 
 .chat-window {

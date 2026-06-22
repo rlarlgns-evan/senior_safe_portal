@@ -1371,7 +1371,7 @@ function getSiteHeaderHtml() {
   return `
     <div class="site-header-row">
       <a class="site-brand" href="index.html">
-        <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="112" height="112" />
+        <img src="assets/mascot-sheriff.png" alt="" class="brand-mascot" width="44" height="44" />
         <span class="site-brand-text">시니어 디지털 보안관</span>
       </a>
       <nav class="top-nav" aria-label="주요 메뉴" data-auto-nav></nav>
