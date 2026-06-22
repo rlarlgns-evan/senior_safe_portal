@@ -1,0 +1,154 @@
+/* 시니어 디지털 보안관 — 데스크톱·웹 레이아웃 (≥1024px) */
+
+:root {
+  --app-max-width: 75rem;
+  --layout-max-wide: 75rem;
+  --layout-max-content: 75rem;
+  --layout-search-max: 42rem;
+  --space-page-x: 1.25rem;
+  --space-main-x: 1.5rem;
+  --space-cards-x: 1.25rem;
+  --space-header-x: 1.5rem;
+}
+
+body {
+  background: var(--color-bg-main);
+  padding: 0;
+}
+
+#app-container,
+.app-layout {
+  max-width: var(--app-max-width);
+  min-height: 100vh;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
+/* ── 헤더: 가로 메뉴 ── */
+.site-header,
+.site-header.global-header {
+  top: 0;
+  left: max(0px, calc(50% - var(--app-max-width) / 2));
+  width: min(100%, var(--app-max-width));
+  border-radius: 0;
+}
+
+.site-header-row {
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "brand nav login";
+  padding: 0.65rem var(--space-header-x);
+}
+
+.site-brand-text {
+  font-size: 1.25rem;
+}
+
+.top-nav {
+  display: flex !important;
+}
+
+.mobile-menu-toggle {
+  display: none !important;
+}
+
+.mobile-nav {
+  display: none !important;
+}
+
+/* ── 홈: 3열 그리드 ── */
+.home-cards-band {
+  --home-col-gap: 1rem;
+  padding: 1.5rem var(--space-cards-x) 2rem;
+}
+
+.home-cards-band .content-grid,
+.content-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 1rem;
+  padding: 0;
+}
+
+.home-cards-band .content-column {
+  padding: 1rem;
+}
+
+.home-search-band {
+  padding: 2rem var(--space-main-x) 1.5rem;
+}
+
+.home-search-inner {
+  max-width: var(--layout-search-max);
+}
+
+/* ── 브라우즈·카드 그리드 ── */
+.content-card-grid:not(.content-card-grid--home) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.content-card-grid--browse {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* ── 챗봇 ── */
+.chat-fab-wrap {
+  bottom: 1.5rem;
+  right: max(1.5rem, calc((100vw - var(--app-max-width)) / 2 + 1.5rem));
+  left: auto;
+  align-items: flex-end;
+}
+
+.chat-window {
+  width: min(33.75rem, calc(var(--app-max-width) - 2rem));
+  height: min(88dvh, 820px);
+  min-height: 35rem;
+}
+
+.chat-bubble {
+  font-size: var(--font-base);
+}
+
+.chat-chip {
+  font-size: var(--font-base);
+}
+
+.chat-input {
+  font-size: var(--font-base);
+}
+
+/* ── 결과 페이지 ── */
+.result-card-grid {
+  grid-template-columns: 17.5rem 1fr;
+}
+
+/* ── 게시판 · 정보 · 브라우즈 메인 패딩 ── */
+.board-main,
+.browse-main,
+.community-main,
+.info-main {
+  max-width: var(--app-max-width);
+  padding-left: var(--space-page-x);
+  padding-right: var(--space-page-x);
+}
+
+.board-main {
+  padding-top: calc(var(--header-min-height) + 2rem);
+  padding-bottom: 3rem;
+}
+
+.browse-main {
+  padding-top: calc(var(--header-min-height) + 1.75rem);
+}
+
+.community-main,
+.info-main {
+  padding-top: calc(var(--header-min-height) + 1.75rem);
+}
+
+.community-card-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.welfare-grid {
+  grid-template-columns: 1fr 1fr;
+}

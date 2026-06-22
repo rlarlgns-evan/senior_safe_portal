@@ -139,15 +139,6 @@
 
   /* Typography — mobile-first rem (html 16px → 본문 최소 22px) */
   --root-font-size: 16px;
-  --app-max-width: 37.5rem;
-  --font-base: 1.375rem;
-  --font-lg: 1.625rem;
-  --font-xl: 1.875rem;
-  --font-2xl: 2.25rem;
-  --font-search: 1.375rem;
-  --font-family: "Inter", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
-
-  /* Layout tokens (rem) */
   --space-page-x: 0.75rem;
   --space-header-x: 1rem;
   --space-main-x: 1rem;
@@ -156,6 +147,15 @@
   --layout-max-wide: 100%;
   --layout-max-content: 100%;
   --layout-search-max: 100%;
+  --font-base: 1.375rem;
+  --font-lg: 1.625rem;
+  --font-xl: 1.875rem;
+  --font-2xl: 2.25rem;
+  --font-search: 1.375rem;
+  --font-family: "Inter", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+
+  /* Layout tokens (rem) — viewport width set in style-mobile.css / style-desktop.css */
+  --app-max-width: 100%;
   --radius-sm: 0.5rem;
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
@@ -226,7 +226,7 @@ select {
   min-height: var(--btn-min-height);
 }
 
-/* ── Mobile-first app shell (600px cap on desktop) ── */
+/* ── App shell (viewport layout in style-mobile.css / style-desktop.css) ── */
 #app-container,
 .app-layout {
   width: 100%;
@@ -237,21 +237,6 @@ select {
   display: flex;
   flex-direction: column;
   position: relative;
-}
-
-@media (min-width: 601px) {
-  body {
-    background: var(--color-bg-main);
-    padding: 1rem 0;
-  }
-
-  #app-container,
-  .app-layout {
-    min-height: calc(100vh - 2rem);
-    box-shadow: var(--shadow-app-frame);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-  }
 }
 
 *,
@@ -462,14 +447,6 @@ button.back-link-prominent {
   flex-shrink: 0;
 }
 
-@media (min-width: 601px) {
-  .site-header,
-  .site-header.global-header {
-    top: 1rem;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  }
-}
-
 .site-header-row {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -632,14 +609,6 @@ button.back-link-prominent {
   color: var(--color-primary-dark);
 }
 
-.mobile-menu-toggle {
-  display: none;
-}
-
-.mobile-nav {
-  display: none !important;
-}
-
 .mobile-nav-link {
   display: flex;
   align-items: center;
@@ -660,39 +629,6 @@ button.back-link-prominent {
   border-color: var(--color-nav-active-border);
   color: var(--color-primary);
   box-shadow: none;
-}
-
-@media (min-width: 768px) {
-  .site-brand-text {
-    font-size: 1.15rem;
-  }
-}
-
-@media (max-width: 767px) {
-  .site-brand-text {
-    display: none;
-  }
-
-  .header-end:empty {
-    display: none;
-  }
-
-  .weather-card--header {
-    max-width: min(150px, 32vw);
-    padding: 0.2rem 0.35rem;
-  }
-
-  .weather-card--header .weather-location {
-    max-width: 3.8rem;
-    font-size: 0.65rem;
-  }
-
-  .top-nav-link {
-    padding: 0.35rem 0.6rem;
-    font-size: var(--font-base);
-    font-weight: 700;
-    min-height: var(--btn-min-height);
-  }
 }
 
 .app-shell {
@@ -845,12 +781,6 @@ button.back-link-prominent {
   grid-template-columns: 1fr;
 }
 
-@media (min-width: 540px) {
-  .home-cards-band .content-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 .home-cards-band .content-column {
   display: flex;
   flex-direction: column;
@@ -994,61 +924,6 @@ button.back-link-prominent {
   margin-bottom: 0;
   min-height: calc(var(--btn-min-height) * 0.85);
   font-size: 0.82rem;
-}
-
-@media (min-width: 1024px) {
-  .home-cards-band {
-    --home-col-gap: 0.875rem;
-    padding: 1.25rem var(--space-cards-x) 1.5rem;
-  }
-}
-
-@media (max-width: 767px) {
-  .home-search-band {
-    padding: 1rem var(--space-main-x) 0.85rem;
-  }
-
-  .home-cards-band {
-    --home-space: 0.5rem;
-    --home-col-gap: 0.625rem;
-    --home-card-h: 6.75rem;
-    --home-header-h: 2.65rem;
-    padding: 0.75rem var(--space-cards-x) 1rem;
-  }
-
-  .home-cards-band .section-more-link {
-    min-height: 40px;
-    font-size: 0.92rem;
-  }
-
-  .home-cards-band .category-tab {
-    padding: 0.28rem 0.55rem;
-    font-size: 0.76rem;
-  }
-
-  .home-cards-band .media-card-media,
-  .home-cards-band .media-card-media--icon {
-    max-height: 72px;
-  }
-
-  .home-cards-band .media-card-title {
-    font-size: 0.78rem;
-  }
-
-  .home-cards-band .media-card-meta,
-  .home-cards-band .media-card-foot {
-    font-size: 0.68rem;
-  }
-
-  .home-cards-band .verified-badge,
-  .home-cards-band .media-card-badge {
-    font-size: 0.64rem;
-    padding: 0.1rem 0.32rem;
-  }
-
-  .home-cards-band .welfare-location-label {
-    font-size: 0.7rem;
-  }
 }
 
 /* (구) 히어로 — 다른 페이지 호환 */
@@ -1348,16 +1223,6 @@ button.back-link-prominent {
 
 .search-form--board {
   max-width: 640px;
-}
-
-@media (max-width: 640px) {
-  .search-row {
-    padding: 0.3rem 0.35rem 0.3rem 0.45rem;
-  }
-
-  .search-submit-label {
-    display: none;
-  }
 }
 
 .content-grid .news-card-ui {
@@ -1702,18 +1567,6 @@ button.back-link-prominent {
   container-type: inline-size;
 }
 
-@media (min-width: 1024px) {
-  .content-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
-    padding: 1.25rem var(--space-main-x) 1.75rem;
-  }
-
-  .home-cards-band .content-grid {
-    padding: 0;
-  }
-}
-
 .content-grid .section-header {
   flex-shrink: 0;
   padding-bottom: 0.5rem;
@@ -1866,18 +1719,6 @@ button.back-link-prominent {
   gap: 1rem;
   grid-template-columns: 1fr;
   width: 100%;
-}
-
-@media (min-width: 600px) {
-  .content-card-grid:not(.content-card-grid--home) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 900px) {
-  .content-card-grid:not(.content-card-grid--home):not([class*="content-card-grid--fit-"]) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 .content-card-grid--fit-1 {
@@ -2679,50 +2520,6 @@ button.back-link-prominent {
   font-size: var(--icon-base);
 }
 
-@media (min-width: 768px) {
-  .chat-fab-wrap {
-    bottom: 1.5rem;
-    right: 1.5rem;
-  }
-
-  .chat-window {
-    width: 540px;
-    height: min(88vh, 820px);
-    min-height: 580px;
-  }
-
-  .chat-bubble {
-    font-size: 1.12rem;
-  }
-
-  .chat-chip {
-    font-size: 1rem;
-  }
-
-  .chat-input {
-    font-size: 1.12rem;
-  }
-}
-
-@media (max-width: 767px) {
-  .chat-fab-wrap {
-    left: 0.5rem;
-    right: 0.5rem;
-    align-items: stretch;
-  }
-
-  .chat-window {
-    width: 100%;
-    height: min(86vh, 760px);
-    min-height: 520px;
-    max-height: calc(100vh - 5.5rem);
-  }
-
-  .chat-message-content {
-    max-width: min(90%, 380px);
-  }
-}
-
 /* ── 로그인 모달 ── */
 #login-modal.modal-overlay {
   background: var(--color-overlay-dark);
@@ -3156,16 +2953,6 @@ button.back-link-prominent {
   display: none;
 }
 
-@media (max-width: 360px) {
-  .auth-social-btn--kakao .auth-social-text-full {
-    display: none;
-  }
-
-  .auth-social-btn--kakao .auth-social-text-short {
-    display: inline;
-  }
-}
-
 .auth-social-icon {
   width: 20px;
   height: 20px;
@@ -3214,16 +3001,6 @@ button.back-link-prominent {
 
 .login-success p {
   margin: 0;
-}
-
-@media (max-width: 420px) {
-  .auth-modal-panel {
-    padding: 1.65rem 1.25rem 1.35rem;
-  }
-
-  .auth-social-buttons {
-    gap: 1rem;
-  }
 }
 
 /* ── 결과 / 로딩 / 오류 ── */
@@ -3486,12 +3263,6 @@ button.back-link-prominent {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-card);
-}
-
-@media (min-width: 768px) {
-  .result-card-grid {
-    grid-template-columns: 280px 1fr;
-  }
 }
 
 .result-thumb-panel {
@@ -4078,12 +3849,6 @@ button.back-link-prominent {
   grid-template-columns: 1fr;
 }
 
-@media (min-width: 640px) {
-  .community-card-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 .community-card {
   padding: 1.25rem;
   border-radius: var(--radius-md);
@@ -4461,16 +4226,4 @@ button.back-link-prominent {
   line-height: 1.65;
   white-space: pre-wrap;
   word-break: break-word;
-}
-
-@media (max-width: 768px) {
-  .board-table .col-id,
-  .board-table .col-views {
-    display: none;
-  }
-
-  .board-table th.col-id,
-  .board-table th.col-views {
-    display: none;
-  }
 }

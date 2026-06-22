@@ -1,0 +1,189 @@
+/* 시니어 디지털 보안관 — 모바일·태블릿 레이아웃 (≤1023px) */
+
+:root {
+  --app-max-width: 100%;
+  --layout-max-wide: 100%;
+  --layout-max-content: 100%;
+  --layout-search-max: 100%;
+  --space-page-x: 0.75rem;
+  --space-main-x: 0.875rem;
+}
+
+body {
+  background: var(--color-surface);
+  padding: 0;
+}
+
+#app-container,
+.app-layout {
+  max-width: 100%;
+  min-height: 100vh;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
+/* ── 헤더: 햄버거 + 로고 ── */
+.site-header,
+.site-header.global-header {
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-radius: 0;
+}
+
+.site-header-row {
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "brand login";
+}
+
+.top-nav {
+  display: none !important;
+}
+
+.mobile-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--btn-min-height);
+  min-height: var(--btn-min-height);
+  padding: 0;
+  border: var(--btn-border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.mobile-menu-toggle:hover,
+.mobile-menu-toggle:focus-visible {
+  background: var(--color-primary-light);
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.mobile-nav:not(.hidden) {
+  display: flex !important;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem var(--space-header-x) 1rem;
+  border-top: var(--btn-border-width) solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.site-brand-text {
+  font-size: 1.05rem;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── 홈: 1열 카드 ── */
+.home-cards-band .content-grid,
+.content-grid {
+  grid-template-columns: 1fr !important;
+}
+
+.home-search-band {
+  padding: 1rem var(--space-main-x) 0.85rem;
+}
+
+.home-cards-band {
+  --home-space: 0.5rem;
+  --home-col-gap: 0.625rem;
+  --home-card-h: 6.75rem;
+  --home-header-h: 2.65rem;
+  padding: 0.75rem var(--space-cards-x) 1rem;
+}
+
+.home-cards-band .section-more-link {
+  min-height: var(--btn-min-height);
+  font-size: var(--font-base);
+}
+
+.home-cards-band .category-tab {
+  padding: 0.28rem 0.55rem;
+  font-size: 0.76rem;
+}
+
+.home-cards-band .media-card-media,
+.home-cards-band .media-card-media--icon {
+  max-height: 72px;
+}
+
+.content-card-grid:not(.content-card-grid--home) {
+  grid-template-columns: 1fr !important;
+}
+
+.welfare-grid {
+  grid-template-columns: 1fr !important;
+}
+
+/* ── 검색 ── */
+.search-row {
+  padding: 0.3rem 0.35rem 0.3rem 0.45rem;
+}
+
+.search-submit-label {
+  display: none;
+}
+
+/* ── 챗봇 ── */
+.chat-fab-wrap {
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 1rem;
+  align-items: stretch;
+}
+
+.chat-window {
+  width: 100%;
+  height: min(86dvh, 760px);
+  min-height: 28rem;
+  max-height: calc(100dvh - 5.5rem);
+}
+
+.chat-message-content {
+  max-width: min(90%, 380px);
+}
+
+/* ── 게시판 ── */
+.board-table .col-id,
+.board-table .col-views,
+.board-table th.col-id,
+.board-table th.col-views {
+  display: none;
+}
+
+/* ── 소형 화면 (≤767px) ── */
+@media (max-width: 767px) {
+  .site-brand-text {
+    display: none;
+  }
+
+  .top-nav-link {
+    padding: 0.35rem 0.6rem;
+    font-size: var(--font-base);
+  }
+}
+
+@media (max-width: 420px) {
+  .auth-modal-panel {
+    padding: 1.65rem 1.25rem 1.35rem;
+  }
+
+  .auth-social-buttons {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .auth-social-btn--kakao .auth-social-text-full {
+    display: none;
+  }
+
+  .auth-social-btn--kakao .auth-social-text-short {
+    display: inline;
+  }
+}
