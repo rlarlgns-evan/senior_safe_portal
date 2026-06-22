@@ -3065,91 +3065,51 @@ button.back-link-prominent {
   border-color: var(--color-social-google-border-hover);
 }
 
-.auth-social-btn--naver {
-  justify-content: center;
-  gap: 0;
+.auth-social-btn--naver,
+.auth-social-btn--kakao {
+  display: block;
+  width: 100%;
   min-height: 0;
-  height: auto;
+  height: 45px;
   padding: 0;
-  border-radius: 0;
-  background: transparent;
   border: none;
+  border-radius: 8px;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.auth-social-btn--naver {
+  background-color: #03C75A;
+  background-image: url("assets/social-naver-login-wide.png");
 }
 
 .auth-social-btn--naver:hover {
-  background: transparent;
   opacity: 0.92;
+  filter: brightness(0.97);
 }
 
 .auth-social-btn--naver:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
-
-.auth-social-naver-wide {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  height: 48px;
-  object-fit: contain;
-  object-position: center;
-  pointer-events: none;
-}
-
-.auth-social-btn--naver .auth-social-brand {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.auth-social-btn--naver .auth-social-logo {
-  display: block;
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  object-fit: contain;
-}
-
-.auth-social-btn--naver .auth-social-text {
-  font-size: var(--font-base);
-  font-weight: 700;
-  line-height: 1;
-  color: var(--color-text-on-primary);
-  letter-spacing: -0.01em;
 }
 
 .auth-social-btn--kakao {
-  justify-content: center;
-  gap: 0;
-  min-height: 0;
-  height: auto;
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
-  border: none;
+  background-color: #FEE500;
+  background-image: url("assets/social-kakao-login-wide.png");
 }
 
 .auth-social-btn--kakao:hover {
-  background: transparent;
   opacity: 0.92;
+  filter: brightness(0.97);
 }
 
 .auth-social-btn--kakao:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
-
-.auth-social-kakao-wide {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  height: 48px;
-  object-fit: contain;
-  object-position: center;
-  pointer-events: none;
 }
 
 .auth-social-btn--kakao .auth-social-symbol {

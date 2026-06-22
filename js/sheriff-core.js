@@ -1446,15 +1446,11 @@ function getAuthSocialButtonsHtml() {
   `;
 
   const naverButton = `
-    <button type="button" class="auth-social-btn auth-social-btn--naver" data-social-provider="naver" aria-label="네이버 로그인">
-      <img src="assets/social-naver-login-wide.png" alt="" class="auth-social-naver-wide" width="320" height="48" />
-    </button>
+    <button type="button" class="auth-social-btn auth-social-btn--naver" data-social-provider="naver" aria-label="네이버 로그인"></button>
   `;
 
   const kakaoButton = `
-    <button type="button" class="auth-social-btn auth-social-btn--kakao" data-social-provider="kakao" aria-label="카카오 로그인">
-      <img src="assets/social-kakao-login-wide.png" alt="" class="auth-social-kakao-wide" width="320" height="48" />
-    </button>
+    <button type="button" class="auth-social-btn auth-social-btn--kakao" data-social-provider="kakao" aria-label="카카오 로그인"></button>
   `;
 
   return `
