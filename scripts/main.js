@@ -1,51 +1,57 @@
 /**
  * App entry point — layout, auth, page bootstrap
  */
+import { SITE_ASSET_VERSION } from "./config.js";
 import {
   injectSiteHeader,
   injectLoginModal,
   initSiteNavigation,
   SiteAuth,
   injectSiteFooter,
-  initSiteWeather,
-} from "./ui/core.js";
-import { injectSiteChat, initSiteChat } from "./ui/chat.js";
-import { pageUrl } from "./paths.js";
+  initHomeLocationServices,
+} from `./ui/core.js?v=${SITE_ASSET_VERSION}`;
+import { injectSiteChat, initSiteChat } from `./ui/chat.js?v=${SITE_ASSET_VERSION}`;
+import { pageUrl } from `./paths.js?v=${SITE_ASSET_VERSION}`;
+
+const pageModuleUrl = (path) => `${path}?v=${SITE_ASSET_VERSION}`;
 
 document.addEventListener("DOMContentLoaded", async () => {
-  injectSiteHeader();
-  injectLoginModal();
-  initSiteNavigation();
-  await SiteAuth.init();
-  injectSiteFooter();
+  try {
+    injectSiteHeader();
+    injectLoginModal();
+    initSiteNavigation();
+    await SiteAuth.init();
+    injectSiteFooter();
 
-  const page = document.body.dataset.page;
-  const browseType = document.body.dataset.browse;
-  const chatPages = page === "home" || (page === "browse" && ["youtube", "news", "welfare"].includes(browseType));
+    const page = document.body.dataset.page;
+    const browseType = document.body.dataset.browse;
+    const chatPages = page === "home" || (page === "browse" && ["youtube", "news", "welfare"].includes(browseType));
 
-  if (chatPages) {
-    injectSiteChat();
-  }
-
-  initSiteWeather();
-
-  if (page === "home") {
-    const { initHomePage } = await import("./ui/pages/home.js");
-    initHomePage();
-  }
-
-  if (page === "browse") {
-    const { initBrowsePage } = await import("./ui/pages/browse.js");
-    await initBrowsePage();
-    if (["youtube", "news", "welfare"].includes(browseType)) {
-      initSiteChat({
-        onLinkResult: () => { window.location.href = pageUrl("index", { hash: "results" }); },
-      });
+    if (chatPages) {
+      injectSiteChat();
     }
-  }
 
-  if (page === "board") {
-    const { initBoardPage } = await import("./ui/pages/board.js");
-    await initBoardPage();
+    if (page === "home") {
+      const { initHomePage } = await import(pageModuleUrl("./ui/pages/home.js"));
+      initHomePage();
+      await initHomeLocationServices();
+    }
+
+    if (page === "browse") {
+      const { initBrowsePage } = await import(pageModuleUrl("./ui/pages/browse.js"));
+      await initBrowsePage();
+      if (["youtube", "news", "welfare"].includes(browseType)) {
+        initSiteChat({
+          onLinkResult: () => { window.location.href = pageUrl("index", { hash: "results" }); },
+        });
+      }
+    }
+
+    if (page === "board") {
+      const { initBoardPage } = await import(pageModuleUrl("./ui/pages/board.js"));
+      await initBoardPage();
+    }
+  } catch (err) {
+    console.error("App bootstrap failed:", err);
   }
 });

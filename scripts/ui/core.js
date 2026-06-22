@@ -1,8 +1,9 @@
 /**
  * Core UI + orchestration (from sheriff-core.js)
  */
-import { supabaseClient } from '../api/client.js';
-import { getInvokeErrorMessage } from '../api/errors.js';
+import { SITE_ASSET_VERSION } from "../config.js";
+import { supabaseClient } from `../api/client.js?v=${SITE_ASSET_VERSION}`;
+import { getInvokeErrorMessage } from `../api/errors.js?v=${SITE_ASSET_VERSION}`;
 import {
   SEARCH_RESULTS_KEY,
   MASCOT_SRC,
@@ -24,16 +25,16 @@ import {
   DEFAULT_LOCATION,
   ENGLISH_TO_KOREAN_REGION,
   ENGLISH_TO_KOREAN_CITY,
-} from '../config.js';
-import { assetUrl, pageUrl, buildBrowsePageUrl } from '../paths.js';
-import { escapeHtml, decodeHtmlEntities, sanitizeNewsText } from '../security/sanitize.js';
-import { isLikelyUrl, normalizeUrl } from '../security/url.js';
+} from "../config.js";
+import { assetUrl, pageUrl, buildBrowsePageUrl } from `../paths.js?v=${SITE_ASSET_VERSION}`;
+import { escapeHtml, decodeHtmlEntities, sanitizeNewsText } from `../security/sanitize.js?v=${SITE_ASSET_VERSION}`;
+import { isLikelyUrl, normalizeUrl } from `../security/url.js?v=${SITE_ASSET_VERSION}`;
 import {
   sanitizeUserFacingMessage,
   validateTextInput,
   validateEmailInput,
   validatePasswordInput,
-} from '../security/validate.js';
+} from `../security/validate.js?v=${SITE_ASSET_VERSION}`;
 
 
 function mascotImg(className, alt = "디지털 보안관 마스코트") {
@@ -984,7 +985,11 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
 
   if (!cachedWelfareContext) {
     container.innerHTML = mascotLoadingHtml("위치 정보를 확인한 뒤 복지 정보를 불러옵니다...");
-    return;
+    if (typeof welfareCategoryReload === "function") {
+      return;
+    }
+    await initHomeLocationServices();
+    if (!cachedWelfareContext) return;
   }
 
   const { weather, locationSource, coords } = cachedWelfareContext;

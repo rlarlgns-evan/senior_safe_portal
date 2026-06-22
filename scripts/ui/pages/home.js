@@ -17,22 +17,22 @@ import { initSiteChat } from "../chat.js";
 import { ResultsModule } from "./results.js";
 
 const homeDom = {
-  mobileMenuToggle: document.getElementById("mobile-menu-toggle"),
-  mobileNav: document.getElementById("mobile-nav"),
-  spaHomeLink: document.getElementById("spa-home-link"),
-  viewHome: document.getElementById("view-home"),
-  viewResults: document.getElementById("view-results"),
-  searchForm: document.getElementById("search-form"),
-  searchInput: document.getElementById("search-input"),
-  youtubeContent: document.getElementById("youtube-content"),
-  newsContent: document.getElementById("news-content"),
-  resultsBackHome: document.getElementById("results-back-home"),
-  loadingOverlay: document.getElementById("loading-overlay"),
-  loadingMessage: document.getElementById("loading-message"),
-  loadingCancel: document.getElementById("loading-cancel"),
-  errorBox: document.getElementById("error-box"),
-  errorMessage: document.getElementById("error-message"),
-  errorClose: document.getElementById("error-close"),
+  get mobileMenuToggle() { return document.getElementById("mobile-menu-toggle"); },
+  get mobileNav() { return document.getElementById("mobile-nav"); },
+  get spaHomeLink() { return document.getElementById("spa-home-link"); },
+  get viewHome() { return document.getElementById("view-home"); },
+  get viewResults() { return document.getElementById("view-results"); },
+  get searchForm() { return document.getElementById("search-form"); },
+  get searchInput() { return document.getElementById("search-input"); },
+  get youtubeContent() { return document.getElementById("youtube-content"); },
+  get newsContent() { return document.getElementById("news-content"); },
+  get resultsBackHome() { return document.getElementById("results-back-home"); },
+  get loadingOverlay() { return document.getElementById("loading-overlay"); },
+  get loadingMessage() { return document.getElementById("loading-message"); },
+  get loadingCancel() { return document.getElementById("loading-cancel"); },
+  get errorBox() { return document.getElementById("error-box"); },
+  get errorMessage() { return document.getElementById("error-message"); },
+  get errorClose() { return document.getElementById("error-close"); },
 };
 
 let searchInProgress = false;
