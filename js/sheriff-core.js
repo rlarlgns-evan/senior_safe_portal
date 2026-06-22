@@ -606,7 +606,7 @@ function renderNewsCard(article) {
         <div class="media-card-body">
           <h4 class="media-card-title">${escapeHtml(article.title)}</h4>
           <p class="media-card-meta">${escapeHtml(article.summary || "관련 기사")}</p>
-          <span class="media-card-foot">${escapeHtml(article.pubDate || "자세히 읽기")} →</span>
+          <span class="media-card-foot">기사 보기 →</span>
         </div>
       </article>
     </a>
