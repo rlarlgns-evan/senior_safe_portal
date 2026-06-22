@@ -39,6 +39,18 @@ function escapeHtml(value) {
   return div.innerHTML;
 }
 
+function decodeHtmlEntities(value) {
+  if (value == null || value === "") return "";
+  const el = document.createElement("textarea");
+  el.innerHTML = String(value);
+  return el.value;
+}
+
+function sanitizeNewsText(value, fallback = "") {
+  const decoded = decodeHtmlEntities(value);
+  return decoded.replace(/\s+/g, " ").trim() || fallback;
+}
+
 function isLikelyUrl(text) {
   const t = text.trim();
   return /^https?:\/\//i.test(t) || /^[\w-]+\.(com|co\.kr|net|org|kr|go\.kr|or\.kr)/i.test(t);
@@ -590,6 +602,8 @@ function renderYoutubeCard(item) {
 
 function renderNewsCard(article) {
   const href = article.originallink || article.link;
+  const title = sanitizeNewsText(article.title, "뉴스");
+  const summary = sanitizeNewsText(article.summary, "관련 기사");
   const thumb = article.thumbnail || getFaviconThumbnail(href);
   const isLogo = !article.thumbnail || thumb.includes("google.com/s2/favicons");
   const thumbHtml = thumb
@@ -604,8 +618,8 @@ function renderNewsCard(article) {
           ${renderVerifiedBadge("확인된 기사")}
         </div>
         <div class="media-card-body">
-          <h4 class="media-card-title">${escapeHtml(article.title)}</h4>
-          <p class="media-card-meta">${escapeHtml(article.summary || "관련 기사")}</p>
+          <h4 class="media-card-title">${escapeHtml(title)}</h4>
+          <p class="media-card-meta">${escapeHtml(summary)}</p>
           <span class="media-card-foot">기사 보기 →</span>
         </div>
       </article>

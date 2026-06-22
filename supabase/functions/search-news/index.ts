@@ -22,8 +22,20 @@ type NewsArticle = {
   publisher: string;
 };
 
+function decodeHtmlEntities(value: string): string {
+  return value
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&amp;/gi, "&");
+}
+
 function stripHtml(value: string): string {
-  return value.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+  return decodeHtmlEntities(value.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim());
 }
 
 function formatPubDate(pubDate: string): string {
