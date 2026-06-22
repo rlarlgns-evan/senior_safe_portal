@@ -1453,13 +1453,7 @@ function getAuthSocialButtonsHtml() {
 
   const kakaoButton = `
     <button type="button" class="auth-social-btn auth-social-btn--kakao" data-social-provider="kakao" aria-label="카카오 로그인">
-      <span class="auth-social-symbol" aria-hidden="true">
-        <img src="assets/social-kakao-symbol.svg" alt="" width="18" height="18" />
-      </span>
-      <span class="auth-social-text auth-social-text--kakao">
-        <span class="auth-social-text-full">카카오 로그인</span>
-        <span class="auth-social-text-short" aria-hidden="true">로그인</span>
-      </span>
+      <img src="assets/social-kakao-login-wide.png" alt="" class="auth-social-kakao-wide" width="320" height="48" />
     </button>
   `;
 
