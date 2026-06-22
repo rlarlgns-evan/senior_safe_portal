@@ -1441,7 +1441,7 @@ function getAuthSocialButtonsHtml() {
   const googleButton = `
     <button type="button" class="auth-social-btn auth-social-btn--google" data-social-provider="google" aria-label="Google로 로그인">
       <span class="auth-google-mark" aria-hidden="true">
-        <img src="assets/social-google-g.svg" alt="" width="20" height="20" />
+        <img src="assets/social-google-g.svg" alt="" width="16" height="16" />
       </span>
       <span class="auth-google-label">Google로 로그인</span>
     </button>
@@ -1450,7 +1450,7 @@ function getAuthSocialButtonsHtml() {
   const naverButton = `
     <button type="button" class="auth-social-btn auth-social-btn--naver" data-social-provider="naver" aria-label="네이버 로그인">
       <span class="auth-naver-mark" aria-hidden="true">
-        <img src="assets/social-naver-icon.png" alt="" width="20" height="20" />
+        <img src="assets/social-naver-icon.png" alt="" width="16" height="16" />
       </span>
       <span class="auth-naver-label">네이버 로그인</span>
     </button>
@@ -1459,7 +1459,7 @@ function getAuthSocialButtonsHtml() {
   const kakaoButton = `
     <button type="button" class="auth-social-btn auth-social-btn--kakao" data-social-provider="kakao" aria-label="카카오 로그인">
       <span class="auth-kakao-mark" aria-hidden="true">
-        <img src="assets/social-kakao-symbol.svg" alt="" width="18" height="18" />
+        <img src="assets/social-kakao-symbol.svg" alt="" width="16" height="16" />
       </span>
       <span class="auth-kakao-label">카카오 로그인</span>
     </button>
