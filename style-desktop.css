@@ -133,6 +133,32 @@ body {
   grid-template-rows: repeat(5, 1fr);
 }
 
+.home-cards-band .content-grid .category-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.35rem;
+  width: 100%;
+  min-height: 2.15rem;
+  overflow: visible;
+}
+
+.home-cards-band .content-grid .category-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  flex: unset;
+  min-height: 2.15rem;
+  padding: 0.38rem 0.2rem;
+  font-size: clamp(0.7rem, 1.55cqi, 0.82rem);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .home-cards-band .section-more-link {
   align-self: stretch;
   text-align: center;
