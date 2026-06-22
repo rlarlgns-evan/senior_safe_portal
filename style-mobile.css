@@ -103,8 +103,8 @@ body {
 }
 
 .home-cards-band .section-more-link {
-  min-height: var(--btn-min-height);
-  font-size: var(--font-base);
+  min-height: 2.5rem;
+  font-size: 0.85rem;
 }
 
 .home-cards-band .category-tab {

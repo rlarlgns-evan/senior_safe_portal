@@ -786,6 +786,8 @@ button.back-link-prominent {
   flex-direction: column;
   align-self: stretch;
   width: 100%;
+  height: 100%;
+  min-height: 100%;
   padding: var(--home-col-gap);
   gap: var(--home-space);
   container-type: inline-size;
@@ -920,10 +922,16 @@ button.back-link-prominent {
 
 .home-cards-band .section-more-link {
   flex-shrink: 0;
+  align-self: stretch;
   margin-top: auto;
   margin-bottom: 0;
-  min-height: calc(var(--btn-min-height) * 0.85);
-  font-size: 0.82rem;
+  margin-inline: 0;
+  min-height: 2.5rem;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-width: var(--card-border-width);
+  line-height: 1.2;
 }
 
 /* (구) 히어로 — 다른 페이지 호환 */
@@ -3152,24 +3160,40 @@ button.back-link-prominent {
 }
 
 .section-more-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
   margin-top: auto;
   margin-bottom: 0;
-  padding-top: 0;
+  margin-inline: auto;
+  padding: 0.5rem 0.75rem;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   text-align: center;
   text-decoration: none;
-  min-height: var(--btn-min-height);
+  min-height: 2.75rem;
   font-size: var(--font-base);
-  font-weight: 800;
+  font-weight: 700;
+  line-height: 1.2;
   border-radius: var(--radius-btn);
+  border: var(--card-border-width) solid var(--color-border);
+}
+
+.section-more-link.btn {
+  border-width: var(--card-border-width);
+  padding: 0.5rem 0.75rem;
+  min-height: 2.75rem;
+  font-size: var(--font-base);
+  font-weight: 700;
 }
 
 .section-more-link::after {
   content: "→";
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
 }
 
 .section-more-link:hover,
