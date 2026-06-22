@@ -1446,7 +1446,12 @@ function getAuthSocialButtonsHtml() {
   `;
 
   const naverButton = `
-    <button type="button" class="auth-social-btn auth-social-btn--naver" data-social-provider="naver" aria-label="네이버 로그인"></button>
+    <button type="button" class="auth-social-btn auth-social-btn--naver" data-social-provider="naver" aria-label="네이버 로그인">
+      <span class="auth-naver-mark" aria-hidden="true">
+        <img src="assets/social-naver-n.svg" alt="" width="16" height="16" />
+      </span>
+      <span class="auth-naver-label">네이버 로그인</span>
+    </button>
   `;
 
   const kakaoButton = `
