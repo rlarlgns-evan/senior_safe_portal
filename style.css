@@ -199,9 +199,25 @@
   --size-search-mark-img: 2rem;
   --size-search-input: 3.75rem;
   --size-search-chip: 3.75rem;
-  --size-fab-mascot: 2rem;
+  --size-fab-mascot: 1.75rem;
   --icon-base: 1.75rem;
   --icon-lg: 2rem;
+
+  /* 챗봇 — 컴팩트 크기 (열린 창 전체) */
+  --chat-window-width: 22rem;
+  --chat-window-height: 32rem;
+  --chat-window-min-height: 18rem;
+  --chat-control-size: 2.75rem;
+  --chat-avatar-size: 2.5rem;
+  --chat-header-pad: 0.7rem 0.9rem;
+  --chat-title-size: 1.125rem;
+  --chat-status-size: 0.8125rem;
+  --chat-bubble-size: 1rem;
+  --chat-bubble-pad: 0.6rem 0.85rem;
+  --chat-messages-pad: 0.75rem 0.85rem;
+  --chat-messages-gap: 0.75rem;
+  --chat-chip-size: 0.8125rem;
+  --chat-chip-min-h: 2.35rem;
 
   --shadow-app-frame: 0 0.625rem 1.875rem var(--color-shadow-neutral-10);
   --shadow-modal: 0 1.5rem 3rem var(--color-shadow-neutral-18);
@@ -2205,12 +2221,13 @@ button.back-link-prominent {
 }
 
 .chat-window {
-  width: min(calc(var(--app-max-width) - 1.5rem), calc(100vw - 1.5rem));
-  height: min(88dvh, 820px);
-  min-height: 35rem;
+  width: min(var(--chat-window-width), calc(100vw - 1.5rem));
+  height: min(70dvh, var(--chat-window-height));
+  min-height: var(--chat-window-min-height);
+  max-height: calc(100dvh - 4.5rem);
   background: var(--color-surface);
   border: none;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -2221,8 +2238,8 @@ button.back-link-prominent {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.85rem;
-  padding: 1.15rem 1.25rem;
+  gap: 0.6rem;
+  padding: var(--chat-header-pad);
   background: var(--color-primary);
   color: var(--color-text-on-primary);
   flex-shrink: 0;
@@ -2232,13 +2249,13 @@ button.back-link-prominent {
 .chat-header-info {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.55rem;
   min-width: 0;
 }
 
 .chat-header-avatar {
-  width: 56px;
-  height: 56px;
+  width: var(--chat-avatar-size);
+  height: var(--chat-avatar-size);
   border-radius: var(--radius-full);
   background: var(--color-surface);
   display: flex;
@@ -2250,7 +2267,7 @@ button.back-link-prominent {
 
 .chat-header-text h3 {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: var(--chat-title-size);
   font-weight: 800;
   line-height: 1.2;
 }
@@ -2258,33 +2275,33 @@ button.back-link-prominent {
 .chat-header-status {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  margin: 0.25rem 0 0;
-  font-size: 0.95rem;
+  gap: 0.3rem;
+  margin: 0.15rem 0 0;
+  font-size: var(--chat-status-size);
   font-weight: 600;
   opacity: 0.95;
 }
 
 .chat-status-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: var(--radius-full);
   background: var(--accent-color);
   flex-shrink: 0;
 }
 
 .chat-header-mascot {
-  width: 44px;
-  height: 44px;
+  width: calc(var(--chat-avatar-size) - 0.35rem);
+  height: calc(var(--chat-avatar-size) - 0.35rem);
   object-fit: contain;
 }
 
 .chat-minimize-btn {
-  width: var(--btn-min-height);
-  height: var(--btn-min-height);
-  min-width: var(--btn-min-height);
-  min-height: var(--btn-min-height);
-  border-radius: var(--radius-md);
+  width: var(--chat-control-size);
+  height: var(--chat-control-size);
+  min-width: var(--chat-control-size);
+  min-height: var(--chat-control-size);
+  border-radius: var(--radius-sm);
   border: var(--btn-border-width) solid var(--color-overlay-on-primary-32);
   background: var(--color-overlay-on-primary-22);
   color: var(--color-text-on-primary);
@@ -2303,17 +2320,17 @@ button.back-link-prominent {
 }
 
 .chat-minimize-btn .material-symbols-outlined {
-  font-size: 1.5rem !important;
+  font-size: 1.25rem !important;
 }
 
 .chat-messages {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: 1.15rem 1rem;
+  padding: var(--chat-messages-pad);
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  gap: var(--chat-messages-gap);
   background: var(--color-surface-muted);
 }
 
@@ -2331,8 +2348,8 @@ button.back-link-prominent {
 .chat-message-content {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  max-width: min(88%, 420px);
+  gap: 0.25rem;
+  max-width: min(88%, 17.5rem);
   min-width: 0;
 }
 
@@ -2348,16 +2365,16 @@ button.back-link-prominent {
 }
 
 .chat-mascot-avatar {
-  width: 44px;
-  height: 44px;
+  width: var(--chat-avatar-size);
+  height: var(--chat-avatar-size);
   object-fit: contain;
   flex-shrink: 0;
-  margin-top: 1.1rem;
+  margin-top: 0.75rem;
 }
 
 .chat-user-avatar {
-  width: 44px;
-  height: 44px;
+  width: var(--chat-avatar-size);
+  height: var(--chat-avatar-size);
   border-radius: var(--radius-full);
   background: var(--color-surface-avatar);
   color: var(--color-text-decorative);
@@ -2369,15 +2386,15 @@ button.back-link-prominent {
 }
 
 .chat-user-avatar .material-symbols-outlined {
-  font-size: var(--icon-base) !important;
+  font-size: 1.25rem !important;
 }
 
 .chat-bubble {
-  padding: 0.9rem 1.1rem;
-  border-radius: var(--radius-lg);
-  font-size: 1.1rem;
+  padding: var(--chat-bubble-pad);
+  border-radius: var(--radius-md);
+  font-size: var(--chat-bubble-size);
   font-weight: 600;
-  line-height: 1.6;
+  line-height: 1.5;
   word-break: break-word;
 }
 
@@ -2409,13 +2426,13 @@ button.back-link-prominent {
 
 .chat-action-btn {
   width: 100%;
-  min-height: var(--btn-min-height);
-  padding: 0.75rem 1.1rem;
+  min-height: var(--chat-control-size);
+  padding: 0.5rem 0.85rem;
   background: var(--color-primary);
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   color: var(--color-text-on-primary);
-  font-size: 1.05rem;
+  font-size: var(--chat-bubble-size);
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
@@ -2431,13 +2448,13 @@ button.back-link-prominent {
 .chat-footer {
   flex-shrink: 0;
   background: var(--color-surface);
-  padding-bottom: 1rem;
+  padding-bottom: 0.65rem;
 }
 
 .chat-suggestions {
   display: flex;
-  gap: 0.55rem;
-  padding: 0.75rem 1rem 0;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem 0;
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -2449,13 +2466,13 @@ button.back-link-prominent {
 
 .chat-chip {
   flex: 0 0 auto;
-  min-height: var(--btn-min-height);
-  padding: 0.55rem 1rem;
+  min-height: var(--chat-chip-min-h);
+  padding: 0.35rem 0.75rem;
   border-radius: var(--radius-pill);
   border: 1px solid var(--color-surface-user-bubble);
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: 0.95rem;
+  font-size: var(--chat-chip-size);
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
@@ -2478,9 +2495,9 @@ button.back-link-prominent {
 .chat-input-wrap {
   display: flex;
   align-items: flex-end;
-  gap: 0.35rem;
-  margin: 0.75rem 1rem 0;
-  padding: 0.45rem 0.45rem 0.45rem 1.15rem;
+  gap: 0.3rem;
+  margin: 0.5rem 0.75rem 0;
+  padding: 0.3rem 0.3rem 0.3rem 0.85rem;
   background: var(--color-surface-muted);
   border: 1px solid var(--color-surface-user-bubble);
   border-radius: var(--radius-pill);
@@ -2493,22 +2510,23 @@ button.back-link-prominent {
 }
 
 .chat-input-label {
-  margin: 0.75rem 1rem 0;
+  margin: 0.5rem 0.75rem 0;
+  font-size: var(--chat-chip-size);
 }
 
 .chat-input {
   flex: 1;
   min-width: 0;
-  min-height: var(--btn-min-height);
-  max-height: 140px;
-  padding: 0.65rem 0;
+  min-height: var(--chat-control-size);
+  max-height: 6rem;
+  padding: 0.4rem 0;
   border: none;
   border-radius: 0;
   background: transparent;
   font-family: inherit;
-  font-size: var(--font-base);
+  font-size: var(--chat-bubble-size);
   font-weight: 700;
-  line-height: 1.45;
+  line-height: 1.4;
   resize: none;
   color: var(--color-text);
 }
@@ -2519,10 +2537,10 @@ button.back-link-prominent {
 
 .chat-send-btn {
   flex-shrink: 0;
-  width: var(--btn-min-height);
-  height: var(--btn-min-height);
-  min-width: var(--btn-min-height);
-  min-height: var(--btn-min-height);
+  width: var(--chat-control-size);
+  height: var(--chat-control-size);
+  min-width: var(--chat-control-size);
+  min-height: var(--chat-control-size);
   border: none;
   border-radius: var(--radius-full);
   background: transparent;
@@ -2541,7 +2559,7 @@ button.back-link-prominent {
 }
 
 .chat-send-btn .material-symbols-outlined {
-  font-size: var(--icon-base) !important;
+  font-size: 1.35rem !important;
   font-variation-settings: "FILL" 1;
 }
 
@@ -2562,9 +2580,9 @@ button.back-link-prominent {
 }
 
 .chat-fab.chat-fab--mascot {
-  min-height: 2.25rem;
-  padding: 0.15rem 0.65rem 0.15rem 0.15rem;
-  font-size: 0.875rem;
+  min-height: 2rem;
+  padding: 0.12rem 0.55rem 0.12rem 0.12rem;
+  font-size: 0.8125rem;
   border-width: 1.5px;
   box-shadow: var(--shadow-card-subtle);
 }
@@ -2572,11 +2590,11 @@ button.back-link-prominent {
 .chat-fab--mascot {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
   width: auto;
   max-width: 100%;
-  min-height: 2.25rem;
-  padding: 0.15rem 0.65rem 0.15rem 0.15rem;
+  min-height: 2rem;
+  padding: 0.12rem 0.55rem 0.12rem 0.12rem;
   background: var(--color-surface);
   color: var(--color-text);
   border: 1.5px solid var(--primary-color);
@@ -2594,7 +2612,7 @@ button.back-link-prominent {
 }
 
 .chat-fab--mascot span {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 700;
   color: var(--color-text);
   white-space: nowrap;

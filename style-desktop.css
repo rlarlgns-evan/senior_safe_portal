@@ -148,30 +148,30 @@ body {
 }
 
 .chat-fab.chat-fab--mascot {
-  min-height: 2.25rem;
-  padding: 0.15rem 0.7rem 0.15rem 0.15rem;
+  min-height: 2rem;
+  padding: 0.12rem 0.55rem 0.12rem 0.12rem;
 }
 
 .chat-fab--mascot span {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 .chat-window {
-  width: min(33.75rem, calc(var(--app-max-width) - 2rem));
-  height: min(88dvh, 820px);
-  min-height: 35rem;
+  width: min(var(--chat-window-width), calc(var(--app-max-width) - 2rem));
+  height: min(68dvh, var(--chat-window-height));
+  min-height: var(--chat-window-min-height);
 }
 
 .chat-bubble {
-  font-size: var(--font-base);
+  font-size: var(--chat-bubble-size);
 }
 
 .chat-chip {
-  font-size: var(--font-base);
+  font-size: var(--chat-chip-size);
 }
 
 .chat-input {
-  font-size: var(--font-base);
+  font-size: var(--chat-bubble-size);
 }
 
 /* ── 결과 페이지 ── */

@@ -22,7 +22,7 @@ function getSiteChatHtml() {
         <div class="chat-header">
           <div class="chat-header-info">
             <div class="chat-header-avatar">
-              <img src="assets/mascot-sheriff.png" alt="" class="chat-header-mascot" width="44" height="44" />
+              <img src="assets/mascot-sheriff.png" alt="" class="chat-header-mascot" width="36" height="36" />
             </div>
             <div class="chat-header-text">
               <h3 id="chat-title">보안관 단디</h3>
@@ -55,7 +55,7 @@ function getSiteChatHtml() {
         </div>
       </div>
       <button type="button" id="chat-fab" class="chat-fab chat-fab--mascot btn btn--accent">
-        <img src="assets/mascot-sheriff.png" alt="" class="chat-fab-img" width="32" height="32" />
+        <img src="assets/mascot-sheriff.png" alt="" class="chat-fab-img" width="28" height="28" />
         <span>보안관 단디에게 물어보기</span>
       </button>
     </div>
