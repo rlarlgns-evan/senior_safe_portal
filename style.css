@@ -929,15 +929,18 @@ button.back-link-prominent {
   gap: var(--home-space);
   flex: 1 1 auto;
   width: 100%;
+  align-items: stretch;
 }
 
 .home-cards-band .media-card-link {
-  display: block;
-  height: auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   min-height: 0;
 }
 
 .home-cards-band .media-card {
+  flex: 1 1 auto;
   height: auto;
   min-height: 0;
 }
@@ -971,7 +974,7 @@ button.back-link-prominent {
   flex: 1;
   padding: var(--home-space);
   gap: 0.2rem;
-  min-height: 0;
+  min-height: 5.75rem;
   overflow: hidden;
 }
 
@@ -985,6 +988,7 @@ button.back-link-prominent {
   font-size: 0.75rem;
   line-height: 1.35;
   -webkit-line-clamp: 2;
+  min-height: calc(0.75rem * 1.35 * 2);
 }
 
 .home-cards-band .media-card-foot {
@@ -1715,6 +1719,33 @@ button.back-link-prominent {
   margin-top: auto;
   margin-bottom: 0;
   padding-top: 0;
+}
+
+/* 홈 카드 밴드: content-grid 전역 규칙보다 우선 (탭·목록 겹침 방지) */
+.home-cards-band .content-grid .category-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  grid-template-columns: unset;
+}
+
+.home-cards-band .content-grid .category-tab {
+  width: auto;
+  min-width: fit-content;
+  flex-shrink: 0;
+}
+
+.home-cards-band .content-grid .youtube-grid,
+.home-cards-band .content-grid .news-list,
+.home-cards-band .content-grid .welfare-content {
+  flex: 0 0 auto;
+  min-height: auto;
+  overflow: visible;
+}
+
+.home-cards-band .content-grid .content-column {
+  height: auto;
+  min-height: 0;
 }
 
 .content-grid .category-tab,

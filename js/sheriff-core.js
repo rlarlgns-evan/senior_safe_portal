@@ -565,6 +565,7 @@ function renderYoutubeCard(item) {
         </div>
         <div class="media-card-body">
           <h4 class="media-card-title">${escapeHtml(item.title)}</h4>
+          <span class="media-card-foot">차단된 영상</span>
         </div>
       </article>
     `;
@@ -580,6 +581,7 @@ function renderYoutubeCard(item) {
         <div class="media-card-body">
           <h4 class="media-card-title">${escapeHtml(item.title)}</h4>
           ${item.channel ? `<p class="media-card-meta">${escapeHtml(item.channel)}</p>` : ""}
+          <span class="media-card-foot">영상 보기 →</span>
         </div>
       </article>
     </a>
