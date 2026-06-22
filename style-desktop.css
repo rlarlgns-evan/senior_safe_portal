@@ -127,7 +127,13 @@ body {
 }
 
 .home-search-inner {
-  max-width: var(--layout-search-max);
+  width: min(100%, 40rem);
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+.search-form--home .search-row {
+  margin-inline: auto;
 }
 
 /* ── 브라우즈·카드 그리드 ── */
