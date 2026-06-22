@@ -925,7 +925,7 @@ button.back-link-prominent {
 .home-cards-band .content-card-grid--home {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: repeat(3, auto);
+  grid-template-rows: repeat(5, auto);
   gap: var(--home-space);
   flex: 1 1 auto;
   width: 100%;

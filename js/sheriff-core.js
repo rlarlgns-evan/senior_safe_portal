@@ -351,9 +351,9 @@ const WELFARE_CATEGORY_KEYWORDS = {
   housing: ["주거", "주택", "생활", "임대", "수리", "난방", "에너지"],
 };
 
-const HOME_YOUTUBE_PREVIEW = 3;
-const HOME_NEWS_PREVIEW = 3;
-const HOME_WELFARE_PREVIEW = 3;
+const HOME_YOUTUBE_PREVIEW = 5;
+const HOME_NEWS_PREVIEW = 5;
+const HOME_WELFARE_PREVIEW = 5;
 const BROWSE_YOUTUBE_LIMIT = 20;
 const BROWSE_NEWS_LIMIT = 20;
 const BROWSE_WELFARE_LIMIT = 10;
@@ -738,7 +738,7 @@ async function loadHomeNewsRecommendations(container, query, options = {}) {
   container.innerHTML = mascotLoadingHtml("오늘의 뉴스를 불러오고 있습니다...");
 
   try {
-    const articles = await searchNews(query, preview ? 5 : BROWSE_NEWS_LIMIT);
+    const articles = await searchNews(query, preview ? HOME_NEWS_PREVIEW : BROWSE_NEWS_LIMIT);
     const visibleArticles = preview ? articles.slice(0, HOME_NEWS_PREVIEW) : articles;
 
     if (visibleArticles.length === 0) {
@@ -1155,7 +1155,7 @@ async function loadHomeWelfareInfo(container, categoryId = "all", options = {}) 
   container.innerHTML = mascotLoadingHtml("우리 지역 복지 혜택을 찾고 있습니다...");
 
   try {
-    const fetchLimit = preview ? 6 : BROWSE_WELFARE_LIMIT;
+    const fetchLimit = preview ? HOME_WELFARE_PREVIEW + 3 : BROWSE_WELFARE_LIMIT;
     const data = await fetchWelfareInfo(
       weather.region,
       weather.city,
