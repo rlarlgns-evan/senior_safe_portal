@@ -101,9 +101,9 @@
   --color-social-google-border-hover: var(--primary-color);
   --color-social-naver: #03A94D;
   --color-social-naver-hover: #038F44;
-  --color-social-kakao: var(--accent-color);
-  --color-social-kakao-hover: var(--accent-color);
-  --color-social-kakao-text: var(--color-surface);
+  --color-social-kakao: #FEE500;
+  --color-social-kakao-hover: #F0D900;
+  --color-social-kakao-text: rgba(0, 0, 0, 0.85);
 
   /* Flat accents (no multi-stop gradients) */
   --color-accent-gradient-start: var(--accent-color);
@@ -3118,26 +3118,26 @@ button.back-link-prominent {
 }
 
 .auth-social-btn--kakao {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   width: 100%;
-  min-height: 0;
+  min-height: 45px;
   height: 45px;
-  padding: 0;
+  padding: 0 16px;
   border: none;
-  border-radius: 8px;
-  overflow: hidden;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100% 100%;
+  border-radius: 12px;
+  background: var(--color-social-kakao);
+  color: var(--color-social-kakao-text);
   cursor: pointer;
   flex-shrink: 0;
-  background-color: #FEE500;
-  background-image: url("assets/social-kakao-login-wide.png");
 }
 
 .auth-social-btn--kakao:hover {
-  opacity: 0.92;
-  filter: brightness(0.97);
+  background: var(--color-social-kakao-hover);
+  opacity: 1;
+  filter: none;
 }
 
 .auth-social-btn--kakao:focus-visible {
@@ -3145,35 +3145,29 @@ button.back-link-prominent {
   outline-offset: 2px;
 }
 
-.auth-social-btn--kakao .auth-social-symbol {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
+.auth-kakao-mark {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 18px;
   height: 18px;
-  pointer-events: none;
+  flex-shrink: 0;
 }
 
-.auth-social-btn--kakao .auth-social-symbol img {
+.auth-kakao-mark img {
   display: block;
   width: 18px;
   height: 18px;
   object-fit: contain;
 }
 
-.auth-social-text--kakao {
+.auth-kakao-label {
   font-size: 15px;
   font-weight: 400;
   line-height: 1;
+  color: var(--color-social-kakao-text);
   letter-spacing: 0;
-}
-
-.auth-social-text--kakao .auth-social-text-short {
-  display: none;
+  font-family: inherit;
 }
 
 .auth-social-icon {
