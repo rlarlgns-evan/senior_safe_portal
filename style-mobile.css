@@ -131,10 +131,26 @@ body {
 
 /* ── 챗봇 ── */
 .chat-fab-wrap {
-  left: 0.5rem;
-  right: 0.5rem;
-  bottom: 1rem;
-  align-items: stretch;
+  left: auto;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  align-items: flex-end;
+  max-width: calc(100% - 1.5rem);
+}
+
+.chat-fab.chat-fab--mascot {
+  min-height: 3rem;
+  padding: 0.25rem 0.85rem 0.25rem 0.25rem;
+}
+
+.chat-fab--mascot span {
+  font-size: 1rem;
+}
+
+@media (max-width: 380px) {
+  .chat-fab--mascot span {
+    font-size: 0.9rem;
+  }
 }
 
 .chat-window {
